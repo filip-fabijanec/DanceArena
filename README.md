@@ -26,7 +26,7 @@ Kratko opisati cilj Vašeg projekta. Vaša motivacija?  (Napomena: odgovor nije 
 
 #Instalcija
 # Članovi tima 
-> Popis članova tima/linkovi/ glavni doprinos
+> Filip Fabijanec, Josip Petričević, Vito Cindori, Marija Jurić, Martin Tomišić, David Premuš, Ivona Gašparić
 >
 
 # Kontribucije
