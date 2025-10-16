@@ -6,10 +6,31 @@
 </head>
 <body>
    <div class="maincontainer">
-   <div class="maintext">Dance Arena</div>
-   <form action="/login" method="GET">
-      <input class="mainbutton" type="submit" value="Login">
-   </form>
-   </div>
+  <%- include('partials/header'); %>
+
+  <% if (userType) { %>
+    <div class="welcometext" id="welcometext">
+      Dobrodošli, <%= userType %>!
+    </div>
+      <% if (userType === 'Organizator') { %>
+        <%- include('partials/organizator'); %>
+      <% } else if (userType === 'Voditelj kluba') { %>
+        <%- include('partials/voditeljkluba'); %>
+      <% } else if (userType === 'Sudac') { %>
+        <%- include('partials/sudac'); %>
+      <% } else if (userType === 'Administrator') { %>
+        <%- include('partials/admin'); %>
+      <% } %>
+    <form action="/settings" method="POST">
+      <input class="mainbutton" type="submit" value="Upravljanje računom">
+    </form>
+  <% } else { %>
+    <%- include('partials/main'); %>
+    <form action="/login" method="POST">
+      <input class="mainbutton" type="submit" value="Prijava">
+    </form>
+  <% } %>
+</div>
+
 </body>
 </html>

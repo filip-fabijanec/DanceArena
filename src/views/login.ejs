@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" type="text/css" href="css/site.css">
+</head>
+<body>
+   <div class="maincontainer">
+   <div class="maintext">Dance Arena</div>
+   <div class="registertext">Registracija</div>
+   <form action="/login/register" method="POST">
+      <label class="textlabel">Ime</label>
+      <input class="textinput" type="text" name="ime" required>
+      <br>
+      <label class="textlabel">Prezime</label>
+      <input class="textinput" type="text" name="prezime" required>
+      <br>
+      <label class="textlabel">E-mail</label>
+      <input class="textinput" type="text" name="email" required>
+      <br>
+      <label class="textlabel">Lozinka</label>
+      <input class="textinput" type="password" name="lozinka" required>
+      <br>
+      <input class="selectinput" type="radio" name="type" value="Organizator" required>
+      <label class="selectlabel">Organizator</label><br>
+      <input class="selectinput" type="radio" name="type" value="Voditelj kluba" required>
+      <label class="selectlabel">Voditelj kluba</label><br>
+      <input class="selectinput" type="radio" name="type" value="Sudac" required>
+      <label class="selectlabel">Sudac</label><br>
+      <% if(errorregister) { %>
+      <div class="error-text"><%= errorregister %></div>
+      <br>
+      <% } %>
+      <input class="mainbutton" type="submit" value="Registracija">
+   </form>
+   </div>
+   <div class="registertext">Prijava</div>
+   <form action="/login/login" method="POST">
+      <label class="textlabel">E-mail</label>
+      <input class="textinput" type="text" name="email" required>
+      <br>
+      <label class="textlabel">Lozinka</label>
+      <input class="textinput" type="password" name="lozinka" required>
+      <br>
+      <% if(errorlogin) { %>
+      <div class="error-text"><%= errorlogin %></div>
+      <br>
+      <% } %>
+      <input class="mainbutton" type="submit" value="Prijava">
+   </form>
+   </div>
+   <form action="/login/back" method="POST">
+    <input class="mainbutton" type="submit" value="Natrag">
+  </form>
+</body>
+</html>

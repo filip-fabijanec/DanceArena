@@ -10,11 +10,13 @@
         "express",
         "express-session"
     ],
-    "author": "igor.mekterovic@fer.hr",
+    "author": "ff55912@fer.hr",
     "license": "MIT",
     "dependencies": {
+        "bcrypt": "^6.0.0",
         "ejs": "^3.1.8",
         "express": "^4.18.1",
-        "express-session": "^1.17.3"
+        "express-session": "^1.17.3",
+        "mysql2": "^3.15.2"
     }
 }

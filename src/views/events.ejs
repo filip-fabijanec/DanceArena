@@ -1,0 +1,50 @@
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" type="text/css" href="css/site.css">
+</head>
+<body>
+   <div class="maincontainer">
+  <%- include('partials/header'); %>
+  <div class="welcometext" id="welcometext">
+    Pregled natjecanja
+  </div>
+  <% for(let i=0; i<events.length; i++) { %>
+    <div class="user-card">
+      <div><strong>Naziv natjecanja:</strong> <%= events[i].naziv %></div>
+      <div><strong>Datum održavanja:</strong> <%= events[i].datum.toLocaleDateString() %></div>
+      <div><strong>Lokacija:</strong> <%= events[i].lokacija %></div>
+      <div><strong>Opis:</strong> <%= events[i].opis %></div>
+      <div><strong>Kotizacija:</strong> <%= events[i].kotizacija %> €</div>
+      <div><strong>Organizator:</strong> <%= events[i].organizator_email %></div>
+    </div>
+    <form action="/events/edit" method="POST">
+      <input type="hidden" name="id" value="<%= events[i].id %>">
+      <input class="mainbutton" type="submit" value="Uredi natjecanje">
+    </form>
+    <form action="/events/delete" method="POST" onsubmit="return confirm('Jeste li sigurni da želite izbrisati ovo natjecanje?');">
+      <input type="hidden" name="id" value="<%= events[i].id %>">
+      <input class="deletebutton" type="submit" value="Izbriši natjecanje">
+    </form>
+  <% } %>
+  <div class="welcometext" id="welcometext">
+    Dodaj novo natjecanje
+  </div>
+  <form action="/events/add" method="POST">
+  <input type="text" name="naziv" placeholder="Naziv natjecanja" required>
+  <input type="date" name="datum" placeholder="Datum održavanja" required>
+  <input type="text" name="lokacija" placeholder="Lokacija" required>
+  <input type="text" name="opis" placeholder="Opis" required>
+  <input type="number" name="kotizacija" placeholder="Kotizacija" required>
+  <input type="search" name="suci" placeholder="Suci ovo je malo zeznuto" required>
+  <input type="hidden" name="organizator_email" value="<%= user.email %>" required>
+  <input class="mainbutton" type="submit" value="Dodaj">
+  </form>
+  <form action="/events/back" method="POST">
+  <input class="mainbutton" type="submit" value="Natrag">
+  </form>
+</div>
+
+</body>
+</html>
