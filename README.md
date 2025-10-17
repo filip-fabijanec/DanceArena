@@ -194,8 +194,7 @@ Klonirati GitHub repozitorij:
 ### 4. Pokretanje backend-a
 
 ```console
-    dotnet restore
-    dotnet run
+    node server.js
 ```
 
 ### 5. Postavljanje i pokretanje frontend-a
@@ -212,14 +211,14 @@ Klonirati GitHub repozitorij:
 
 ### 6. Pristupanje aplikaciji
 
-Nakon ovih koraka otvoiti preglednik i navigirajte do https://localhost:3000 kako bi pristupili "DanceArena" aplikaciji.
+Nakon ovih koraka otvoiti preglednik i navigirajte do https://localhost:8080 kako bi pristupili "DanceArena" aplikaciji.
 
 # Članovi tima 
 | Članovi          | Uloge            |
 | :-------------   | :--------------- |
 | Filip Fabijanec  | Backend          |
 | Josip Petričević | Frontend         |
-| Vito Cindor      | Frontend         |
+| Vito Cindori     | Frontend         |
 | Marija Jurić     | Frontend         |
 | Martin Tomišić   | Database         |
 | David Premuš     | Backend          |
