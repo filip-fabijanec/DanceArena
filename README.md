@@ -155,7 +155,7 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 -   Autetnikacija: [Google Cloud](https://console.cloud.google.com/)
 -   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
   
-# Instalcija
+# Instalacija
 
 ### 1. Klonirati repozitorij
 
