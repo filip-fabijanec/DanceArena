@@ -148,7 +148,7 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 # Tehnologije
 
 -   Frontend: [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/)
--   Backend: [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
+-   Backend: [Node.js](https://nodejs.org/)
 -   Baza podataka: [PostgreSQL](https://www.postgresql.org/)
 -   Dokumentacija: [Github](https://github.com/)
 -   Plačanje: [Stripe](https://stripe.com/en-hr)
