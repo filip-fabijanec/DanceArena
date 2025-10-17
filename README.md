@@ -1,37 +1,218 @@
 # DanceArena
 DanceArena je web platforma za organizaciju plesnih natjecanja. Cilj platforme je omogućiti organizatorima jednostavno kreiranje natjecanja i kategorija, voditeljima plesnih klubova praktičnu prijavu svojih grupa i nastupa, te sucima jednostavno ocjenjivanje nastupa. 
-
-# Programsko inženjerstvo
-
-> Ime projekta u naslovu ima cilj opisati namjenu projekta te pomoći u podizanju početnog interesa za projekt prezentirajući osnovnu svrhu projekta.
-> Isključivo ovisi o Vama!
-> 
-> Naravno, nijedan predložak nije idealan za sve projekte jer su potrebe i ciljevi različiti. Ne bojte se naglasiti Vaš cilj u ovoj početnoj stranici projekta, podržat ćemo ga bez obzira usredotočili se Vi više na tenologiju ili marketing.
-> 
-> Zašto ovaj dokument? Samo manji dio timova je do sada propoznao potrebu (a i meni je lakše pratiti Vaš rad).  
-
-# Opis projekta
 Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu. 
 
-Kratko opisati cilj Vašeg projekta. Vaša motivacija?  (Napomena: odgovor nije »Zato što je to bio zadatak i nismo imali ideje za drugo.«). Koji problem rješavate?
-> Obzirom da je ovo zadani projekt navedite i što želite/jeste novo  naučili.
-
-> Dobro izrađen opis omogućuje vam da pokažete svoj rad drugim programerima, kao i potencijalnim poslodavcima. Ne samo da prvi dojam na stranici opisa često razlikuje dobar projekt od lošeg projekta već i predstavlja dobru praksu koju morate savladati.
-
 # Funkcijski zahtjevi
-> Navedite ključne zahtjeve Vašeg projekta.
+**Korisnik:**
+
+> Pretraživanje stavki (tečaj/radionica/objava)
+>
+> -   Pretraživanje po naslovu
+> -   Pretraživanje po broju likeova
+> -   Pretraživanje po vremenu
+> -   Pretraživanje po popularnosti
+> -   Pretraživanje po cijeni (tečaj/radionicu)
+
+> Pregled tuđih profila
+
+> Prijava u sustav
+>
+> -   Autentifikacija
+> -   Resetiranje lozinke ("Zaboravio/la sam lozinku.")
+
+> Prijava na stavku (tečaj/radionica)
+>
+> -   Besplatna prijava (za besplatne stavke)
+> -   Prijava s plaćanjem (za privatne stavke)
+
+> Kreiranje stavki (tečaj/radionica)
+>
+> -   Definirati naslov
+> -   Definiranje opisa
+> -   Upload slika
+> -   Definirati lekcije (tečaj)
+> -   Definiranje kategorije
+
+> Modificiranje stavki (tečaj/radionica/objava)
+>
+> -   Brisanje stavke
+> -   Modificiranje stavke
+> -   Označavanje točnog odgovora (objava)
+
+> Komentiranje stavki (tečaj/radionica/objava)
+>
+> -   Stvaranje objave kao komentar
+> -   Lajkanje stavke
+> -   Favoriziranje stavke
+
+> Personalizacija profila
+>
+> -   Promjena imena
+> -   Promjena slike
+> -   Resetiranje lozinke
+
+> Prijava korisnika za neprimjereno ponašanje
+
+> Prijava za verificiranje profila
+
+**Moderator:**
+
+> Brisanje stavke (tečaj/radionica/objava)
+
+> Verificiranje korisnika
+
+> Utišanje korisnika
+
+**Administrator:**
+
+> Brisanje profila
+
+> Davanje moderatorske uloge
+
+**Server:**
+
+> Obrada zahtjeva
+>
+> -   Dohvat podataka
+> -   Izmjena podataka
+> -   Spremanje podataka
+
+> Kreiranje stavki (tečaj/radionica)
+>
+> -   Definirati naslov
+> -   Definiranje opisa
+> -   Upload slika
+> -   Definirati lekcije (tečaj)
+> -   Definiranje kategorije
+
+> Modificiranje stavki (tečaj/radionica/objava)
+>
+> -   Brisanje stavke
+> -   Modificiranje stavke
+> -   Označavanje točnog odgovora (objava)
+
+> Komentiranje stavki (tečaj/radionica/objava)
+>
+> -   Stvaranje objave kao komentar
+> -   Lajkanje stavke
+> -   Favoriziranje stavke
+
+> Personalizacija profila
+>
+> -   Promjena imena
+> -   Promjena slike
+> -   Resetiranje lozinke
+
+> Prijava korisnika za neprimjereno ponašanje
+
+> Prijava za verificiranje profila
+
+**Moderator:**
+
+> Brisanje stavke (tečaj/radionica/objava)
+
+> Verificiranje korisnika
+
+> Utišanje korisnika
+
+**Administrator:**
+
+> Brisanje profila
+
+> Davanje moderatorske uloge
+
+**Server:**
+
+> Obrada zahtjeva
+>
+> -   Dohvat podataka
+> -   Izmjena podataka
+> -   Spremanje podataka
 
 
 # Tehnologije
 
-#Instalcija
+-   Frontend: [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/)
+-   Backend: [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
+-   Baza podataka: [PostgreSQL](https://www.postgresql.org/)
+-   Dokumentacija: [Github](https://github.com/)
+-   Plačanje: [Stripe](https://stripe.com/en-hr)
+-   Autetnikacija: [Google Cloud](https://console.cloud.google.com/)
+-   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
+  
+# Instalcija
+
+### 1. Klonirati repozitorij
+
+Klonirati GitHub repozitorij:
+
+```console
+    git clone https://github.com/filip-fabijanec/DanceArena.git
+    cd DanceArena/src
+```
+
+### 2. Postavljanje backend okruženja
+
+1. Navigirajte do DanceArena.API direktorija.
+2. Stvorite "appsettings.development.json" datoteku.
+3. Kopirajte sadržaj "appsettings.development.json.txt" u stvorenu datoteku.
+4. Dodajte JWT ključ u datoteku.
+5. Dodajte ostale "secrets" ako ih imate.
+
+### 3. Postavljanje baze podataka
+
+1. Napravite novog PostgreSQL korisnika s imenom "dancearena_backend" i dodijeliti mu lozinku.
+2. Kreirajte bazu podataka s imenom "dancearena" i schemom "backend".
+3. Popunite ConnectionString u "appsettings.development.json" datoteci.
+4. Ako nemate instaliran dotnet tools, pokrenuti sljedeću naredbu:
+
+```console
+    dotnet tool install --global dotnet-ef --version 8.*
+```
+
+5. Za kreiranje tablica u bazi podataka, pokrenite iduću naredbu iz "DanceArena/src" direktorija:
+
+```console
+    dotnet ef database update -s Dancearena.API -p DanceArena.Model
+```
+
+### 4. Pokretanje backend-a
+
+```console
+    dotnet restore
+    dotnet run
+```
+
+### 5. Postavljanje i pokretanje frontend-a
+
+1. Navigirajte do "DanceArena.Front" direktorija.
+2. Kreirajte ".env.development" datoteku.
+3. Kopirajte sadržaj ".env.development.txt" u stvorenu datoteku.
+4. Pokrenite sljedeće naredbe iz "DanceArena.Front" direktorija:
+
+```console
+    npm install
+    npm run dev
+```
+
+### 6. Pristupanje aplikaciji
+
+Nakon ovih koraka otvoiti preglednik i navigirajte do https://localhost:3000 kako bi pristupili "DanceArena" aplikaciji.
+
 # Članovi tima 
-> Filip Fabijanec, Josip Petričević, Vito Cindori, Marija Jurić, Martin Tomišić, David Premuš, Ivona Gašparić
->
+| Članovi          | Uloge            |
+| :-------------   | :--------------- |
+| Filip Fabijanec  | Backend          |
+| Josip Petričević | Frontend         |
+| Vito Cindor      | Frontend         |
+| Marija Jurić     | Frontend         |
+| Martin Tomišić   | Database         |
+| David Premuš     | Backend          |
+| Ivona Gašparić   | Backend          |
+
 
 # Kontribucije
 >Pravila ovise o organizaciji tima i su često izdvojena u CONTRIBUTING.md
-
 
 
 # 📝 Kodeks ponašanja [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
