@@ -1,73 +1,97 @@
 # DanceArena
 DanceArena je web platforma za organizaciju plesnih natjecanja. Cilj platforme je omogućiti organizatorima jednostavno kreiranje natjecanja i kategorija, voditeljima plesnih klubova praktičnu prijavu svojih grupa i nastupa, te sucima jednostavno ocjenjivanje nastupa. 
+
 Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu. 
 
 # Funkcijski zahtjevi
-**Korisnik:**
 
-> Pretraživanje stavki (tečaj/radionica/objava)
+**Organizator:**
+
+> Kreiranje natjecanja
 >
-> -   Pretraživanje po naslovu
-> -   Pretraživanje po broju likeova
-> -   Pretraživanje po vremenu
-> -   Pretraživanje po popularnosti
-> -   Pretraživanje po cijeni (tečaj/radionicu)
+> -  Unos naziva, datuma, lokacije i opisa događaja
+> -  Definiranje kategorija (dobne skupine, stilovi, veličine grupa)
 
-> Pregled tuđih profila
-
-> Prijava u sustav
+> Upravljanje prijavama
 >
-> -   Autentifikacija
-> -   Resetiranje lozinke ("Zaboravio/la sam lozinku.")
+> -  Pregled prijavljenih nastupa
+> -  Potvrđivanje, izmjena ili odbijanje prijava
 
-> Prijava na stavku (tečaj/radionica)
+> Odabir sudaca
 >
-> -   Besplatna prijava (za besplatne stavke)
-> -   Prijava s plaćanjem (za privatne stavke)
+> -  Odabir minimalno 3 suca (neparan broj: 3, 5, 7)
+> -  Slanje poziva putem e-maila ako sudac nije registriran
 
-> Kreiranje stavki (tečaj/radionica)
+> Upravljanje kotizacijama
 >
-> -   Definirati naslov
-> -   Definiranje opisa
-> -   Upload slika
-> -   Definirati lekcije (tečaj)
-> -   Definiranje kategorije
+> -  Plaćanje kotizacija kreditnom karticom prilikom prijave
 
-> Modificiranje stavki (tečaj/radionica/objava)
+> Zaključavanje prijava
 >
-> -   Brisanje stavke
-> -   Modificiranje stavke
-> -   Označavanje točnog odgovora (objava)
+> -  Generiranje PDF dokumenta s popisom nastupa po kategorijama
+> -  Omogućavanje preuzimanja PDF-a svim korisnicima
 
-> Komentiranje stavki (tečaj/radionica/objava)
+
+**Voditelj:**
+
+> Registracija i prijava u sustav
 >
-> -   Stvaranje objave kao komentar
-> -   Lajkanje stavke
-> -   Favoriziranje stavke
+> -  Autentifikacija putem vanjskog servisa (Google OAuth2)
 
-> Personalizacija profila
+> Upravljanje profilom
 >
-> -   Promjena imena
-> -   Promjena slike
-> -   Resetiranje lozinke
+> -  Naziv plesnog kluba, lokacija, e-mail
+> -  Uređivanje podataka profila
 
-> Prijava korisnika za neprimjereno ponašanje
+> Prijava grupe na natjecanje
+>
+> -  Odabir natjecanja i kategorije
+> -  Unos naziva koreografije, trajanja i imena koreografa
+> -  Upload glazbene datoteke
+> -  Plaćanje kotizacije ako je potrebno
 
-> Prijava za verificiranje profila
+> Pregled statusa prijava
+>
+> -  Pregled potvrđenih, odbijenih i prijava na čekanju
 
-**Moderator:**
+> Pregled rezultata
+>
+> -  Pregled ocjena i poretka nakon završetka natjecanja
 
-> Brisanje stavke (tečaj/radionica/objava)
+**Sudac:**
 
-> Verificiranje korisnika
+> Prijava u sustav (Google OAuth2)
+>
+> -  Autentifikacija putem vanjskog servisa
 
-> Utišanje korisnika
+> Pregled dodijeljenih natjecanja
+>
+> -  Pregled natjecanja na kojima je imenovan za suca
+
+> Ocjenjivanje nastupa
+>
+> -  Unos ocjene (0–30 bodova) za svaku koreografiju
+> -  Mogućnost izmjene ocjene prije zaključavanja natjecanja
+
+> Pregled vlastitih ocjena
+>
+> -  Pregled i potvrda ocjena nakon završetka natjecanja
 
 **Administrator:**
 
-> Brisanje profila
+> Upravljanje korisnicima
+>
+> -  Dodavanje i brisanje korisnika
+> -  Postavljanje uloga (organizator, sudac, voditelj)
 
-> Davanje moderatorske uloge
+> Postavljanje godišnje članarine
+>
+> -  Definiranje cijene članarine
+> -  Upravljanje naplatom članarina
+
+> Nadgledanje sustava
+>
+> -  Pregled svih prijava, natjecanja i aktivnosti korisnika
 
 **Server:**
 
@@ -77,58 +101,49 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 > -   Izmjena podataka
 > -   Spremanje podataka
 
-> Kreiranje stavki (tečaj/radionica)
+> Upravljanje korisnicima
 >
-> -   Definirati naslov
-> -   Definiranje opisa
-> -   Upload slika
-> -   Definirati lekcije (tečaj)
-> -   Definiranje kategorije
+> -   Registracija i prijava korisnika putem Google OAuth2
+> -   Provjera uloga (organizator, voditelj, sudac, administrator)
+> -   Autentifikacija i autorizacija korisnika
 
-> Modificiranje stavki (tečaj/radionica/objava)
+> Upravljanje natjecanjima
 >
-> -   Brisanje stavke
-> -   Modificiranje stavke
-> -   Označavanje točnog odgovora (objava)
+> -   Kreiranje natjecanja (naziv, datum, lokacija, opis)
+> -   Dodavanje kategorija (dobne skupine, stilovi, veličine grupa)
+> -   Uređivanje i brisanje natjecanja
 
-> Komentiranje stavki (tečaj/radionica/objava)
+> Upravljanje prijavama
 >
-> -   Stvaranje objave kao komentar
-> -   Lajkanje stavke
-> -   Favoriziranje stavke
+> -   Zaprimanje prijava od voditelja
+> -   Potvrđivanje, izmjena ili odbijanje prijava od strane organizatora
+> -   Zaključavanje prijava i generiranje PDF-a s listom nastupa
 
-> Personalizacija profila
+> Ocjenjivanje nastupa
 >
-> -   Promjena imena
-> -   Promjena slike
-> -   Resetiranje lozinke
+> -   Spremanje ocjena (0–30 bodova)
+> -   Izračun ukupnih bodova po kategoriji
+> -   Generiranje rang liste po kategorijama
 
-> Prijava korisnika za neprimjereno ponašanje
-
-> Prijava za verificiranje profila
-
-**Moderator:**
-
-> Brisanje stavke (tečaj/radionica/objava)
-
-> Verificiranje korisnika
-
-> Utišanje korisnika
-
-**Administrator:**
-
-> Brisanje profila
-
-> Davanje moderatorske uloge
-
-**Server:**
-
-> Obrada zahtjeva
+> Učitavanje i pohrana datoteka
 >
-> -   Dohvat podataka
-> -   Izmjena podataka
-> -   Spremanje podataka
+> -  Upload glazbe uz prijavu nastupa
+> -  Pohrana i dohvat datoteka s poslužitelja
 
+> Obrada plaćanja
+>
+> -  Plaćanje kotizacija putem kreditne kartice
+> -  Plaćanje godišnje članarine
+
+> Generiranje dokumenata
+>
+> -  Izrada PDF-a s listom prijavljenih natjecatelja
+> -  Generiranje PDF-a s rezultatima po kategorijama
+
+> Komunikacija s vanjskim servisima
+>
+> -  Google OAuth2 za autentifikaciju korisnika
+> -  API integracije za plaćanja i e-mail obavijesti
 
 # Tehnologije
 
