@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const performanceSchema = new mongoose.Schema({
-  clubName: { type: String, ref: "User", required: true },
+  clubId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // id voditelja kluba
 
   choreographyName: { type: String, required: true },
 
-  performanceDuration: { type: Number, required: true }, // duration in seconds
+  performanceDuration: { type: Number, required: true }, // trajanje u sekundama
 
   choreographer: { type: String },
 

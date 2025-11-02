@@ -7,7 +7,7 @@ const competitionSchema = new mongoose.Schema({
 
   location: { type: String, required: true },
 
-  organizer: {
+  organizer: { // id organizatora
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,

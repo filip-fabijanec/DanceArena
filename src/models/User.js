@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+// mongoDB svakom objektu dodeljuje jedinstveni _id, stoga nije potrebno posebno definirati ID polje
+
 const userSchema = new mongoose.Schema({
   role: {
     type: String,
