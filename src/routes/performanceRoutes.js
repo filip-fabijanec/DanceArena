@@ -18,6 +18,9 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const performances = await Performance.find();
+    if(!performances){
+      return res.status(404).json({ error: "No performances found" });
+    }
     res.status(200).json(performances);
   } catch (error) {
     res.status(400).json({ error: error.message });
