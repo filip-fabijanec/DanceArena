@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Score = require("../models/Performance");
+const Score = require("../models/Score");
 
 router.post("/", async (req, res) => {
   try {
