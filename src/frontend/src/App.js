@@ -1,5 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
+function MyButton() {
+  return (
+    <button>I'm a button</button>
+  );
+}
 
 function App() {
   return (
@@ -17,6 +22,7 @@ function App() {
         >
           Learn React
         </a>
+        <MyButton />
       </header>
     </div>
   );
