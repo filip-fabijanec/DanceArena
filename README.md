@@ -149,10 +149,10 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 
 -   Frontend: [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/)
 -   Backend: [Node.js](https://nodejs.org/)
--   Baza podataka: [PostgreSQL](https://www.postgresql.org/)
+-   Baza podataka: [MongoDB](https://www.mongodb.com/)
 -   Dokumentacija: [Github](https://github.com/)
 -   Plačanje: [Stripe](https://stripe.com/en-hr)
--   Autetnikacija: [Google Cloud](https://console.cloud.google.com/)
+-   Autentikacija: [Google Cloud](https://console.cloud.google.com/)
 -   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
   
 # Instalacija
