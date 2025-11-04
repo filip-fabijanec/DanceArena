@@ -6,8 +6,19 @@ const PORT = process.env.PORT || 3500;
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 
+//rute
+const userRoutes = require('./routes/userRoutes');
+const competitionRoutes = require('./routes/competitionRoutes');
+const scoreRoutes = require('./routes/scoreRoutes');
+const performanceRoutes = require('./routes/performanceRoutes');
+
 //Povezivanje s bazom podataka
 connectDB();
+
+app.use('/users', userRoutes);
+app.use('/competitions', competitionRoutes);
+app.use('/scores', scoreRoutes);
+app.use('/performances', performanceRoutes);
 
 //Slusamo na portu samo ako se uspostavi veza s bazom podataka
 mongoose.connection.once('open', () => {
