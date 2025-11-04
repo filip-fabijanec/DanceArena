@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 3500;
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 
+app.use(express.json());
+
 //rute
 const userRoutes = require('./routes/userRoutes');
 const competitionRoutes = require('./routes/competitionRoutes');
