@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #697faa;
+  background-color: #697faa; /* default boja */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,6 +22,11 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  transition: background-color 0.5s;
+}
+
+.App-header.toggled {
+  background-color: orange; /* boja kada je toggled */
 }
 
 .App-link {
@@ -35,4 +40,35 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* STIL ZA BUTTON */
+.my-button {
+  background-color: teal; /* default */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 35px;
+  transition: background-color 0.5s, color 0.5s;
+}
+
+.my-button:hover {
+  opacity: 0.8;
+}
+
+.my-button.toggled {
+  background-color: #697faa; /* boja buttona kada je toggled */
+}
+
+.naslov {
+  display: flex;
+  color: white;
+  font-size: 80px;
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: bold;
+  border: none;
+  border-radius: 2px;
+  line-height: 0.5;
 }

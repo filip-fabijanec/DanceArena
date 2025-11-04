@@ -1,28 +1,34 @@
 import logo from './logo.svg';
 import './App.css';
-function MyButton() {
-  return (
-    <button>I'm a button</button>
-  );
-}
+
+import MyButton from './button';
+import { useState } from 'react';
 
 function App() {
+  const [isToggled, setIsToggled] = useState(false);
+
+  const toggleBackground = () => {
+    setIsToggled(prev => !prev);
+  };
+
+  // dodajemo klase na App-header i button ovisno o state-u
+  const headerClass = isToggled ? 'App-header toggled' : 'App-header';
+  const buttonClass = isToggled ? 'my-button toggled' : 'my-button';
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
+      <header className={headerClass}>
+        <p className="naslov">DANCE ARENA</p>
         <a
           className="App-link"
-          href="https://reactjs.org"
+          href="https://github.com/filip-fabijanec/DanceArena"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          Link za Github
         </a>
-        <MyButton />
+        <p></p>
+        <MyButton buttonClass={buttonClass} onClick={toggleBackground} />
       </header>
     </div>
   );
