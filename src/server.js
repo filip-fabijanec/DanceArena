@@ -1,3 +1,4 @@
+
 const dotenv = require('dotenv');
 dotenv.config();
 const express = require('express');
@@ -7,6 +8,8 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 
 app.use(express.json());
+const cors = require('cors');
+app.use(cors());
 
 //rute
 const userRoutes = require('./routes/userRoutes');
