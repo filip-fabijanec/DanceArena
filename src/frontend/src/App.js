@@ -1,7 +1,7 @@
-
 import './App.css';
 import { useEffect, useState } from "react";
 import MyButton from './button';
+import CreateUser from './CreateUser';
 
 function App() {
 
@@ -28,7 +28,14 @@ function App() {
     setIsToggled(prev => !prev);
   };
 
-  // dodajemo klase na App-header i button ovisno o state-u
+  // Funkcija za refresh liste korisnika
+  const refreshUsers = () => {
+    fetch("http://localhost:3500/users")
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((err) => console.error("Fetch error:", err));
+  };
+
   const headerClass = isToggled ? 'App-header toggled' : 'App-header';
   const buttonClass = isToggled ? 'my-button toggled' : 'my-button';
 
@@ -44,18 +51,25 @@ function App() {
         >
           Link za Github
         </a>
+        
+        {/* Nova komponenta za kreiranje korisnika */}
+        <CreateUser onUserCreated={refreshUsers} />
+        
         <p>Backend connection test:</p>
-      <ul>
-        {users.length > 0 ? (
-          users.map((u) => (
-            <li key={u._id}>
-              {u.username || u.name || "Nepoznati korisnik"} — {u.role || ""}
-            </li>
-          ))
-        ) : (
-          <li>Nema korisnika (ili baza prazna)</li>
-        )}
-      </ul>
+        <button onClick={refreshUsers} className="refresh-button">
+          Osvježi listu korisnika
+        </button>
+        <ul>
+          {users.length > 0 ? (
+            users.map((u) => (
+              <li key={u._id}>
+                {u.name} {u.surname} — {u.role} — {u.email}
+              </li>
+            ))
+          ) : (
+            <li>Nema korisnika (ili baza prazna)</li>
+          )}
+        </ul>
         <p></p>
         <MyButton buttonClass={buttonClass} onClick={toggleBackground} />
       </header>
