@@ -7,6 +7,7 @@ import OrganizatorDashboard from './pages/OrganizatorDashboard';
 import VoditeljDashboard from './pages/VoditeljDashboard';
 import SudacDashboard from './pages/SudacDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import CreateUser from './CreateUser';
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
         <Routes>
           {/* Login ruta - javna */}
           <Route path="/login" element={<Login />} />
+          
+          {/* Test ruta za kreiranje korisnika - možeš ostaviti ili maknuti */}
+          <Route path="/create-user" element={<CreateUser />} />
 
           {/* Zaštićene rute po ulogama */}
           <Route
