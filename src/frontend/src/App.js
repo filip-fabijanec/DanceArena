@@ -9,7 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OrganizatorRoutes from './routes/OrganizatorRoutes';
 import VoditeljDashboard from './pages/VoditeljPages/VoditeljDashboard';
 import SudacDashboard from './pages/SudacPages/SudacDashboard';
-import AdminDashboard from './pages/AdminPages/AdminDashboard';
+import AdminRoutes from './routes/AdminRoutes';
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
 
           {/* Voditelj */}
           <Route
-            path="/voditelj"
+            path="/voditelj/*"
             element={
               <ProtectedRoute allowedRoles={['voditeljKluba']}>
                 <VoditeljDashboard />
@@ -52,10 +52,10 @@ function App() {
 
           {/* Admin */}
           <Route
-            path="/admin"
+            path="/admin/*"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
+                <AdminRoutes />
               </ProtectedRoute>
             }
           />

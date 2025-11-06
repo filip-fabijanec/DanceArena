@@ -1,11 +1,10 @@
 import React from 'react';
-import Navbar from '../../components/Navbar';
+import { Link } from 'react-router-dom';
 import '../Dashboard.css';
 
-function AdminDashboard() {
+function Dashboard() {
   return (
     <div>
-      <Navbar />
       <div className="dashboard-container">
         <h1>Administrator Dashboard</h1>
         <p className="welcome-text">Dobrodošli! Ovdje možete upravljati sustavom.</p>
@@ -14,25 +13,33 @@ function AdminDashboard() {
           <div className="dashboard-card">
             <h3>👥 Upravljanje korisnicima</h3>
             <p>Dodajte, uređujte ili brišite korisnike.</p>
-            <button className="card-button">Upravljaj korisnicima</button>
+            <Link to="/admin/korisnici" className="card-button">
+                Upravljaj korisnicima
+            </Link>
           </div>
 
           <div className="dashboard-card">
             <h3>💰 Članarine</h3>
             <p>Postavljanje i upravljanje članarinama.</p>
-            <button className="card-button">Postavi članarinu</button>
+            <Link to="/admin/članarine" className="card-button">
+                Upravljaj članarinama
+            </Link>
           </div>
 
           <div className="dashboard-card">
             <h3>📊 Pregled sustava</h3>
             <p>Pregledajte sve aktivnosti u sustavu.</p>
-            <button className="card-button">Pregled aktivnosti</button>
+             <Link to="/admin/sustav" className="card-button">
+                Pregled aktivnosti
+            </Link>
           </div>
 
           <div className="dashboard-card">
             <h3>🎯 Sva natjecanja</h3>
             <p>Pregledajte sva natjecanja u sustavu.</p>
-            <button className="card-button">Pregled natjecanja</button>
+            <Link to="/admin/natjecanja" className="card-button">
+                Pregled natjecanja
+            </Link>
           </div>
         </div>
       </div>
@@ -40,4 +47,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default Dashboard;
