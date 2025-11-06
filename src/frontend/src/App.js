@@ -1,6 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import LandingPage from './pages/LandingPage';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import OrganizatorDashboard from './pages/OrganizatorDashboard';
@@ -13,7 +14,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Login ruta - javna */}
+          {/* Javne rute */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
 
           {/* Zaštićene rute po ulogama */}
@@ -53,11 +55,8 @@ function App() {
             }
           />
 
-          {/* Redirect sa početne stranice na login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* 404 - Stranica ne postoji */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

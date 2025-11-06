@@ -2,6 +2,21 @@ const express = require("express");
 const router = express.Router();
 const Competition = require("../models/Competition");
 
+router.get("/public", async (req, res) => {
+  try {
+    const competitions = await Competition.find({
+      status: { $in: ["upcoming", "ongoing"] }, // Samo nadolazeća i trenutna
+      date: { $gte: new Date() } // Datum u budućnosti ili danas
+    })
+      .populate("organizer", "name surname") // Dohvati ime organizatora
+      .sort({ date: 1 }); // Sortiraj po datumu (najranija prva)
+    
+    res.status(200).json(competitions);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const newCompetition = new Competition(req.body);
