@@ -4,10 +4,12 @@ import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-import OrganizatorDashboard from './pages/OrganizatorDashboard';
-import VoditeljDashboard from './pages/VoditeljDashboard';
-import SudacDashboard from './pages/SudacDashboard';
-import AdminDashboard from './pages/AdminDashboard';
+
+// Importaj Routes komponente za svaki role
+import OrganizatorRoutes from './routes/OrganizatorRoutes';
+import VoditeljDashboard from './pages/VoditeljPages/VoditeljDashboard';
+import SudacDashboard from './pages/SudacPages/SudacDashboard';
+import AdminDashboard from './pages/AdminPages/AdminDashboard';
 
 function App() {
   return (
@@ -18,16 +20,17 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
 
-          {/* Zaštićene rute po ulogama */}
+          {/* Organizator - sve rute pod /organizator/* */}
           <Route
-            path="/organizator"
+            path="/organizator/*"
             element={
               <ProtectedRoute allowedRoles={['organizator']}>
-                <OrganizatorDashboard />
+                <OrganizatorRoutes />
               </ProtectedRoute>
             }
           />
 
+          {/* Voditelj */}
           <Route
             path="/voditelj"
             element={
@@ -37,6 +40,7 @@ function App() {
             }
           />
 
+          {/* Sudac */}
           <Route
             path="/sudac"
             element={
@@ -46,6 +50,7 @@ function App() {
             }
           />
 
+          {/* Admin */}
           <Route
             path="/admin"
             element={

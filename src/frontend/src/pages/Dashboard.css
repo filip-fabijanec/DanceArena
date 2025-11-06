@@ -64,3 +64,23 @@
 .card-button:hover {
   background-color: #5568d3;
 }
+
+.back-link {
+  display: inline-block;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: opacity 0.3s;
+}
+
+.back-link:hover {
+  opacity: 0.7;
+}
+
+.card-button {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+}
