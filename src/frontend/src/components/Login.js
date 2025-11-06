@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
@@ -46,6 +46,12 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-box">
+        {/* ========== DODAJ OVO ========== */}
+        <Link to="/" className="back-to-home">
+          ← Natrag na početnu
+        </Link>
+        {/* =============================== */}
+
         <h1>DANCE ARENA</h1>
         <h2>Prijava u sustav</h2>
         

@@ -10,7 +10,7 @@ function Dashboard() {
       
       <div className="dashboard-grid">
         <div className="dashboard-card">
-          <h3>📋 Kreiranje natjecanja</h3>
+          <h3>Kreiranje natjecanja</h3>
           <p>Kreirajte novo natjecanje s kategorijama i detaljima.</p>
           <Link to="/organizator/kreiranje-natjecanja" className="card-button">
             Kreiraj natjecanje
@@ -18,7 +18,7 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-card">
-          <h3>🏆 Moja natjecanja</h3>
+          <h3>Moja natjecanja</h3>
           <p>Pregledajte i upravljajte svojim natjecanjima.</p>
           <Link to="/organizator/natjecanja" className="card-button">
             Moja natjecanja
@@ -26,7 +26,7 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-card">
-          <h3>👥 Upravljanje prijavama</h3>
+          <h3>Upravljanje prijavama</h3>
           <p>Pregledajte i upravljajte prijavama na natjecanja.</p>
           <Link to="/organizator/prijave" className="card-button">
             Pregled prijava
@@ -34,7 +34,7 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-card">
-          <h3>⚖️ Odabir sudaca</h3>
+          <h3>Odabir sudaca</h3>
           <p>Dodijelite suce za vaša natjecanja.</p>
           <Link to="/organizator/suci" className="card-button">
             Odaberi suce

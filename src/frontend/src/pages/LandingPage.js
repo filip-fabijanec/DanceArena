@@ -65,8 +65,8 @@ function LandingPage() {
                     <span className="status-badge">{comp.status === 'upcoming' ? 'Nadolazeće' : 'U tijeku'}</span>
                   </div>
                   <div className="card-body">
-                    <p className="date">📅 {formatDate(comp.date)}</p>
-                    <p className="location">📍 {comp.location}</p>
+                    <p className="date">{formatDate(comp.date)}</p>
+                    <p className="location">{comp.location}</p>
                     {comp.description && <p className="description">{comp.description}</p>}
                     <div className="card-details">
                       <span>Kotizacija: {comp.registrationFee} €</span>
@@ -87,17 +87,17 @@ function LandingPage() {
           <h2>O Dance Arena platformi</h2>
           <div className="about-grid">
             <div className="about-card">
-              <div className="about-icon">🎯</div>
+              <div className="about-icon"></div>
               <h3>Organizatorima</h3>
               <p>Jednostavno kreirajte natjecanja, upravljajte prijavama i odaberite suce.</p>
             </div>
             <div className="about-card">
-              <div className="about-icon">💃</div>
+              <div className="about-icon"></div>
               <h3>Voditelji klubova</h3>
               <p>Prijavite svoje grupe na natjecanja i pratite rezultate.</p>
             </div>
             <div className="about-card">
-              <div className="about-icon">⚖️</div>
+              <div className="about-icon"></div>
               <h3>Sucima</h3>
               <p>Ocjenjujte nastupe digitalno i pregledajte svoje ocjene.</p>
             </div>

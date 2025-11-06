@@ -11,7 +11,7 @@ function Dashboard() {
         
         <div className="dashboard-grid">
           <div className="dashboard-card">
-            <h3>👥 Upravljanje korisnicima</h3>
+            <h3>Upravljanje korisnicima</h3>
             <p>Dodajte, uređujte ili brišite korisnike.</p>
             <Link to="/admin/korisnici" className="card-button">
                 Upravljaj korisnicima
@@ -19,7 +19,7 @@ function Dashboard() {
           </div>
 
           <div className="dashboard-card">
-            <h3>💰 Članarine</h3>
+            <h3>Članarine</h3>
             <p>Postavljanje i upravljanje članarinama.</p>
             <Link to="/admin/članarine" className="card-button">
                 Upravljaj članarinama
@@ -27,7 +27,7 @@ function Dashboard() {
           </div>
 
           <div className="dashboard-card">
-            <h3>📊 Pregled sustava</h3>
+            <h3>Pregled sustava</h3>
             <p>Pregledajte sve aktivnosti u sustavu.</p>
              <Link to="/admin/sustav" className="card-button">
                 Pregled aktivnosti
@@ -35,7 +35,7 @@ function Dashboard() {
           </div>
 
           <div className="dashboard-card">
-            <h3>🎯 Sva natjecanja</h3>
+            <h3>Sva natjecanja</h3>
             <p>Pregledajte sva natjecanja u sustavu.</p>
             <Link to="/admin/natjecanja" className="card-button">
                 Pregled natjecanja
