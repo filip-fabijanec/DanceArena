@@ -151,7 +151,6 @@ function CreateUser() {
           />
         </div>
 
-        {/* Opciona polja za voditelja kluba */}
         <div className="form-group">
           <label htmlFor="clubName">Naziv kluba (opciono)</label>
           <input
