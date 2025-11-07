@@ -36,7 +36,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <h2>🕺 DANCE ARENA</h2>
+          <h2>DANCE ARENA</h2>
         </div>
         
         <div className="navbar-user">

@@ -1,14 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../Dashboard.css';
 
 function Dashboard() {
+  const [stats, setStats] = useState({
+    users: { total: 0, approved: 0, pending: 0 },
+    competitions: { total: 0 }
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      // Dohvati korisnike
+      const usersRes = await fetch('http://localhost:3500/users');
+      let usersData = [];
+      if (usersRes.ok) {
+        usersData = await usersRes.json();
+      }
+
+      // Dohvati natjecanja
+      const compsRes = await fetch('http://localhost:3500/competitions');
+      let compsData = [];
+      if (compsRes.ok) {
+        compsData = await compsRes.json();
+      }
+
+      setStats({
+        users: {
+          total: usersData.length,
+          approved: usersData.filter(u => u.approved).length,
+          pending: usersData.filter(u => !u.approved).length,
+        },
+        competitions: {
+          total: compsData.length
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   return (
     <div>
       <div className="dashboard-container">
         <h1>Administrator Dashboard</h1>
         <p className="welcome-text">Dobrodošli! Ovdje možete upravljati sustavom.</p>
         
+        {/* Brzi pregled statistike */}
+        <div className="stats-overview">
+          <div className="stat-box">
+            <div className="stat-number">{stats.users.total}</div>
+            <div className="stat-label">Ukupno korisnika</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-number">{stats.users.pending}</div>
+            <div className="stat-label">Na čekanju</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-number">{stats.competitions.total}</div>
+            <div className="stat-label">Natjecanja</div>
+          </div>
+        </div>
+
         <div className="dashboard-grid">
           <div className="dashboard-card">
             <h3>Upravljanje korisnicima</h3>

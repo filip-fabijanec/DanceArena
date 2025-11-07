@@ -7,7 +7,7 @@ function PublicNavbar() {
     <nav className="public-navbar">
       <div className="public-navbar-container">
         <Link to="/" className="navbar-logo">
-          <h2>🕺 DANCE ARENA</h2>
+          <h2>DANCE ARENA</h2>
         </Link>
         
         <div className="navbar-links">
