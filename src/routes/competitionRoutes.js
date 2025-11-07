@@ -5,13 +5,19 @@ const Competition = require("../models/Competition");
 router.get("/public", async (req, res) => {
   try {
     const competitions = await Competition.find({
-      status: { $in: ["upcoming", "ongoing"] }, // Samo nadolazeća i trenutna
-      date: { $gte: new Date() } // Datum u budućnosti ili danas
+      status: { $in: ["upcoming", "ongoing"] },
     })
-      .populate("organizer", "name surname") // Dohvati ime organizatora
-      .sort({ date: 1 }); // Sortiraj po datumu (najranija prva)
+      .populate("organizer", "name surname")
+      .sort({ date: 1 });
     
-    res.status(200).json(competitions);
+    // Ažuriraj status prije slanja
+    const competitionsWithStatus = competitions.map(comp => {
+      const obj = comp.toObject();
+      obj.status = comp.autoStatus; // Koristi virtual field
+      return obj;
+    });
+    
+    res.status(200).json(competitionsWithStatus);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -23,7 +29,7 @@ router.post("/", async (req, res) => {
     await newCompetition.save({
       runValidators: true,
       validateBeforeSave: true,
-    }); // spremanje u bazu podataka
+    });
     res.status(201).json(newCompetition);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -32,11 +38,27 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const Competitions = await Competition.find();
-    if(!Competitions){
+    const query = req.query.organizerId 
+      ? { organizer: req.query.organizerId }
+      : {};
+    
+    const competitions = await Competition.find(query)
+      .populate("organizer", "name surname")
+      .populate("referees", "name surname")
+      .sort({ date: -1 });
+    
+    if(!competitions || competitions.length === 0){
       return res.status(404).json({ error: "No competitions found" });
     }
-    res.status(200).json(Competitions);
+    
+    // Ažuriraj status prije slanja
+    const competitionsWithStatus = competitions.map(comp => {
+      const obj = comp.toObject();
+      obj.status = comp.autoStatus; // Koristi virtual field za automatski status
+      return obj;
+    });
+    
+    res.status(200).json(competitionsWithStatus);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
