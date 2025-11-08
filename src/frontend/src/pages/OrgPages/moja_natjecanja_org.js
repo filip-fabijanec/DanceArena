@@ -51,7 +51,6 @@ function MojaNatjecanja() {
       });
 
       if (response.ok || response.status === 204) {
-        // Ukloni iz state-a
         setCompetitions(competitions.filter(comp => comp._id !== id));
         setDeleteModal({ show: false, id: null, name: '' });
         alert('Natjecanje uspješno obrisano!');
@@ -167,13 +166,11 @@ function MojaNatjecanja() {
         </button>
       </div>
 
-      {/* Greška */}
-      {error && <div className="error-message">{error}</div>}
 
       {/* Lista natjecanja */}
       {filteredCompetitions.length === 0 ? (
         <div className="empty-state">
-          <h3>📋 Nemate kreiranih natjecanja</h3>
+          <h3>Nemate kreiranih natjecanja</h3>
           <p>Kliknite na "Novo natjecanje" da kreirate svoje prvo natjecanje.</p>
           <Link to="/organizator/kreiranje-natjecanja" className="btn-primary">
             Kreiraj natjecanje
@@ -194,19 +191,15 @@ function MojaNatjecanja() {
 
                 <div className="card-body">
                   <div className="info-row">
-                    <span className="icon">📅</span>
-                    <span>{formatDate(competition.date)}</span>
+                    <span>Datum: {formatDate(competition.date)}</span>
                   </div>
                   <div className="info-row">
-                    <span className="icon">📍</span>
-                    <span>{competition.location}</span>
+                    <span>Lokacija: {competition.location}</span>
                   </div>
                   <div className="info-row">
-                    <span className="icon">💰</span>
                     <span>Kotizacija: {competition.registrationFee} €</span>
                   </div>
                   <div className="info-row">
-                    <span className="icon">⚖️</span>
                     <span>Suci: {competition.referees?.length || 0}</span>
                   </div>
 
@@ -214,7 +207,6 @@ function MojaNatjecanja() {
                     <p className="description">{competition.description}</p>
                   )}
 
-                  {/* Kategorije */}
                   <div className="categories">
                     <div className="category-group">
                       <strong>Dobne kategorije:</strong>
@@ -245,22 +237,16 @@ function MojaNatjecanja() {
 
                 <div className="card-actions">
                   <Link 
-                    to={`/organizator/natjecanja/${competition._id}/uredi`}
-                    className="btn-action btn-edit"
-                  >
-                    ✏️ Uredi
-                  </Link>
-                  <Link 
                     to={`/organizator/prijave?competitionId=${competition._id}`}
                     className="btn-action btn-view"
                   >
-                    👥 Prijave
+                    Prijave
                   </Link>
                   <Link 
                     to={`/organizator/suci?competitionId=${competition._id}`}
                     className="btn-action btn-referees"
                   >
-                    ⚖️ Suci
+                    Suci
                   </Link>
                   <button
                     onClick={() => setDeleteModal({ 
@@ -270,7 +256,7 @@ function MojaNatjecanja() {
                     })}
                     className="btn-action btn-delete"
                   >
-                    🗑️ Obriši
+                    Obriši
                   </button>
                 </div>
               </div>
@@ -279,7 +265,7 @@ function MojaNatjecanja() {
         </div>
       )}
 
-      {/* Delete Modal */}
+      {/* Brisanje natjecanja */}
       {deleteModal.show && (
         <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, id: null, name: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

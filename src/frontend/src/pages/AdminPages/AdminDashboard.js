@@ -14,14 +14,12 @@ function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      // Dohvati korisnike
       const usersRes = await fetch('http://localhost:3500/users');
       let usersData = [];
       if (usersRes.ok) {
         usersData = await usersRes.json();
       }
 
-      // Dohvati natjecanja
       const compsRes = await fetch('http://localhost:3500/competitions');
       let compsData = [];
       if (compsRes.ok) {
@@ -49,7 +47,6 @@ function Dashboard() {
         <h1>Administrator Dashboard</h1>
         <p className="welcome-text">Dobrodošli! Ovdje možete upravljati sustavom.</p>
         
-        {/* Brzi pregled statistike */}
         <div className="stats-overview">
           <div className="stat-box">
             <div className="stat-number">{stats.users.total}</div>
@@ -68,9 +65,9 @@ function Dashboard() {
         <div className="dashboard-grid">
           <div className="dashboard-card">
             <h3>Upravljanje korisnicima</h3>
-            <p>Dodajte, uređujte ili brišite korisnike.</p>
+            <p>Dodavanje, brisanje, odobravanje korisnika</p>
             <Link to="/admin/korisnici" className="card-button">
-                Upravljaj korisnicima
+                Pregled korisnika
             </Link>
           </div>
 

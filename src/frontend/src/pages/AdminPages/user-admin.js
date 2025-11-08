@@ -19,7 +19,6 @@ function PregledUser() {
     clubLocation: '',
     approved: true
   });
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -160,7 +159,9 @@ function PregledUser() {
         </button>
       </div>
 
-      {/* Filteri */}
+
+
+      {/*filteri*/}
       <div className="filters-section">
         <div className="filter-group">
           <label>Uloga:</label>
@@ -195,7 +196,10 @@ function PregledUser() {
         </div>
       </div>
 
-      {/* Tablica korisnika */}
+
+
+
+      {/*tablica korisnika*/}
       <div className="users-table-container">
         <table className="users-table">
           <thead>
@@ -222,7 +226,7 @@ function PregledUser() {
                 </td>
                 <td>
                   <span className={`status-badge ${user.approved ? 'approved' : 'pending'}`}>
-                    {user.approved ? '✓ Odobren' : '⏳ Na čekanju'}
+                    {user.approved ? 'Odobren' : 'Na čekanju'}
                   </span>
                 </td>
                 <td>
@@ -236,14 +240,14 @@ function PregledUser() {
                     className={`btn-table ${user.approved ? 'btn-unapprove' : 'btn-approve'}`}
                     title={user.approved ? 'Poništi odobrenje' : 'Odobri'}
                   >
-                    {user.approved ? '✗' : '✓'}
+                    {user.approved ? 'Poništi' : 'Odobri'}
                   </button>
                   <button
                     onClick={() => setShowDeleteModal({ show: true, user })}
                     className="btn-table btn-delete-small"
                     title="Obriši"
                   >
-                    🗑️
+                    Obriši
                   </button>
                 </td>
               </tr>
@@ -258,7 +262,9 @@ function PregledUser() {
         )}
       </div>
 
-      {/* Modal za dodavanje korisnika */}
+
+
+      {/*dodavanje korisnika*/}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
@@ -354,7 +360,9 @@ function PregledUser() {
         </div>
       )}
 
-      {/* Modal za brisanje */}
+
+
+      {/*brisanje korisnika*/}
       {showDeleteModal.show && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal({ show: false, user: null })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

@@ -24,7 +24,6 @@
   background-color: #5568d3;
 }
 
-/* Statistika */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -54,7 +53,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Filteri */
 .filters {
   display: flex;
   gap: 10px;
@@ -83,7 +81,6 @@
   border-color: #667eea;
 }
 
-/* Empty state */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -102,7 +99,6 @@
   margin-bottom: 25px;
 }
 
-/* Competition cards */
 .competitions-grid {
   display: grid;
   gap: 25px;
@@ -167,9 +163,6 @@
   color: #555;
 }
 
-.icon {
-  font-size: 18px;
-}
 
 .description {
   margin: 15px 0;
@@ -242,11 +235,6 @@
   transform: translateY(-1px);
 }
 
-.btn-edit {
-  background-color: #2196f3;
-  color: white;
-}
-
 .btn-view {
   background-color: #4caf50;
   color: white;
@@ -262,7 +250,6 @@
   color: white;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;

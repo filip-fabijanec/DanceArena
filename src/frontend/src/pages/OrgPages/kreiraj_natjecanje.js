@@ -13,13 +13,12 @@ function KreirajNatjecanje() {
     location: '',
     description: '',
     ageCategories: [],
-    danceStyles: [],
+    danceStyles: '',
     groupSizes: [],
     registrationFee: '',
   });
 
   const [selectedAgeCategories, setSelectedAgeCategories] = useState([]);
-  const [selectedDanceStyles, setSelectedDanceStyles] = useState([]);
   const [selectedGroupSizes, setSelectedGroupSizes] = useState([]);
   
   const [message, setMessage] = useState('');
@@ -27,9 +26,8 @@ function KreirajNatjecanje() {
   const [loading, setLoading] = useState(false);
 
   // Opcije za kategorije
-  const ageCategoryOptions = ['Mini (6-8)', 'Djeca (9-11)', 'Juniori (12-15)', 'Seniori (16+)'];
-  const danceStyleOptions = ['Hip Hop', 'Street Dance', 'Breaking', 'Jazz', 'Contemporary', 'Ballet'];
-  const groupSizeOptions = ['Solo', 'Duo', 'Mali (3-7)', 'Srednji (8-15)', 'Veliki (16+)'];
+  const ageCategoryOptions = ['Cicibani (2-7 god.)', 'Djeca (8-11 god.)', 'Juniori (12-16 god.)', 'Seniori (17 + god.)'];
+  const groupSizeOptions = ['Solo (1 plesač)', 'Duo (2 plesača)','Trio (3 plesača)', 'Kvartet  (4 plesača)','Grupa (5-12 plesača)', 'Formacija/produkcija (13 + plesača)'];
 
   const handleChange = (e) => {
     setFormData({
@@ -51,15 +49,9 @@ function KreirajNatjecanje() {
     setMessage('');
     setLoading(true);
 
-    // Validacija
+    // Validacija, ovo je možda ekstra ali ako sam ja išta ja sam performativan
     if (selectedAgeCategories.length === 0) {
       setMessage('Morate odabrati barem jednu dobnu kategoriju');
-      setIsError(true);
-      setLoading(false);
-      return;
-    }
-    if (selectedDanceStyles.length === 0) {
-      setMessage('Morate odabrati barem jedan stil plesa');
       setIsError(true);
       setLoading(false);
       return;
@@ -71,14 +63,30 @@ function KreirajNatjecanje() {
       return;
     }
 
+    if (!formData.danceStyles.trim()) {
+      setMessage('Morate unijeti stilove plesa');
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Pretvori danceStyles string u array
+      const danceStylesArray = formData.danceStyles
+      .split(/[,\n]/)
+      .map(style => style.trim())
+      .filter(style => style.length > 0);
+
       const competitionData = {
-        ...formData,
+        name: formData.name,
+        date: formData.date,
+        location: formData.location,
+        description: formData.description,
         ageCategories: selectedAgeCategories,
-        danceStyles: selectedDanceStyles,
+        danceStyles: danceStylesArray, // ← Šalji kao array
         groupSizes: selectedGroupSizes,
         registrationFee: Number(formData.registrationFee),
-        organizer: currentUser._id, // ID trenutno prijavljenog organizatora
+        organizer: currentUser._id,
       };
 
       const response = await fetch('http://localhost:3500/competitions', {
@@ -100,7 +108,7 @@ function KreirajNatjecanje() {
       setMessage(`Natjecanje "${data.name}" uspješno kreirano!`);
       setIsError(false);
 
-      // Preusmjeri na dashboard nakon 2 sekunde
+      // Preusmjeri na dashboard nakon 2 sekunde, isto ekstra ali kažem... performativno
       setTimeout(() => {
         navigate('/organizator/natjecanja');
       }, 2000);
@@ -123,7 +131,6 @@ function KreirajNatjecanje() {
 
       <form onSubmit={handleSubmit} className="competition-form">
         
-        {/* Osnovni podaci */}
         <div className="form-section">
           <h3>Osnovni podaci</h3>
           
@@ -169,7 +176,7 @@ function KreirajNatjecanje() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Opis (opciono)</label>
+            <label htmlFor="description">Opis (opcionalno)</label>
             <textarea
               id="description"
               name="description"
@@ -196,7 +203,6 @@ function KreirajNatjecanje() {
           </div>
         </div>
 
-        {/* Kategorije */}
         <div className="form-section">
           <h3>Dobne kategorije *</h3>
           <div className="checkbox-grid">
@@ -208,22 +214,6 @@ function KreirajNatjecanje() {
                   onChange={() => handleCheckbox('ageCategories', category, setSelectedAgeCategories, selectedAgeCategories)}
                 />
                 <span>{category}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h3>Stilovi plesa *</h3>
-          <div className="checkbox-grid">
-            {danceStyleOptions.map((style) => (
-              <label key={style} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={selectedDanceStyles.includes(style)}
-                  onChange={() => handleCheckbox('danceStyles', style, setSelectedDanceStyles, selectedDanceStyles)}
-                />
-                <span>{style}</span>
               </label>
             ))}
           </div>
@@ -244,6 +234,42 @@ function KreirajNatjecanje() {
             ))}
           </div>
         </div>
+        
+        <div className="form-section">
+          <h3>Stilovi plesa *</h3>
+          <div className="form-group">
+            <label htmlFor="danceStyles">Unesite stilove plesa (odvojite zarezom)</label>
+            <textarea
+              id="danceStyles"
+              name="danceStyles"
+              value={formData.danceStyles}
+              onChange={handleChange}
+              placeholder="Hip Hop, Breaking, Contemporary, Jazz, Street Dance"
+              rows="4"
+              required
+            />
+            <small className="form-hint">
+              Primjer: Hip Hop, Breaking, Contemporary
+            </small>
+          </div>
+
+
+          <div className="info-footnote">
+            <p>
+              Za više informacija o službenim kategorijama posjetite{' '}
+              <a 
+                href="https://superdance.hr/pravila-natjecanja/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="external-link"
+              >
+                Croatia Dance International - Pravila natjecanja
+              </a>
+            </p>
+          </div>
+        </div>
+
+      
 
         {message && (
           <div className={`message ${isError ? 'error' : 'success'}`}>
