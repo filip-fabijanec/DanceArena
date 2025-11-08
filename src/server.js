@@ -1,34 +1,34 @@
-
 const dotenv = require('dotenv');
 dotenv.config();
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3500;
+const PORT = process.env.PORT || 8080;
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
+const cors = require('cors');
 
 app.use(express.json());
-const cors = require('cors');
 app.use(cors());
 
-//rute
-const userRoutes = require('./routes/userRoutes');
-const competitionRoutes = require('./routes/competitionRoutes');
-const scoreRoutes = require('./routes/scoreRoutes');
-const performanceRoutes = require('./routes/performanceRoutes');
+// Routes
+app.use('/users', require('./routes/userRoutes'));
+app.use('/competitions', require('./routes/competitionRoutes'));
+app.use('/scores', require('./routes/scoreRoutes'));
+app.use('/performances', require('./routes/performanceRoutes'));
 
-//Povezivanje s bazom podataka
+// Connect to DB
 connectDB();
 
-app.use('/users', userRoutes);
-app.use('/competitions', competitionRoutes);
-app.use('/scores', scoreRoutes);
-app.use('/performances', performanceRoutes);
+// Start server immediately
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-//Slusamo na portu samo ako se uspostavi veza s bazom podataka
-mongoose.connection.once('open', () => {
+// Optional: log MongoDB connection status
+mongoose.connection.on('connected', () => {
   console.log('Connected to MongoDB database');
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
 });
