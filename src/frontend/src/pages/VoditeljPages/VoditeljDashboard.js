@@ -24,15 +24,9 @@ function VoditeljDashboard() {
           </div>
 
           <div className="dashboard-card">
-            <h3>Moje prijave</h3>
-            <p>Pregledajte status vaših prijava.</p>
+            <h3>Moja natjecanja</h3>
+            <p>Pregledajte status natjecanja na koja ste se prijavili</p>
             <button className="card-button">Pregled prijava</button>
-          </div>
-
-          <div className="dashboard-card">
-            <h3>Rezultati</h3>
-            <p>Pogledajte rezultate natjecanja.</p>
-            <button className="card-button">Pregled rezultata</button>
           </div>
         </div>
       </div>
