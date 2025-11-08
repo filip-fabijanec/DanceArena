@@ -7,13 +7,13 @@ function Navbar() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  // ===== DODAJ OVO ZA DEBUG =====
-  console.log('Navbar - currentUser:', currentUser);
-  // ==============================
-
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/', { replace: true });
+    
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
   };
 
   const getRoleDisplayName = (role) => {
@@ -25,12 +25,6 @@ function Navbar() {
     };
     return roleNames[role] || role;
   };
-
-  // ===== DODAJ PROVJERU PRIJE RENDERA =====
-  if (!currentUser) {
-    return <div>Loading...</div>;
-  }
-  // ========================================
 
   return (
     <nav className="navbar">

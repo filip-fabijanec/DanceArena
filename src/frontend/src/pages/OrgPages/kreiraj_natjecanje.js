@@ -124,7 +124,7 @@ function KreirajNatjecanje() {
 
   return (
     <div className="dashboard-container">
-      <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
+      <Link to="/organizator/natjecanja" className="back-link">← Natrag na pregled natjecanja</Link>
       
       <h1>Kreiraj novo natjecanje</h1>
       <p className="subtitle">Popunite podatke o natjecanju</p>

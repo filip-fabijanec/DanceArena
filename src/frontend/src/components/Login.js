@@ -18,11 +18,9 @@ function Login() {
     try {
       const user = await login(email);
       console.log('Prijavljen korisnik:', user);
-      
-      // Preusmjeri korisnika na odgovarajući dashboard ovisno o ulozi
       switch (user.role) {
         case 'organizator':
-          navigate('/organizator');
+          navigate('/organizator/natjecanja');
           break;
         case 'voditeljKluba':
           navigate('/voditelj');
@@ -46,11 +44,9 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-box">
-        {/* ========== DODAJ OVO ========== */}
         <Link to="/" className="back-to-home">
           ← Natrag na početnu
         </Link>
-        {/* =============================== */}
 
         <h1>DANCE ARENA</h1>
         <h2>Prijava u sustav</h2>
@@ -77,7 +73,7 @@ function Login() {
         </form>
 
         <div className="info-box">
-          <p>ℹ️ Za testiranje koristi email postojećeg korisnika iz baze.</p>
+          <p>Za testiranje koristi email postojećeg korisnika iz baze.</p>
         </div>
       </div>
     </div>

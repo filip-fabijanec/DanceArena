@@ -5,7 +5,7 @@ import LandingPage from './pages/LandingPage';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Importaj Routes komponente za svaki role
+// Importamo Routes komponente za svaki role
 import OrganizatorRoutes from './routes/OrganizatorRoutes';
 import VoditeljDashboard from './pages/VoditeljPages/VoditeljDashboard';
 import SudacDashboard from './pages/SudacPages/SudacDashboard';

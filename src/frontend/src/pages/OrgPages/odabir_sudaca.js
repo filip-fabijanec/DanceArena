@@ -5,7 +5,7 @@ import '../Dashboard.css';
 function OdabirSudaca() {
   return (
     <div className="dashboard-container">
-      <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
+      <Link to="/organizator/natjecanja" className="back-link">← Natrag na pregled natjecanja</Link>
       <h1>WORK IN PROGRESS</h1>
       <p>Omogućiti pregled sudaca, biranje sudaca za natjecanje, nekakav fetch ali samo ako je role sudac</p>
     </div>

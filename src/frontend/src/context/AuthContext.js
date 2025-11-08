@@ -6,7 +6,6 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Učitaj korisnika iz localStorage pri pokretanju
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -17,7 +16,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email) => {
     try {
-      // Poziv na backend da provjeri korisnika
       const response = await fetch(`http://localhost:3500/users/login`, {
         method: 'POST',
         headers: {
@@ -32,7 +30,6 @@ export const AuthProvider = ({ children }) => {
 
       const user = await response.json();
       
-      // Spremi korisnika u state i localStorage
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
       
@@ -62,7 +59,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook za lakše korištenje
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

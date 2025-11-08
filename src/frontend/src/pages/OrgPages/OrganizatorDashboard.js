@@ -24,22 +24,6 @@ function Dashboard() {
             Moja natjecanja
           </Link>
         </div>
-
-        <div className="dashboard-card">
-          <h3>Upravljanje prijavama</h3>
-          <p>Pregledajte i upravljajte prijavama na natjecanja.</p>
-          <Link to="/organizator/prijave" className="card-button">
-            Pregled prijava
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Odabir sudaca</h3>
-          <p>Dodijelite suce za vaša natjecanja.</p>
-          <Link to="/organizator/suci" className="card-button">
-            Odaberi suce
-          </Link>
-        </div>
       </div>
     </div>
   );
