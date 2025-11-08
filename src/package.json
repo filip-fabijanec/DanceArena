@@ -10,6 +10,7 @@
     "author": "martin.tomisic@fer.hr, filip.fabijanec@fer.hr",
     "license": "",
     "dependencies": {
+        "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "ejs": "^3.1.8",
         "express": "^4.21.2",
