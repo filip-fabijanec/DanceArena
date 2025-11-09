@@ -2,23 +2,22 @@ const express = require("express");
 const router = express.Router();
 const Performance = require("../models/Performance");
 
-router.post("/", async (req, res) => {
-  try {
-    const newPerformance = new Performance(req.body);
-    await newPerformance.save({
-      runValidators: true,
-      validateBeforeSave: true,
-    }); // spremanje u bazu podataka
-    res.status(201).json(newPerformance);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
+// GET - Dohvati sve prijave (s opcionalnim filterom)
 router.get("/", async (req, res) => {
   try {
-    const performances = await Performance.find();
-    if(!performances){
+    const { competitionId, clubId } = req.query;
+    
+    // ← DODAJ FILTER ZA QUERY PARAMETRE
+    let query = {};
+    if (competitionId) query.competitionId = competitionId;
+    if (clubId) query.clubId = clubId;
+    
+    const performances = await Performance.find(query)
+      .populate("clubId", "name surname clubName clubLocation")  // ← DODAJ POPULATE
+      .populate("competitionId", "name date location")           // ← DODAJ POPULATE
+      .sort({ createdAt: -1 });
+    
+    if(!performances || performances.length === 0){
       return res.status(404).json({ error: "No performances found" });
     }
     res.status(200).json(performances);
@@ -27,15 +26,57 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST - Kreiraj novu prijavu
+router.post("/", async (req, res) => {
+  try {
+    const newPerformance = new Performance(req.body);
+    await newPerformance.save({
+      runValidators: true,
+      validateBeforeSave: true,
+    });
+    
+    // ← DODAJ POPULATE prije slanja odgovora
+    await newPerformance.populate("clubId", "name surname clubName clubLocation");
+    await newPerformance.populate("competitionId", "name date location");
+    
+    res.status(201).json(newPerformance);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ← DODAJ NOVI ENDPOINT za odobravanje
+router.put("/:id/approve", async (req, res) => {
+  try {
+    const performance = await Performance.findByIdAndUpdate(
+      req.params.id,
+      { approved: true },
+      { new: true, runValidators: true }
+    )
+      .populate("clubId", "name surname clubName clubLocation")
+      .populate("competitionId", "name date location");
+    
+    if (!performance) {
+      return res.status(404).json({ error: "Performance not found" });
+    }
+    
+    res.status(200).json(performance);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// PUT - Ažuriraj performance (opcionalno)
 router.put("/:id", async (req, res) => {
   try {
     const updatedPerformance = await Performance.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true },
-      { runValidators: true, validateBeforeSave: true },
-      { context: "query" }
-    );
+      { new: true, runValidators: true }
+    )
+      .populate("clubId", "name surname clubName clubLocation")
+      .populate("competitionId", "name date location");
+    
     if (!updatedPerformance) {
       return res.status(404).json({ error: "Performance not found" });
     }
@@ -45,10 +86,14 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// DELETE - Obriši prijavu
 router.delete("/:id", async (req, res) => {
   try {
-    await Performance.findByIdAndDelete(req.params.id);
-    res.status(204).send();
+    const deleted = await Performance.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Performance not found" });
+    }
+    res.status(200).json({ message: "Performance deleted successfully" }); // ← Vraćaj message umjesto 204
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

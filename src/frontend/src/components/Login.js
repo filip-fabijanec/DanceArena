@@ -17,7 +17,6 @@ function Login() {
 
     try {
       const user = await login(email);
-      console.log('Prijavljen korisnik:', user);
       switch (user.role) {
         case 'organizator':
           navigate('/organizator/natjecanja');

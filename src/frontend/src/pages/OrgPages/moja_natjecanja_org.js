@@ -118,7 +118,7 @@ function MojaNatjecanja() {
         </Link>
       </div>
 
-      {/* Statistika */}
+      {/* Statistika natjecanja */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-number">{stats.total}</div>

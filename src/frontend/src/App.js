@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Importamo Routes komponente za svaki role
 import OrganizatorRoutes from './routes/OrganizatorRoutes';
-import VoditeljDashboard from './pages/VoditeljPages/VoditeljDashboard';
+import VoditeljRoutes from './routes/VoditeljRoutes';  // ← 1. DODAJ OVO
 import SudacDashboard from './pages/SudacPages/SudacDashboard';
 import AdminRoutes from './routes/AdminRoutes';
 
@@ -30,19 +30,19 @@ function App() {
             }
           />
 
-          {/* Voditelj */}
+          {/* Voditelj - 2. PROMIJENI OVO */}
           <Route
             path="/voditelj/*"
             element={
               <ProtectedRoute allowedRoles={['voditeljKluba']}>
-                <VoditeljDashboard />
+                <VoditeljRoutes />
               </ProtectedRoute>
             }
           />
 
           {/* Sudac */}
           <Route
-            path="/sudac"
+            path="/sudac/*"
             element={
               <ProtectedRoute allowedRoles={['sudac']}>
                 <SudacDashboard />

@@ -37,7 +37,6 @@ function LandingPage() {
     <div className="landing-page">
       <PublicNavbar />
       
-      {/* Hero sekcija */}
       <section className="hero-section">
         <div className="hero-content">
           <h1>Dobrodošli u Dance Arena</h1>
@@ -49,7 +48,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Nadolazeća natjecanja */}
       <section id="competitions" className="competitions-section">
         <div className="section-container">
           <h2>Nadolazeća natjecanja</h2>
@@ -81,7 +79,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* O platformi */}
       <section className="about-section">
         <div className="section-container">
           <h2>O Dance Arena platformi</h2>
@@ -105,7 +102,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-container">
           <p>&copy; 2025 Dance Arena. Sva prava pridržana.</p>
