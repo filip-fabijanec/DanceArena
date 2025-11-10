@@ -151,7 +151,7 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 -   Backend: [Node.js](https://nodejs.org/)
 -   Baza podataka: [MongoDB](https://www.mongodb.com/)
 -   Dokumentacija: [Github](https://github.com/)
--   Plačanje: [Stripe](https://stripe.com/en-hr)
+-   Plaćanje: [Stripe](https://stripe.com/en-hr)
 -   Autentikacija: [Google Cloud](https://console.cloud.google.com/)
 -   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
   
