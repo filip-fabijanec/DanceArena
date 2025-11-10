@@ -6,9 +6,11 @@ const PORT = process.env.PORT || 8080;
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 const cors = require('cors');
+const path = require('path');
 
 app.use(express.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // Routes
 app.use('/users', require('./routes/userRoutes'));
@@ -31,4 +33,8 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
