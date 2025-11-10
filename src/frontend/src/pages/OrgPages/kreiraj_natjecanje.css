@@ -184,3 +184,136 @@
   font-style: italic;
 }
 
+/* (Existing styles...) */
+
+/* Section description */
+.section-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* Referees Grid */
+.referees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.referee-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.referee-card:hover {
+  border-color: #667eea;
+  background-color: #f9f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+.referee-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8eaf6 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.referee-card input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.referee-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.referee-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.referee-email {
+  color: #666;
+  font-size: 13px;
+}
+
+.checkmark {
+  font-size: 24px;
+  color: #667eea;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.referee-card.selected .checkmark {
+  opacity: 1;
+}
+
+/* Validation feedback za suce */
+.referee-validation {
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 15px;
+  margin-top: 20px;
+}
+
+.referee-validation.valid {
+  background-color: #d4edda;
+  color: #155724;
+  border: 2px solid #c3e6cb;
+}
+
+.referee-validation.invalid {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 2px solid #ffeaa7;
+}
+
+/* Warning box */
+.warning-box {
+  padding: 20px;
+  background-color: #fff3cd;
+  border: 2px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.warning-box p {
+  margin: 10px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .referees-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .referee-card {
+    padding: 12px;
+  }
+
+  .referee-name {
+    font-size: 14px;
+  }
+
+  .referee-email {
+    font-size: 12px;
+  }
+}

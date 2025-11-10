@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './kreiraj_natjecanje.css';
@@ -20,6 +20,9 @@ function KreirajNatjecanje() {
 
   const [selectedAgeCategories, setSelectedAgeCategories] = useState([]);
   const [selectedGroupSizes, setSelectedGroupSizes] = useState([]);
+  const [selectedReferees, setSelectedReferees] = useState([]);
+  const [referees, setReferees] = useState([]);
+  const [refereesLoading, setRefereesLoading] = useState(true);
   
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
@@ -28,6 +31,29 @@ function KreirajNatjecanje() {
   // Opcije za kategorije
   const ageCategoryOptions = ['Cicibani (2-7 god.)', 'Djeca (8-11 god.)', 'Juniori (12-16 god.)', 'Seniori (17 + god.)'];
   const groupSizeOptions = ['Solo (1 plesač)', 'Duo (2 plesača)','Trio (3 plesača)', 'Kvartet  (4 plesača)','Grupa (5-12 plesača)', 'Formacija/produkcija (13 + plesača)'];
+
+  useEffect(() => {
+    fetchReferees();
+  }, []);
+
+  const fetchReferees = async () => {
+    try {
+      setRefereesLoading(true);
+      const response = await fetch('http://localhost:3500/users/referees');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setReferees(data);
+      } else if (response.status === 404) {
+        setReferees([]);
+      }
+    } catch (error) {
+      console.error('Error fetching referees:', error);
+      setReferees([]);
+    } finally {
+      setRefereesLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -44,12 +70,39 @@ function KreirajNatjecanje() {
     }
   };
 
+  // ← Handle checkbox za suce
+  const handleRefereeToggle = (refereeId) => {
+    if (selectedReferees.includes(refereeId)) {
+      setSelectedReferees(selectedReferees.filter(id => id !== refereeId));
+    } else {
+      setSelectedReferees([...selectedReferees, refereeId]);
+    }
+  };
+
+  // Validacija sudaca
+  const validateReferees = () => {
+    const count = selectedReferees.length;
+    
+    if (count === 0) {
+      return { valid: false, message: 'Morate odabrati barem 3 suca' };
+    }
+    if (count < 3) {
+      return { valid: false, message: `Odabrano: ${count} sudac(a). Minimalno je potrebno 3 suca.` };
+    }
+    if (count % 2 === 0) {
+      return { valid: false, message: `Odabrano: ${count} sudaca. Mora biti neparan broj sudaca.` };
+    }
+    return { valid: true, message: `✅ Odabrano: ${count} sudaca` };
+  };
+
+  const refereesValidation = validateReferees();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setLoading(true);
 
-    // Validacija, ovo je možda ekstra ali ako sam ja išta ja sam performativan
+    // Validacija kategorija
     if (selectedAgeCategories.length === 0) {
       setMessage('Morate odabrati barem jednu dobnu kategoriju');
       setIsError(true);
@@ -62,7 +115,6 @@ function KreirajNatjecanje() {
       setLoading(false);
       return;
     }
-
     if (!formData.danceStyles.trim()) {
       setMessage('Morate unijeti stilove plesa');
       setIsError(true);
@@ -70,12 +122,19 @@ function KreirajNatjecanje() {
       return;
     }
 
+    // Validacija sudaca
+    if (!refereesValidation.valid) {
+      setMessage(refereesValidation.message);
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Pretvori danceStyles string u array
       const danceStylesArray = formData.danceStyles
-      .split(/[,\n]/)
-      .map(style => style.trim())
-      .filter(style => style.length > 0);
+        .split(/[,\n]/)
+        .map(style => style.trim())
+        .filter(style => style.length > 0);
 
       const competitionData = {
         name: formData.name,
@@ -83,10 +142,11 @@ function KreirajNatjecanje() {
         location: formData.location,
         description: formData.description,
         ageCategories: selectedAgeCategories,
-        danceStyles: danceStylesArray, // ← Šalji kao array
+        danceStyles: danceStylesArray,
         groupSizes: selectedGroupSizes,
         registrationFee: Number(formData.registrationFee),
         organizer: currentUser._id,
+        referees: selectedReferees,
       };
 
       const response = await fetch('http://localhost:3500/competitions', {
@@ -108,7 +168,6 @@ function KreirajNatjecanje() {
       setMessage(`Natjecanje "${data.name}" uspješno kreirano!`);
       setIsError(false);
 
-      // Preusmjeri na dashboard nakon 2 sekunde, isto ekstra ali kažem... performativno
       setTimeout(() => {
         navigate('/organizator/natjecanja');
       }, 2000);
@@ -131,6 +190,7 @@ function KreirajNatjecanje() {
 
       <form onSubmit={handleSubmit} className="competition-form">
         
+        {/* Osnovni podaci */}
         <div className="form-section">
           <h3>Osnovni podaci</h3>
           
@@ -203,6 +263,7 @@ function KreirajNatjecanje() {
           </div>
         </div>
 
+        {/* Dobne kategorije */}
         <div className="form-section">
           <h3>Dobne kategorije *</h3>
           <div className="checkbox-grid">
@@ -219,6 +280,7 @@ function KreirajNatjecanje() {
           </div>
         </div>
 
+        {/* Veličine grupa */}
         <div className="form-section">
           <h3>Veličine grupa *</h3>
           <div className="checkbox-grid">
@@ -235,6 +297,7 @@ function KreirajNatjecanje() {
           </div>
         </div>
         
+        {/* Stilovi plesa */}
         <div className="form-section">
           <h3>Stilovi plesa *</h3>
           <div className="form-group">
@@ -253,7 +316,6 @@ function KreirajNatjecanje() {
             </small>
           </div>
 
-
           <div className="info-footnote">
             <p>
               Za više informacija o službenim kategorijama posjetite{' '}
@@ -269,7 +331,50 @@ function KreirajNatjecanje() {
           </div>
         </div>
 
-      
+        {/* ← NOVO: Odabir sudaca s karticama */}
+        <div className="form-section">
+          <h3>Odabir sudaca *</h3>
+          
+          {refereesLoading ? (
+            <p>Učitavanje sudaca...</p>
+          ) : referees.length === 0 ? (
+            <div className="warning-box">
+              <p>⚠️ Nema dostupnih sudaca u sustavu.</p>
+              <p>Kontaktirajte administratora da doda suce prije kreiranja natjecanja.</p>
+            </div>
+          ) : (
+            <>
+              <p className="section-description">
+                Odaberite najmanje 3 suca (mora biti neparan broj).
+              </p>
+
+              <div className="referees-grid">
+                {referees.map((ref) => (
+                  <label 
+                    key={ref._id} 
+                    className={`referee-card ${selectedReferees.includes(ref._id) ? 'selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedReferees.includes(ref._id)}
+                      onChange={() => handleRefereeToggle(ref._id)}
+                    />
+                    <div className="referee-info">
+                      <span className="referee-name">{ref.name} {ref.surname}</span>
+                      <span className="referee-email">{ref.email}</span>
+                    </div>
+                    <div className="checkmark">✓</div>
+                  </label>
+                ))}
+              </div>
+
+              {/* Validation feedback */}
+              <div className={`referee-validation ${refereesValidation.valid ? 'valid' : 'invalid'}`}>
+                {refereesValidation.message}
+              </div>
+            </>
+          )}
+        </div>
 
         {message && (
           <div className={`message ${isError ? 'error' : 'success'}`}>
@@ -277,7 +382,11 @@ function KreirajNatjecanje() {
           </div>
         )}
 
-        <button type="submit" className="submit-button" disabled={loading}>
+        <button 
+          type="submit" 
+          className="submit-button" 
+          disabled={loading || refereesLoading || referees.length === 0}
+        >
           {loading ? 'Kreiranje...' : 'Kreiraj natjecanje'}
         </button>
       </form>

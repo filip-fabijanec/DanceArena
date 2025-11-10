@@ -27,6 +27,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /users/referees - samo suci
+router.get("/referees", async (req, res) => {
+  try {
+    const referees = await User.find({ role: "sudac" });
+    if (!referees || referees.length === 0) {
+      return res.status(404).json({ error: "No referees found" });
+    }
+    res.status(200).json(referees);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.put("/:id", async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
