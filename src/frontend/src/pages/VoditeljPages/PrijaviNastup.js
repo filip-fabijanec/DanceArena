@@ -109,7 +109,7 @@ function PrijaviNastup() {
       const data = await response.json();
       console.log('Performance created:', data);
 
-      setMessage('✅ Nastup uspješno prijavljen!');
+      setMessage('Nastup uspješno prijavljen!');
       setIsError(false);
 
       // Redirect nakon 2 sekunde
@@ -175,15 +175,15 @@ function PrijaviNastup() {
           <h2>{competition.name}</h2>
           <div className="info-grid">
             <div className="info-item">
-              <span className="icon">📅</span>
-              <span>{formatDate(competition.date)}</span>
+              <span className="icon"></span>
+              <span>Datum: {formatDate(competition.date)}</span>
             </div>
             <div className="info-item">
-              <span className="icon">📍</span>
-              <span>{competition.location}</span>
+              <span className="icon"></span>
+              <span>Lokacija: {competition.location}</span>
             </div>
             <div className="info-item">
-              <span className="icon">💰</span>
+              <span className="icon"></span>
               <span>Kotizacija: {competition.registrationFee} €</span>
             </div>
           </div>
@@ -194,7 +194,7 @@ function PrijaviNastup() {
           
           {/* Osnovni podaci */}
           <div className="form-section">
-            <h3>📋 Osnovni podaci</h3>
+            <h3>Osnovni podaci</h3>
 
             <div className="form-group">
               <label htmlFor="choreographyName">Naziv koreografije *</label>
@@ -259,7 +259,7 @@ function PrijaviNastup() {
 
           {/* Kategorije */}
           <div className="form-section">
-            <h3>🏆 Kategorije</h3>
+            <h3>Kategorije</h3>
 
             <div className="form-group">
               <label htmlFor="ageCategory">Dobna kategorija *</label>
@@ -318,13 +318,13 @@ function PrijaviNastup() {
 
           {/* Plaćanje */}
           <div className="form-section">
-            <h3>💳 Plaćanje kotizacije</h3>
+            <h3>Plaćanje kotizacije</h3>
             <div className="payment-info">
               <p>
                 Kotizacija za ovo natjecanje iznosi <strong>{competition.registrationFee} €</strong>.
               </p>
               <p className="payment-notice">
-                ⚠️ Ovo je trenutno simulacija plaćanja. Stvarno plaćanje bit će implementirano kasnije.
+                Ovo je trenutno simulacija plaćanja. Stvarno plaćanje bit će implementirano kasnije.
               </p>
             </div>
 
