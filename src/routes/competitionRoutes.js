@@ -2,27 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Competition = require("../models/Competition");
 
-// GET /competitions/public
-router.get("/public", async (req, res) => {
-  try {
-    const competitions = await Competition.find({
-      status: { $in: ["upcoming", "ongoing"] },
-    })
-      .populate("organizer", "name surname")
-      .sort({ date: 1 });
-    
-    // Ažuriraj status prije slanja
-    const competitionsWithStatus = competitions.map(comp => {
-      const obj = comp.toObject();
-      obj.status = comp.autoStatus; // Koristi virtual field
-      return obj;
-    });
-    
-    res.status(200).json(competitionsWithStatus);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
 
 // GET /competitions/upcoming
 router.get("/upcoming", async (req, res) => {

@@ -12,7 +12,7 @@ function LandingPage() {
 
   const fetchPublicCompetitions = async () => {
     try {
-      const response = await fetch('http://localhost:3500/competitions/public');
+      const response = await fetch('http://localhost:3500/competitions/upcoming');
       if (response.ok) {
         const data = await response.json();
         setCompetitions(data);

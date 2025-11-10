@@ -9,11 +9,7 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/', { replace: true });
-    
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 100);
+    navigate('/login', { replace: true });
   };
 
   const getRoleDisplayName = (role) => {
