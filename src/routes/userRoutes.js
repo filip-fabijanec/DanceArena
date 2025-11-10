@@ -27,6 +27,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /users/referees - samo suci
+router.get("/referees", async (req, res) => {
+  try {
+    const referees = await User.find({ role: "sudac" });
+    if (!referees || referees.length === 0) {
+      return res.status(404).json({ error: "No referees found" });
+    }
+    res.status(200).json(referees);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.put("/:id", async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
@@ -49,6 +62,27 @@ router.delete("/:id", async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "Email je obavezan" });
+    }
+
+    const user = await User.findOne({ email: email });
+    
+    if (!user) {
+      return res.status(404).json({ error: "Korisnik s tim emailom ne postoji" });
+    }
+
+    // Vrati korisnika (bez osjetljivih podataka ako ih budeš imao)
+    res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

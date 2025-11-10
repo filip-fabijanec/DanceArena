@@ -1,48 +1,46 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import LandingPage from './pages/LandingPage';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// Importamo Routes komponente za svaki role
-import OrganizatorRoutes from './routes/OrganizatorRoutes';
-import VoditeljRoutes from './routes/VoditeljRoutes';  // ← 1. DODAJ OVO
-import SudacDashboard from './pages/SudacPages/SudacDashboard';
-import AdminRoutes from './routes/AdminRoutes';
+import OrganizatorDashboard from './pages/OrganizatorDashboard';
+import VoditeljDashboard from './pages/VoditeljDashboard';
+import SudacDashboard from './pages/SudacDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import CreateUser from './CreateUser';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Javne rute */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Login ruta - javna */}
           <Route path="/login" element={<Login />} />
+          
+          {/* Test ruta za kreiranje korisnika - možeš ostaviti ili maknuti */}
+          <Route path="/create-user" element={<CreateUser />} />
 
-          {/* Organizator - sve rute pod /organizator/* */}
+          {/* Zaštićene rute po ulogama */}
           <Route
-            path="/organizator/*"
+            path="/organizator"
             element={
               <ProtectedRoute allowedRoles={['organizator']}>
-                <OrganizatorRoutes />
+                <OrganizatorDashboard />
               </ProtectedRoute>
             }
           />
 
-          {/* Voditelj - 2. PROMIJENI OVO */}
           <Route
-            path="/voditelj/*"
+            path="/voditelj"
             element={
               <ProtectedRoute allowedRoles={['voditeljKluba']}>
-                <VoditeljRoutes />
+                <VoditeljDashboard />
               </ProtectedRoute>
             }
           />
 
-          {/* Sudac */}
           <Route
-            path="/sudac/*"
+            path="/sudac"
             element={
               <ProtectedRoute allowedRoles={['sudac']}>
                 <SudacDashboard />
@@ -50,18 +48,20 @@ function App() {
             }
           />
 
-          {/* Admin */}
           <Route
-            path="/admin/*"
+            path="/admin"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <AdminRoutes />
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />
 
-          {/* 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Redirect sa početne stranice na login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* 404 - Stranica ne postoji */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

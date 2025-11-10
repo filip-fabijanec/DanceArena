@@ -1,0 +1,331 @@
+/* Competition Info Banner */
+.competition-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.competition-info h1 {
+  margin: 0 0 20px 0;
+  font-size: 28px;
+  color: white;
+}
+
+.info-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 16px;
+}
+
+.info-details span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Performances List */
+.performances-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.performance-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+  border-left: 5px solid #ff9800;
+}
+
+.performance-card.approved {
+  border-left-color: #4caf50;
+}
+
+.performance-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.performance-header {
+  background-color: #f9f9f9;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  border-bottom: 2px solid #eee;
+}
+
+.performance-header h3 {
+  margin: 0 0 5px 0;
+  color: #667eea;
+  font-size: 22px;
+}
+
+.club-name {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.pending {
+  background-color: #fff9c4;
+  color: #f57f17;
+}
+
+.status-badge.approved {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+/* Performance Body */
+.performance-body {
+  padding: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-item .label {
+  font-weight: 600;
+  color: #555;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item .value {
+  color: #333;
+  font-size: 15px;
+}
+
+.music-info {
+  padding: 15px;
+  background-color: #f0f4ff;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.music-info .label {
+  font-weight: 600;
+  color: #555;
+  font-size: 13px;
+}
+
+.music-link {
+  color: #667eea;
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 14px;
+}
+
+.music-link:hover {
+  text-decoration: underline;
+}
+
+/* Performance Actions */
+.performance-actions {
+  padding: 15px 20px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-approve {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-approve:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2px;
+}
+
+.btn-delete:hover {
+  background-color: #da190b;
+  transform: translateY(-1px);
+}
+
+.approved-message {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.modal-performance-name {
+  font-weight: bold;
+  color: #667eea;
+  font-size: 18px;
+  margin: 15px 0;
+}
+
+.modal-warning {
+  color: #f44336;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.btn-cancel,
+.btn-confirm-delete {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.btn-cancel {
+  background-color: #ddd;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  opacity: 0.8;
+}
+
+.btn-confirm-delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-confirm-delete:hover {
+  opacity: 0.9;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.empty-state p {
+  color: #666;
+}
+
+/* Error Message */
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-details {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .performance-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .performance-actions {
+    flex-direction: column;
+  }
+
+  .btn-approve,
+  .btn-delete {
+    width: 100%;
+  }
+}

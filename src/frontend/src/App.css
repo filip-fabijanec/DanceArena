@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #697faa; /* default boja */
+  background-color: #697faa;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,7 @@
 }
 
 .App-header.toggled {
-  background-color: orange; /* boja kada je toggled */
+  background-color: orange; 
 }
 
 .App-link {
@@ -42,9 +42,9 @@
   }
 }
 
-/* STIL ZA BUTTON */
+
 .my-button {
-  background-color: teal; /* default */
+  background-color: teal; 
   color: white;
   padding: 10px 20px;
   border: none;
@@ -59,7 +59,7 @@
 }
 
 .my-button.toggled {
-  background-color: #697faa; /* boja buttona kada je toggled */
+  background-color: #697faa;
 }
 
 .naslov {
