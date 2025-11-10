@@ -20,14 +20,14 @@ function VoditeljDashboard() {
       setLoading(true);
       
       // Dohvati nadolazeća natjecanja
-      const compResponse = await fetch('http://localhost:3500/competitions/upcoming');
+      const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
         setCompetitions(compData);
       }
 
       // Dohvati moje prijave
-      const perfResponse = await fetch(`http://localhost:3500/performances?clubId=${currentUser._id}`);
+      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances?clubId=${currentUser._id}`);
       if (perfResponse.ok) {
         const perfData = await perfResponse.json();
         setMyPerformances(perfData);

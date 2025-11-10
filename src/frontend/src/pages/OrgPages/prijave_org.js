@@ -27,14 +27,14 @@ function UpravljanjePrijavama() {
       setLoading(true);
 
       // Dohvati podatke o natjecanju
-      const compResponse = await fetch(`http://localhost:3500/competitions/${competitionId}`);
+      const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
         setCompetition(compData);
       }
 
       // Dohvati prijave za to natjecanje
-      const perfResponse = await fetch(`http://localhost:3500/performances?competitionId=${competitionId}`);
+      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances?competitionId=${competitionId}`);
       
       if (perfResponse.status === 404) {
         setPerformances([]);
@@ -55,7 +55,7 @@ function UpravljanjePrijavama() {
 
   const handleApprove = async (performanceId) => {
     try {
-      const response = await fetch(`http://localhost:3500/performances/${performanceId}/approve`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/performances/${performanceId}/approve`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ function UpravljanjePrijavama() {
 
   const handleDelete = async (performanceId) => {
     try {
-      const response = await fetch(`http://localhost:3500/performances/${performanceId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/performances/${performanceId}`, {
         method: 'DELETE',
       });
 
