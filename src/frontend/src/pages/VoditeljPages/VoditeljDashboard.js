@@ -78,7 +78,7 @@ function VoditeljDashboard() {
 
         {/* ========== SEKCIJA 1: MOJ KLUB ========== */}
         <section className="dashboard-section">
-          <h2>📋 Moj Klub</h2>
+          <h2>Moj Klub</h2>
           <div className="club-info-card">
             <div className="club-info-row">
               <span className="info-label">Naziv kluba:</span>
@@ -98,11 +98,11 @@ function VoditeljDashboard() {
 
         {/* ========== SEKCIJA 2: NADOLAZEĆA NATJECANJA ========== */}
         <section className="dashboard-section">
-          <h2>🏆 Nadolazeća natjecanja</h2>
+          <h2>Nadolazeća natjecanja</h2>
           
           {competitions.length === 0 ? (
             <div className="empty-state">
-              <p>📅 Trenutno nema nadolazećih natjecanja.</p>
+              <p>Trenutno nema nadolazećih natjecanja.</p>
             </div>
           ) : (
             <div className="competitions-grid">
@@ -113,15 +113,15 @@ function VoditeljDashboard() {
                   </div>
                   <div className="card-body">
                     <div className="info-item">
-                      <span className="icon">📅</span>
-                      <span>{formatDate(comp.date)}</span>
+                      <span className="icon"></span>
+                      <span>Datum: {formatDate(comp.date)}</span>
                     </div>
                     <div className="info-item">
-                      <span className="icon">📍</span>
-                      <span>{comp.location}</span>
+                      <span className="icon"></span>
+                      <span>Lokacija: {comp.location}</span>
                     </div>
                     <div className="info-item">
-                      <span className="icon">💰</span>
+                      <span className="icon"></span>
                       <span>Kotizacija: {comp.registrationFee} €</span>
                     </div>
                     
@@ -159,11 +159,11 @@ function VoditeljDashboard() {
 
         {/* ========== SEKCIJA 3: MOJE PRIJAVE ========== */}
         <section className="dashboard-section">
-          <h2>📝 Moje prijave</h2>
+          <h2>Moje prijave</h2>
           
           {myPerformances.length === 0 ? (
             <div className="empty-state">
-              <p>📋 Nemate prijavljenih nastupa.</p>
+              <p>Nemate prijavljenih nastupa.</p>
               <p style={{ fontSize: '14px', color: '#999' }}>
                 Prijavite se na natjecanje iznad!
               </p>
@@ -180,7 +180,7 @@ function VoditeljDashboard() {
                       </p>
                     </div>
                     <span className={`status-badge ${perf.approved ? 'approved' : 'pending'}`}>
-                      {perf.approved ? '✅ Prihvaćeno' : '⏳ Na čekanju'}
+                      {perf.approved ? 'Prihvaćeno' : 'Na čekanju'}
                     </span>
                   </div>
 
@@ -221,7 +221,7 @@ function VoditeljDashboard() {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Plaćeno:</span>
-                      <span className="detail-value">{perf.paid ? '✅ Da' : '❌ Ne'}</span>
+                      <span className="detail-value">{perf.paid ? 'Da' : 'Ne'}</span>
                     </div>
                   </div>
                 </div>
