@@ -12,17 +12,21 @@ function LandingPage() {
 
   const fetchPublicCompetitions = async () => {
     try {
+      console.log('Fetching from:', `${process.env.REACT_APP_API_URL}/competitions/upcoming`);
       const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`);
-      if (response.ok) {
-        const data = await response.json();
-        setCompetitions(data);
-      }
+
+      const text = await response.text();
+      console.log('Response text (first 100 chars):', text.slice(0, 100));
+
+      const data = JSON.parse(text);
+      setCompetitions(data);
     } catch (error) {
       console.error('Error fetching competitions:', error);
     } finally {
       setLoading(false);
     }
   };
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
