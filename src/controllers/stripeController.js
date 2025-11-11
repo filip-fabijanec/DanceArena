@@ -2,10 +2,11 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const Competition = require('../models/Competition');
 const Registration = require('../models/Registration');
+const Performance = require('../models/Performance');
 
 exports.createCheckoutSession = async (req, res) => {
   try {
-    const { competitionId, userId } = req.body;
+    const { competitionId, userId, performanceId } = req.body;
 
     // 1️⃣ Dohvati natjecanje
     const competition = await Competition.findById(competitionId);
@@ -25,9 +26,9 @@ exports.createCheckoutSession = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.REACT_APP_API_URL}/payment-success?competitionId=${competitionId}`,
-      cancel_url: `${process.env.REACT_APP_API_URL}/payment-cancelled`,
-      metadata: { userId, competitionId },
+      success_url: `${process.env.REACT_APP_API_URL}/payment-success?competitionId=${competitionId}&performanceId=${performanceId}`,
+      cancel_url: `${process.env.REACT_APP_API_URL}/payment-cancelled?competitionId=${competitionId}`,
+      metadata: { userId, competitionId, performanceId: performanceId || '' },
     });
 
     res.json({ url: session.url });
@@ -43,24 +44,31 @@ exports.stripeWebhook = async (req, res) => {
 
   let event;
   try {
-    
     event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], endpointSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { userId, competitionId } = session.metadata;
+    const { userId, competitionId, performanceId } = session.metadata;
 
-    
+    // Ažuriraj registraciju
     await Registration.findOneAndUpdate(
       { user: userId, competition: competitionId },
       { paymentStatus: 'paid', stripeSessionId: session.id },
       { upsert: true, new: true }
     );
+
+    // Ako postoji performanceId, označi ga kao plaćen
+    if (performanceId) {
+      await Performance.findByIdAndUpdate(
+        performanceId,
+        { paid: true, paymentStatus: 'paid' }
+      );
+      console.log(`Nastup ${performanceId} označen kao plaćen.`);
+    }
 
     console.log(`Registracija za korisnika ${userId} i natjecanje ${competitionId} je sada plaćena.`);
   }

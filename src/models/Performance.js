@@ -18,8 +18,16 @@ const performanceSchema = new mongoose.Schema({
   danceStyle: { type: String, required: true },
 
   groupSize: { type: String, required: true },
+
+  paid: { type: Boolean, default: false },
+
+  paymentStatus: { 
+    type: String, 
+    enum: ["pending", "paid"], 
+    default: "pending" 
+  },
+
+  createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("Performance", performanceSchema);
-
-
