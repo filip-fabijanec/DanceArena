@@ -20,7 +20,7 @@ function MojaNatjecanja() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/competitions?organizerId=${currentUser._id}`
+        `/competitions?organizerId=${currentUser._id}`
       );
       
       if (response.status === 404) {
@@ -46,7 +46,7 @@ function MojaNatjecanja() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3500/competitions/${id}`, {
+      const response = await fetch(`/competitions/${id}`, {
         method: 'DELETE',
       });
 

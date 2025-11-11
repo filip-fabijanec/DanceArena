@@ -14,13 +14,13 @@ function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const usersRes = await fetch('http://localhost:3500/users');
+      const usersRes = await fetch('/users');
       let usersData = [];
       if (usersRes.ok) {
         usersData = await usersRes.json();
       }
 
-      const compsRes = await fetch('http://localhost:3500/competitions');
+      const compsRes = await fetch('/competitions');
       let compsData = [];
       if (compsRes.ok) {
         compsData = await compsRes.json();

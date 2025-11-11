@@ -34,7 +34,7 @@ function PrijaviNastup() {
   const fetchCompetition = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
+      const response = await fetch(`/competitions/${competitionId}`);
       
       if (!response.ok) {
         throw new Error('Natjecanje nije pronađeno');
@@ -93,7 +93,7 @@ function PrijaviNastup() {
         paid: formData.paid
       };
 
-      const response = await fetch('${process.env.REACT_APP_API_URL}/performances', {
+      const response = await fetch(`/performances`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

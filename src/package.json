@@ -5,7 +5,9 @@
     "main": "server.js",
     "scripts": {
         "dev": "nodemon server.js",
-        "start": "node server.js"
+        "start": "node server.js",
+        "build": "cd frontend && npm install && npm run build",
+        "deploy": "npm run build && gcloud app deploy"
     },
     "author": "martin.tomisic@fer.hr, filip.fabijanec@fer.hr",
     "license": "",
