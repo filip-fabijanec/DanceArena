@@ -17,6 +17,7 @@ function Login() {
 
     try {
       const user = await login(email);
+      // Korisnik postoji - redirect prema roli
       switch (user.role) {
         case 'organizator':
           navigate('/organizator/natjecanja');
@@ -34,7 +35,8 @@ function Login() {
           navigate('/');
       }
     } catch (err) {
-      setError('Korisnik s tim emailom ne postoji. Provjerite email.');
+      // Korisnik ne postoji - redirect na registraciju s emailom
+      navigate('/registracija', { state: { email } });
     } finally {
       setLoading(false);
     }
@@ -73,6 +75,7 @@ function Login() {
 
         <div className="info-box">
           <p>Za testiranje koristi email postojećeg korisnika iz baze.</p>
+          <p>Ako nemate korisnički račun, unijet ćete email i bit ćete preusmjereni na registraciju.</p>
         </div>
       </div>
     </div>

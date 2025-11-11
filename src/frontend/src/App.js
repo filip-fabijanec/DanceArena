@@ -3,11 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import Login from './components/Login';
+import Registracija from './components/Registracija';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Importamo Routes komponente za svaki role
 import OrganizatorRoutes from './routes/OrganizatorRoutes';
-import VoditeljRoutes from './routes/VoditeljRoutes';  // ← 1. DODAJ OVO
+import VoditeljRoutes from './routes/VoditeljRoutes';
 import SudacDashboard from './pages/SudacPages/SudacDashboard';
 import AdminRoutes from './routes/AdminRoutes';
 
@@ -19,6 +20,7 @@ function App() {
           {/* Javne rute */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/registracija" element={<Registracija />} />
 
           {/* Organizator - sve rute pod /organizator/* */}
           <Route
@@ -30,7 +32,7 @@ function App() {
             }
           />
 
-          {/* Voditelj - 2. PROMIJENI OVO */}
+          {/* Voditelj */}
           <Route
             path="/voditelj/*"
             element={
