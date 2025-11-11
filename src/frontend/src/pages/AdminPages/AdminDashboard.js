@@ -14,13 +14,13 @@ function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const usersRes = await fetch('/users');
+      const usersRes = await fetch(`${process.env.REACT_APP_API_URL}/users`);
       let usersData = [];
       if (usersRes.ok) {
         usersData = await usersRes.json();
       }
 
-      const compsRes = await fetch('/competitions');
+      const compsRes = await fetch('${process.env.REACT_APP_API_URL}/competitions');
       let compsData = [];
       if (compsRes.ok) {
         compsData = await compsRes.json();

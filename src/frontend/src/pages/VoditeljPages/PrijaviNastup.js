@@ -34,7 +34,7 @@ function PrijaviNastup() {
   const fetchCompetition = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/competitions/${competitionId}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
       
       if (!response.ok) {
         throw new Error('Natjecanje nije pronađeno');

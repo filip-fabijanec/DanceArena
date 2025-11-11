@@ -30,7 +30,7 @@ function PregledUser() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/users');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users`);
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -59,7 +59,7 @@ function PregledUser() {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/users', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -95,7 +95,7 @@ function PregledUser() {
 
   const handleApproveToggle = async (userId, currentStatus) => {
     try {
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approved: !currentStatus })
@@ -113,7 +113,7 @@ function PregledUser() {
 
   const handleDeleteUser = async () => {
     try {
-      const response = await fetch(`/users/${showDeleteModal.user._id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/${showDeleteModal.user._id}`, {
         method: 'DELETE'
       });
 
