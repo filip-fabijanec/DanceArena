@@ -13,10 +13,10 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
 // Routes
-app.use('/users', require('./routes/userRoutes'));
-app.use('/competitions', require('./routes/competitionRoutes'));
-app.use('/scores', require('./routes/scoreRoutes'));
-app.use('/performances', require('./routes/performanceRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/competitions', require('./routes/competitionRoutes'));
+app.use('/api/scores', require('./routes/scoreRoutes'));
+app.use('/api/performances', require('./routes/performanceRoutes'));
 
 // Connect to DB
 connectDB();
