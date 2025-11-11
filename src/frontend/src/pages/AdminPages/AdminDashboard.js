@@ -20,7 +20,7 @@ function Dashboard() {
         usersData = await usersRes.json();
       }
 
-      const compsRes = await fetch('${process.env.REACT_APP_API_URL}/competitions');
+      const compsRes = await fetch(`${process.env.REACT_APP_API_URL}/competitions`);
       let compsData = [];
       if (compsRes.ok) {
         compsData = await compsRes.json();
