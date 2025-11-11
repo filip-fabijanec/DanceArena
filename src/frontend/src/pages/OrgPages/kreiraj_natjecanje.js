@@ -39,7 +39,7 @@ function KreirajNatjecanje() {
   const fetchReferees = async () => {
     try {
       setRefereesLoading(true);
-      const response = await fetch('http://localhost:3500/users/referees');
+      const response = await fetch('/users/referees');
       
       if (response.ok) {
         const data = await response.json();
@@ -149,7 +149,7 @@ function KreirajNatjecanje() {
         referees: selectedReferees,
       };
 
-      const response = await fetch('http://localhost:3500/competitions', {
+      const response = await fetch('/competitions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
