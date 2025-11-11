@@ -266,6 +266,9 @@ function UpravljanjePrijavama() {
           </div>
         </div>
       )}
+      <a href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`} target="_blank" rel="noopener noreferrer" className="btn-export">
+         Preuzmi PDF
+      </a>
     </div>
   );
 }

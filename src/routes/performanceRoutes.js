@@ -2,6 +2,7 @@ const express = require("express");
 const PDFDocument = require("pdfkit");
 const router = express.Router();
 const Performance = require("../models/Performance");
+const Competition = require("../models/Competition"); // Dodaj na vrh
 
 // GET - Dohvati sve prijave (s opcionalnim filterom)
 router.get("/", async (req, res) => {
@@ -130,8 +131,10 @@ router.get('/export-pdf/:competitionId', async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="natjecanje_${competitionId}.pdf"`);
 
+    doc.pipe(res); // prvo pipe
+
     doc.fontSize(16).text(`Natjecanje: ${competition?.name || ''}`);
-    doc.fontSize(14).text(`Natjecanje: ${competition?.organizer || ''}`);
+    doc.fontSize(14).text(`Organizator: ${competition?.organizer || ''}`);
     doc.fontSize(12).text(`Datum: ${competition?.date || ''}`);
     doc.moveDown();
 
@@ -139,8 +142,7 @@ router.get('/export-pdf/:competitionId', async (req, res) => {
       doc.text(`${idx + 1}. ${perf.choreographyName} (${perf.clubId?.clubName || 'N/A'})`);
     });
 
-    doc.end();
-    doc.pipe(res);
+    doc.end(); // na kraju end
   } catch (err) {
     res.status(500).send('Greška pri generiranju PDF-a');
   }

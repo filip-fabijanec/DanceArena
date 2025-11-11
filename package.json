@@ -2,6 +2,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "nodemailer": "^7.0.10",
+    "pdfkit": "^0.17.2",
     "stripe": "^19.3.0"
   }
 }
