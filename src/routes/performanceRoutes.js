@@ -1,4 +1,5 @@
 const express = require("express");
+const PDFDocument = require("pdfkit");
 const router = express.Router();
 const Performance = require("../models/Performance");
 
@@ -98,5 +99,52 @@ router.delete("/:id", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
+router.get("/competition/:competitionId", async (req, res) => {
+  try {
+    const { competitionId } = req.params;
+
+    // Dohvati sve nastupe za zadani competitionId
+    const performances = await Performance.find({ competitionId })
+      .populate("clubId", "name surname") // Opcionalno: podaci o klubu
+      .populate("competitionId", "name date location"); // Opcionalno: podaci o natjecanju
+
+    if (!performances || performances.length === 0) {
+      return res.status(404).json({ message: "Nema nastupa za ovo natjecanje." });
+    }
+
+    res.status(200).json(performances);
+  } catch (error) {
+    console.error("Greška pri dohvaćanju nastupa:", error);
+    res.status(500).json({ message: "Greška na serveru." });
+  }
+});
+
+router.get('/export-pdf/:competitionId', async (req, res) => {
+  try {
+    const { competitionId } = req.params;
+    const competition = await Competition.findById(competitionId);
+    const performances = await Performance.find({ competitionId });
+
+    const doc = new PDFDocument();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="natjecanje_${competitionId}.pdf"`);
+
+    doc.fontSize(16).text(`Natjecanje: ${competition?.name || ''}`);
+    doc.fontSize(14).text(`Natjecanje: ${competition?.organizer || ''}`);
+    doc.fontSize(12).text(`Datum: ${competition?.date || ''}`);
+    doc.moveDown();
+
+    performances.forEach((perf, idx) => {
+      doc.text(`${idx + 1}. ${perf.choreographyName} (${perf.clubId?.clubName || 'N/A'})`);
+    });
+
+    doc.end();
+    doc.pipe(res);
+  } catch (err) {
+    res.status(500).send('Greška pri generiranju PDF-a');
+  }
+});
+
 
 module.exports = router;
