@@ -13,6 +13,9 @@ function LandingPage() {
   const fetchPublicCompetitions = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`);
+      console.log('Response status:', response.status);
+      const text = await response.text();
+      console.log('Response text:', text);
       if (response.ok) {
         const data = await response.json();
         setCompetitions(data);
