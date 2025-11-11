@@ -1,3 +1,11 @@
 runtime: nodejs20
 instance_class: F1
 env: standard
+
+env_variables:
+  DATABASE_URI: "mongodb+srv://too_misic:testing123@cluster0.vp6qvis.mongodb.net/test?appName=Cluster0"
+  PORT: "8080"
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 1
