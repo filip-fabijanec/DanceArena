@@ -105,85 +105,116 @@
   font-style: italic;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  border: 2px solid #ddd;
-  transition: all 0.3s;
-}
-
-.checkbox-label:hover {
-  border-color: #667eea;
-  background-color: #f0f4ff;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: auto;
-  cursor: pointer;
-  transform: scale(1.2);
-}
-
-.checkbox-label span {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
 /* Payment Info */
 .payment-info {
-  background-color: #f0f4ff;
-  padding: 20px;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 10px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .payment-info p {
-  margin: 10px 0;
-  color: #555;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.payment-info strong {
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .payment-notice {
-  color: #ff9800 !important;
-  font-weight: 600;
+  color: white !important;
+  font-weight: 500;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Submit Button */
 .submit-button {
   width: 100%;
-  padding: 14px;
-  background-color: #667eea;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
   margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .submit-button:disabled {
-  background-color: #ccc;
+  background: #ccc;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Secure notice */
+.secure-notice {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lock-icon {
+  font-size: 16px;
 }
 
 /* Message */
 .message {
   margin: 20px 0;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 8px;
   text-align: center;
   font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .message.success {
@@ -217,6 +248,10 @@
   }
 
   .performance-form {
+    padding: 20px;
+  }
+
+  .competition-info-banner {
     padding: 20px;
   }
 }

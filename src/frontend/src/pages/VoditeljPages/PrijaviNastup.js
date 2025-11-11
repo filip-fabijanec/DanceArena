@@ -13,6 +13,7 @@ function PrijaviNastup() {
   const [competition, setCompetition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
@@ -23,8 +24,7 @@ function PrijaviNastup() {
     musicFilePath: '',
     ageCategory: '',
     danceStyle: '',
-    groupSize: '',
-    paid: false
+    groupSize: ''
   });
 
   useEffect(() => {
@@ -52,34 +52,34 @@ function PrijaviNastup() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handlePaymentAndSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
-    setSubmitting(true);
 
     // Validacija
     if (!formData.ageCategory || !formData.danceStyle || !formData.groupSize) {
       setMessage('Morate odabrati sve kategorije!');
       setIsError(true);
-      setSubmitting(false);
       return;
     }
 
-    if (!formData.paid) {
-      setMessage('Morate potvrditi plaćanje kotizacije!');
+    if (!formData.choreographyName || !formData.performanceDuration || !formData.musicFilePath) {
+      setMessage('Morate popuniti sve obavezne podatke!');
       setIsError(true);
-      setSubmitting(false);
       return;
     }
 
     try {
+      setProcessingPayment(true);
+
+      // 1️⃣ Prvo kreiraj prijavu nastupa (nepotvrđenu)
       const performanceData = {
         competitionId: competitionId,
         clubId: currentUser._id,
@@ -89,11 +89,10 @@ function PrijaviNastup() {
         musicFilePath: formData.musicFilePath,
         ageCategory: formData.ageCategory,
         danceStyle: formData.danceStyle,
-        groupSize: formData.groupSize,
-        paid: formData.paid
+        groupSize: formData.groupSize
       };
 
-      const response = await fetch(`/performances`, {
+      const performanceResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,28 +100,47 @@ function PrijaviNastup() {
         body: JSON.stringify(performanceData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Greška prilikom prijave');
+      if (!performanceResponse.ok) {
+        const errorData = await performanceResponse.json();
+        throw new Error(errorData.error || 'Greška prilikom prijave nastupa');
       }
 
-      const data = await response.json();
-      console.log('Performance created:', data);
+      const createdPerformance = await performanceResponse.json();
+      console.log('Performance created:', createdPerformance);
 
-      setMessage('Nastup uspješno prijavljen!');
+      // 2️⃣ Kreiraj Stripe Checkout Session
+      const stripeResponse = await fetch(`${process.env.REACT_APP_API_URL}/stripe/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          competitionId: competitionId,
+          userId: currentUser._id,
+          performanceId: createdPerformance._id // Opcionalno - možeš spremiti i ID nastupa
+        }),
+      });
+
+      if (!stripeResponse.ok) {
+        const errorData = await stripeResponse.json();
+        throw new Error(errorData.error || 'Greška prilikom kreiranja plaćanja');
+      }
+
+      const { url } = await stripeResponse.json();
+
+      // 3️⃣ Preusmjeri na Stripe Checkout
+      setMessage('Preusmjeravanje na stranicu za plaćanje...');
       setIsError(false);
-
-      // Redirect nakon 2 sekunde
-      setTimeout(() => {
-        navigate('/voditelj');
-      }, 2000);
+      
+      // Redirekcija na Stripe checkout
+      window.location.href = url;
 
     } catch (error) {
-      console.error('Error submitting performance:', error);
+      console.error('Error processing payment:', error);
       setMessage(`Greška: ${error.message}`);
       setIsError(true);
     } finally {
-      setSubmitting(false);
+      setProcessingPayment(false);
     }
   };
 
@@ -175,22 +193,22 @@ function PrijaviNastup() {
           <h2>{competition.name}</h2>
           <div className="info-grid">
             <div className="info-item">
-              <span className="icon"></span>
+              <span className="icon">📅</span>
               <span>Datum: {formatDate(competition.date)}</span>
             </div>
             <div className="info-item">
-              <span className="icon"></span>
+              <span className="icon">📍</span>
               <span>Lokacija: {competition.location}</span>
             </div>
             <div className="info-item">
-              <span className="icon"></span>
+              <span className="icon">💰</span>
               <span>Kotizacija: {competition.registrationFee} €</span>
             </div>
           </div>
         </div>
 
         {/* Forma */}
-        <form onSubmit={handleSubmit} className="performance-form">
+        <form onSubmit={handlePaymentAndSubmit} className="performance-form">
           
           {/* Osnovni podaci */}
           <div className="form-section">
@@ -324,21 +342,14 @@ function PrijaviNastup() {
                 Kotizacija za ovo natjecanje iznosi <strong>{competition.registrationFee} €</strong>.
               </p>
               <p className="payment-notice">
-                Ovo je trenutno simulacija plaćanja. Stvarno plaćanje bit će implementirano kasnije.
+                ✓ Nakon pritiska gumba biti ćete preusmjereni na sigurnu Stripe stranicu za plaćanje.
               </p>
-            </div>
-
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="paid"
-                  checked={formData.paid}
-                  onChange={handleChange}
-                  required
-                />
-                <span>Potvrđujem da je kotizacija plaćena *</span>
-              </label>
+              <p className="payment-notice">
+                ✓ Prihvaćamo sve veće kreditne i debitne kartice.
+              </p>
+              <p className="payment-notice">
+                ✓ Vaša prijava bit će potvrđena tek nakon uspješnog plaćanja.
+              </p>
             </div>
           </div>
 
@@ -350,9 +361,27 @@ function PrijaviNastup() {
           )}
 
           {/* Submit button */}
-          <button type="submit" className="submit-button" disabled={submitting}>
-            {submitting ? 'Slanje prijave...' : 'Prijavi nastup'}
+          <button 
+            type="submit" 
+            className="submit-button" 
+            disabled={processingPayment || submitting}
+          >
+            {processingPayment ? (
+              <>
+                <span className="spinner"></span>
+                Preusmjeravanje na plaćanje...
+              </>
+            ) : (
+              <>
+                🔒 Nastavi na plaćanje ({competition.registrationFee} €)
+              </>
+            )}
           </button>
+
+          <p className="secure-notice">
+            <span className="lock-icon">🔒</span>
+            Sigurno plaćanje putem Stripe
+          </p>
         </form>
       </div>
     </div>
