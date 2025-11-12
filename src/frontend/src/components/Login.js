@@ -2,21 +2,20 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
+import { GoogleLogin } from '@react-oauth/google';
 
 function Login() {
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
 
     try {
-      const user = await login(email);
+      const user = await loginWithGoogle(credentialResponse.credential);
       // Korisnik postoji - redirect prema roli
       switch (user.role) {
         case 'organizator':
@@ -35,11 +34,29 @@ function Login() {
           navigate('/');
       }
     } catch (err) {
-      // Korisnik ne postoji - redirect na registraciju s emailom
-      navigate('/registracija', { state: { email } });
+      // Izvuci email iz Google tokena za redirect na registraciju
+      try {
+        const base64Url = credentialResponse.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const payload = JSON.parse(jsonPayload);
+        const email = payload.email;
+        
+        // Korisnik ne postoji - redirect na registraciju s emailom
+        navigate('/registracija', { state: { email } });
+      } catch (decodeError) {
+        setError('Greška pri obradi Google prijave');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google prijava nije uspjela. Molimo pokušajte ponovo.');
   };
 
   return (
@@ -52,30 +69,29 @@ function Login() {
         <h1>DANCE ARENA</h1>
         <h2>Prijava u sustav</h2>
         
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email adresa</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="korisnik@example.com"
-              required
-              disabled={loading}
-            />
+        <div className="google-login-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap
+            text="signin_with"
+            shape="rectangular"
+            size="large"
+            width="100%"
+          />
+        </div>
+
+        {error && <div className="error-message">{error}</div>}
+
+        {loading && (
+          <div className="loading-message">
+            Prijava u tijeku...
           </div>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Prijava...' : 'Prijavi se'}
-          </button>
-        </form>
+        )}
 
         <div className="info-box">
-          <p>Za testiranje koristi email postojećeg korisnika iz baze.</p>
-          <p>Ako nemate korisnički račun, unijet ćete email i bit ćete preusmjereni na registraciju.</p>
+          <p>Prijavite se pomoću vašeg Google računa.</p>
+          <p>Ako nemate korisnički račun, bit ćete preusmjereni na registraciju.</p>
         </div>
       </div>
     </div>
