@@ -11,6 +11,8 @@ import OrganizatorRoutes from './routes/OrganizatorRoutes';
 import VoditeljRoutes from './routes/VoditeljRoutes';
 import SudacDashboard from './pages/SudacPages/SudacDashboard';
 import AdminRoutes from './routes/AdminRoutes';
+import SudacRoutes from './routes/SudacRoutes';
+
 
 function App() {
   return (
@@ -47,7 +49,7 @@ function App() {
             path="/sudac/*"
             element={
               <ProtectedRoute allowedRoles={['sudac']}>
-                <SudacDashboard />
+                <SudacRoutes />
               </ProtectedRoute>
             }
           />

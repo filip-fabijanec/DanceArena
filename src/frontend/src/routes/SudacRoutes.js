@@ -8,6 +8,12 @@ import KreirajNatjecanje from '../pages/OrgPages/kreiraj_natjecanje';
 import UpravljanjePrijavama from '../pages/OrgPages/prijave_org';
 import OdabirSudaca from '../pages/OrgPages/odabir_sudaca';
 
+import SudacDashboard from '../pages/SudacPages/SudacDashboard';
+import SudacFolder from '../pages/SudacPages/SudacFolder';
+import OcjenjivanjePage from '../pages/SudacPages/OcjenjivanjePage';
+import OcjenjivanjeKategorija from '../pages/SudacPages/OcjenjivanjeKategorija'; 
+
+
 function OrganizatorRoutes() {
   return (
     <div>
@@ -22,5 +28,15 @@ function OrganizatorRoutes() {
     </div>
   );
 }
+const SudacRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<SudacDashboard />} />
+      <Route path="/moja-natjecanja" element={<SudacFolder />} />
+      <Route path="/ocjenjivanje/:competitionId" element={<OcjenjivanjeKategorija />} />
+      <Route path="/ocjenjeno" element={<OcjenjivanjePage />} />
+    </Routes>
+  );
+};
 
-export default OrganizatorRoutes;
+export default SudacRoutes;
