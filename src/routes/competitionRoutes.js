@@ -55,6 +55,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/judge/:judgeId", async (req, res) => {
+  try {
+    const competitions = await Competition.find({
+      referees: req.params.judgeId // Pronađi natjecanja gdje je sudac u referees polju
+    })
+      .populate("organizer", "name surname")
+      .populate("referees", "name surname")
+      .sort({ date: -1 });
+    
+    if (!competitions || competitions.length === 0) {
+      return res.status(200).json([]); // Vrati prazno polje umjesto error
+    }
+    
+    res.status(200).json(competitions);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // GET /competitions/:id (pojedinačno natjecanje)
 router.get("/:id", async (req, res) => {
   try {
