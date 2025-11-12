@@ -21,7 +21,7 @@ function SudacFolder() {
 
     const fetchCompetitions = async () => {
       // --- DIJAGNOSTIČKI BLOK ---
-      const urlToFetch = `${process.env.REACT_APP_API_URL}/api/competitions/judge/${judgeId}`;
+      const urlToFetch = `${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`;
       console.log("Pokušavam dohvatiti podatke s URL-a:", urlToFetch);
       // --- KRAJ DIJAGNOSTIČKOG BLOKA ---
 
