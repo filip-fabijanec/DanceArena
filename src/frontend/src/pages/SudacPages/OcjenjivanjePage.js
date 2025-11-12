@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import '../Dashboard.css';
@@ -24,8 +23,10 @@ function OcjenjivanjePage() {
       try {
         setLoading(true);
         // Dohvati sva natjecanja na kojima je sudac ocjenjivao
-        const compsRes = await axios.get(`${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`);
-        setCompetitions(compsRes.data || []);
+        const compsRes = await fetch(`${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`);
+        if (!compsRes.ok) throw new Error('Greška pri dohvaćanju natjecanja');
+        const compsData = await compsRes.json();
+        setCompetitions(compsData || []);
       } catch (err) {
         setError("Nije moguće dohvatiti podatke. Provjerite konzolu za detalje.");
       } finally {
@@ -40,8 +41,10 @@ function OcjenjivanjePage() {
     if (!judgeId) return;
     const fetchScores = async () => {
       try {
-        const scoresRes = await axios.get(`${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`);
-        setScores(scoresRes.data || []);
+        const scoresRes = await fetch(`${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`);
+        if (!scoresRes.ok) throw new Error('Greška pri dohvaćanju ocjena');
+        const scoresData = await scoresRes.json();
+        setScores(scoresData || []);
       } catch (err) {
         setError("Nije moguće dohvatiti ocjene.");
       }

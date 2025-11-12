@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import '../Dashboard.css';
@@ -27,8 +26,10 @@ function SudacFolder() {
       // --- KRAJ DIJAGNOSTIČKOG BLOKA ---
 
       try {
-        const res = await axios.get(urlToFetch); // Koristimo varijablu
-        setCompetitions(res.data || []);
+        const res = await fetch(urlToFetch);
+        if (!res.ok) throw new Error('Greška pri dohvaćanju podataka');
+        const data = await res.json();
+        setCompetitions(data || []);
       } catch (err) {
         console.error("Greška pri dohvaćanju natjecanja:", err);
         setError("Nije moguće dohvatiti natjecanja. Provjerite konzolu za detalje.");

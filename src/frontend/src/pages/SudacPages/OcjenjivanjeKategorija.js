@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
 function OcjenjivanjeKategorija() {
   const { competitionId } = useParams();
-  const auth = useAuth(); // Dodaj ovu liniju
+  const auth = useAuth();
   const [competition, setCompetition] = useState(null);
   const [scores, setScores] = useState({});
   const [status, setStatus] = useState({});
@@ -16,8 +15,10 @@ function OcjenjivanjeKategorija() {
     const fetchCompetition = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
-        setCompetition(res.data);
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
+        if (!res.ok) throw new Error('Greška pri dohvaćanju podataka');
+        const data = await res.json();
+        setCompetition(data);
       } catch (err) {
         setError("Nije moguće učitati podatke za natjecanje.");
       } finally {
@@ -58,15 +59,27 @@ function OcjenjivanjeKategorija() {
     const totalScore = scoreData.choreography + scoreData.performance + scoreData.rhythm;
 
     try {
-      await axios.post('${process.env.REACT_APP_API_URL}/scores', {
-        performanceId: key,
-        judgeId: auth?.currentUser?._id,
-        score: totalScore
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/scores`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          performanceId: key,
+          judgeId: auth?.currentUser?._id,
+          score: totalScore
+        })
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Greška pri slanju');
+      }
+      
       setStatus(prev => ({ ...prev, [key]: 'Uspješno poslano!' }));
     } catch (err) {
       setStatus(prev => ({ ...prev, [key]: 'Greška pri slanju.' }));
-      console.error("Greška pri slanju ocjene:", err.response?.data || err.message);
+      console.error("Greška pri slanju ocjene:", err.message);
     }
   };
 
