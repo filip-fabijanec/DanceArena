@@ -16,7 +16,6 @@
   position: relative; 
 }
 
-
 .back-to-home {
   display: inline-block;
   color: #667eea;
@@ -30,7 +29,6 @@
 .back-to-home:hover {
   opacity: 0.7;
 }
-
 
 .login-box h1 {
   color: #667eea;
@@ -47,52 +45,19 @@
   font-weight: normal;
 }
 
-.login-box .form-group {
+.google-login-wrapper {
+  display: flex;
+  justify-content: center;
   margin-bottom: 20px;
-}
-
-.login-box .form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-weight: 600;
-}
-
-.login-box .form-group input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  box-sizing: border-box;
 }
 
-.login-box .form-group input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.google-login-wrapper > div {
+  width: 100% !important;
 }
 
-.login-button {
-  width: 100%;
-  padding: 14px;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover:not(:disabled) {
-  background-color: #5568d3;
-}
-
-.login-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.google-login-wrapper > div > div {
+  width: 100% !important;
 }
 
 .error-message {
@@ -104,6 +69,16 @@
   border: 1px solid #f5c6cb;
 }
 
+.loading-message {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  padding: 12px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bee5eb;
+  text-align: center;
+}
+
 .info-box {
   margin-top: 20px;
   padding: 15px;
@@ -113,7 +88,7 @@
 }
 
 .info-box p {
-  margin: 0;
+  margin: 5px 0;
   color: #555;
   font-size: 14px;
 }

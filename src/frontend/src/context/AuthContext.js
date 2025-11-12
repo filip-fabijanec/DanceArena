@@ -40,6 +40,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Nova metoda za Google login
+  const loginWithGoogle = async (googleCredential) => {
+    try {
+      // Dekodiranje JWT tokena da dobiješ email
+      const base64Url = googleCredential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      const email = payload.email;
+
+      // Pozovi postojeću login metodu s emailom
+      return await login(email);
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
@@ -48,6 +69,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     login,
+    loginWithGoogle,
     logout,
     loading,
   };
