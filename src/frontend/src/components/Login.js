@@ -34,7 +34,7 @@ function Login() {
           navigate('/');
       }
     } catch (err) {
-      // Izvuci email iz Google tokena za redirect na registraciju
+      // Izvuci email i providerId iz Google tokena za redirect na registraciju
       try {
         const base64Url = credentialResponse.credential.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -44,9 +44,16 @@ function Login() {
         
         const payload = JSON.parse(jsonPayload);
         const email = payload.email;
+        const providerId = payload.sub; // Google ID korisnika
         
-        // Korisnik ne postoji - redirect na registraciju s emailom
-        navigate('/registracija', { state: { email } });
+        // Korisnik ne postoji - redirect na registraciju s emailom i providerID-om
+        navigate('/registracija', { 
+          state: { 
+            email,
+            providerId,
+            provider: 'google'
+          } 
+        });
       } catch (decodeError) {
         setError('Greška pri obradi Google prijave');
       }

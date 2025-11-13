@@ -8,13 +8,15 @@ function Registracija() {
   const navigate = useNavigate();
   const location = useLocation();
   const emailFromLogin = location.state?.email || '';
+  const providerIdFromLogin = location.state?.providerId || '';
+  const providerFromLogin = location.state?.provider || 'google';
 
   const [formData, setFormData] = useState({
     role: "voditeljKluba",
     name: "",
     surname: "",
-    provider: "google",
-    providerId: "",
+    provider: providerFromLogin,
+    providerId: providerIdFromLogin,
     email: emailFromLogin,
     clubName: "",
     clubLocation: "",
@@ -88,6 +90,10 @@ function Registracija() {
         )}
 
         <form onSubmit={handleSubmit} className="registracija-form">
+          {/* HIDDEN POLJA ZA PROVIDER I PROVIDER ID */}
+          <input type="hidden" name="provider" value={formData.provider} />
+          <input type="hidden" name="providerId" value={formData.providerId} />
+
           <div className="form-group">
             <label htmlFor="role">Uloga *</label>
             <select
@@ -113,7 +119,7 @@ function Registracija() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Unesite ime"
+                placeholder="Vaše ime"
                 required
                 disabled={loading}
               />
@@ -127,7 +133,7 @@ function Registracija() {
                 name="surname"
                 value={formData.surname}
                 onChange={handleChange}
-                placeholder="Unesite prezime"
+                placeholder="Vaše prezime"
                 required
                 disabled={loading}
               />
@@ -142,38 +148,11 @@ function Registracija() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="korisnik@example.com"
-              required
-              disabled={true}
-              className="readonly-field"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="provider">Provider *</label>
-            <input
-              type="text"
-              id="provider"
-              name="provider"
-              value={formData.provider}
-              onChange={handleChange}
-              placeholder="npr. google"
+              placeholder="vas.email@example.com"
               required
               disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="providerId">Provider ID *</label>
-            <input
-              type="text"
-              id="providerId"
-              name="providerId"
-              value={formData.providerId}
-              onChange={handleChange}
-              placeholder="Google ID korisnika"
-              required
-              disabled={loading}
+              className={emailFromLogin ? "readonly-field" : ""}
+              readOnly={!!emailFromLogin}
             />
           </div>
 
