@@ -167,7 +167,7 @@ function Registracija() {
                   name="clubName"
                   value={formData.clubName}
                   onChange={handleChange}
-                  placeholder="Naziv plesnog kluba (opciono)"
+                  placeholder="Naziv plesnog kluba (neobavezno)"
                   disabled={loading}
                 />
               </div>
@@ -180,7 +180,7 @@ function Registracija() {
                   name="clubLocation"
                   value={formData.clubLocation}
                   onChange={handleChange}
-                  placeholder="Grad, Država (opciono)"
+                  placeholder="Grad, Država (neobavezno)"
                   disabled={loading}
                 />
               </div>
