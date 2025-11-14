@@ -162,7 +162,7 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 Aplikacija je hostana na Render platformi. Najnovija verzija stranice dostupna je na ovoj adresi:
 https://dancearena.onrender.com/
 
-Deployment se automatski ažurira prilikom svakog push-a na glavni branch.
+Deployment se automatski ažurira prilikom svakog push-a na master branch.
 
 
 # Članovi tima 
