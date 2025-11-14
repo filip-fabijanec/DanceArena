@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithSecret = async (secret) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/auth/secret-login`,
+        `${process.env.REACT_APP_API_URL}/users/secret-login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
