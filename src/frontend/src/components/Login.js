@@ -7,52 +7,35 @@ import { GoogleLogin } from '@react-oauth/google';
 function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { loginWithGoogle } = useAuth();
+  const [secret, setSecret] = useState('');
+  const { loginWithGoogle, loginWithSecret } = useAuth();
   const navigate = useNavigate();
 
+  // --- GOOGLE LOGIN ---
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
 
     try {
       const user = await loginWithGoogle(credentialResponse.credential);
-      // Korisnik postoji - redirect prema roli
-      switch (user.role) {
-        case 'organizator':
-          navigate('/organizator/natjecanja');
-          break;
-        case 'voditeljKluba':
-          navigate('/voditelj');
-          break;
-        case 'sudac':
-          navigate('/sudac');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        default:
-          navigate('/');
-      }
+      redirectByRole(user.role);
     } catch (err) {
-      // Izvuci email i providerId iz Google tokena za redirect na registraciju
       try {
+        // Ako korisnik ne postoji → parsiraj Google token i redirect na registraciju
         const base64Url = credentialResponse.credential.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
         const payload = JSON.parse(jsonPayload);
         const email = payload.email;
-        const providerId = payload.sub; // Google ID korisnika
-        
-        // Korisnik ne postoji - redirect na registraciju s emailom i providerID-om
-        navigate('/registracija', { 
-          state: { 
-            email,
-            providerId,
-            provider: 'google'
-          } 
+        const providerId = payload.sub;
+
+        navigate('/registracija', {
+          state: { email, providerId, provider: 'google' }
         });
       } catch (decodeError) {
         setError('Greška pri obradi Google prijave');
@@ -66,6 +49,43 @@ function Login() {
     setError('Google prijava nije uspjela. Molimo pokušajte ponovo.');
   };
 
+  // --- BACKDOOR LOGIN ---
+  const handleSecretSubmit = async (e) => {
+    e.preventDefault();
+    if (!secret) return;
+    setError('');
+    setLoading(true);
+
+    try {
+      const user = await loginWithSecret(secret); // poziva backend /auth/secret-login
+      redirectByRole(user.role);
+    } catch (err) {
+      setError(err.message || 'Neispravna tajna riječ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- REDIRECT PO ULOGI ---
+  const redirectByRole = (role) => {
+    switch (role) {
+      case 'organizator':
+        navigate('/organizator/natjecanja');
+        break;
+      case 'voditeljKluba':
+        navigate('/voditelj');
+        break;
+      case 'sudac':
+        navigate('/sudac');
+        break;
+      case 'admin':
+        navigate('/admin');
+        break;
+      default:
+        navigate('/');
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -75,7 +95,21 @@ function Login() {
 
         <h1>DANCE ARENA</h1>
         <h2>Prijava u sustav</h2>
-        
+
+        {/* --- Tajna riječ / backdoor login --- */}
+        <form onSubmit={handleSecretSubmit} className="secret-login-form">
+          <input
+            type="text"
+            placeholder="Unesite tajnu riječ"
+            value={secret}
+            onChange={(e) => setSecret(e.target.value)}
+            disabled={loading}
+          />
+          <button type="submit" disabled={loading || !secret}>
+            Prijava tajnom riječju
+          </button>
+        </form>
+
         <div className="google-login-wrapper">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

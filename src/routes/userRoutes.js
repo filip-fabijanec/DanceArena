@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 router.post("/", async (req, res) => {
   try {
@@ -85,6 +86,38 @@ router.post("/login", async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// Dodaj nakon postojećih ruta
+router.post("/secret-login", async (req, res) => {
+  try {
+    const { secret } = req.body;
+
+    // Provjera tajne riječi
+    const SECRET_PASSWORD = "admin241"; // možeš staviti svoju
+    if (secret !== SECRET_PASSWORD) {
+      return res.status(401).json({ error: "Neispravna tajna riječ" });
+    }
+
+    // Nađi korisnika kojeg želiš automatski ulogirati
+    const user = await User.findOne({ email: "martin.tomisic@gmail.com" });
+    if (!user) {
+      return res.status(404).json({ error: "Korisnik nije pronađen" });
+    }
+
+    // Generiraj JWT token (ako koristiš token-based auth)
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET || "secret123",
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ user, token });
+
+  } catch (error) {
+    console.error("Secret login error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
