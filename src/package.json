@@ -17,6 +17,7 @@
         "ejs": "^3.1.8",
         "express": "^4.21.2",
         "express-session": "^1.17.3",
+        "jsonwebtoken": "^9.0.2",
         "mongodb": "^7.0.0",
         "mongoose": "^8.19.2",
         "pdfkit": "^0.17.2",
