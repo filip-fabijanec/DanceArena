@@ -121,4 +121,47 @@ router.post("/secret-login", async (req, res) => {
   }
 });
 
+router.post("/google-login", async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: "Google credential je obavezan" });
+    }
+
+    // Dekodiranje JWT tokena od Google-a
+    const base64Url = credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = Buffer.from(base64, 'base64').toString('utf8');
+    const payload = JSON.parse(jsonPayload);
+
+    let user = await User.findOne({ email: payload.email });
+
+    if (!user) {
+      // Ako korisnik ne postoji, kreiraj ga
+      user = new User({
+        email: payload.email,
+        provider: 'google',
+        providerId: payload.sub,
+        name: payload.given_name || '',
+        surname: payload.family_name || '',
+        role: 'voditeljKluba', // default rola
+      });
+      await user.save();
+    }
+
+    // Generiraj JWT
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.JWT_SECRET || "secret123",
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ user, token });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(500).json({ error: "Google login failed" });
+  }
+});
+
 module.exports = router;
