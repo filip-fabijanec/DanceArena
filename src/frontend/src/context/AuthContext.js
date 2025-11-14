@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (googleCredential) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/auth/google-login`,
+        `${process.env.REACT_APP_API_URL}/users/google-login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
