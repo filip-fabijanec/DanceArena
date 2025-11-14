@@ -97,18 +97,29 @@ function Login() {
         <h2>Prijava u sustav</h2>
 
         {/* --- Tajna riječ / backdoor login --- */}
-        <form onSubmit={handleSecretSubmit} className="secret-login-form">
-          <input
-            type="text"
-            placeholder="Unesite tajnu riječ"
-            value={secret}
-            onChange={(e) => setSecret(e.target.value)}
-            disabled={loading}
-          />
-          <button type="submit" disabled={loading || !secret}>
-            Prijava tajnom riječju
-          </button>
-        </form>
+        <div className="secret-section">
+          <h3 className="secret-title">Admin / Backdoor Prijava</h3>
+
+          <form onSubmit={handleSecretSubmit} className="secret-login-form">
+            <input
+              type="password"
+              className="secret-input"
+              placeholder="Upišite tajnu administratorsku lozinku..."
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              disabled={loading}
+            />
+
+            <button
+              type="submit"
+              className="secret-button"
+              disabled={loading || !secret}
+            >
+              🔐 Prijavi se
+            </button>
+          </form>
+        </div>
+
 
         <div className="google-login-wrapper">
           <GoogleLogin

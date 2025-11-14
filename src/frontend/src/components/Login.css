@@ -92,3 +92,60 @@
   color: #555;
   font-size: 14px;
 }
+
+/* --- Tajni login dio --- */
+.secret-section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f8f9fb;
+  border: 1px solid #e2e4e8;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.secret-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.secret-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.secret-input {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.2s;
+}
+
+.secret-input:focus {
+  border-color: #0077ff;
+  box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.15);
+}
+
+.secret-button {
+  padding: 12px;
+  background: #0077ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.secret-button:hover {
+  background: #005fcc;
+}
+
+.secret-button:disabled {
+  background: #8cb8ff;
+  cursor: not-allowed;
+}
