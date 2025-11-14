@@ -89,24 +89,34 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Dodaj nakon postojećih ruta
 router.post("/secret-login", async (req, res) => {
   try {
     const { secret } = req.body;
 
-    // Provjera tajne riječi
-    const SECRET_PASSWORD = "admin241"; // možeš staviti svoju
-    if (secret !== SECRET_PASSWORD) {
+    if (!secret) {
+      return res.status(400).json({ error: "Tajna riječ je obavezna" });
+    }
+
+    // Mapiranje tajnih riječi na emailove
+    const secretMap = {
+      "admin123": "martin.tomisic@gmail.com",
+      "sudac123": "vitocindori@gmail.com",
+      "org123": "fico241@gmail.com",
+      "vodklub123": "clashofdubravica@gmail.com"
+    };
+
+    const email = secretMap[secret];
+
+    if (!email) {
       return res.status(401).json({ error: "Neispravna tajna riječ" });
     }
 
-    // Nađi korisnika kojeg želiš automatski ulogirati
-    const user = await User.findOne({ email: "martin.tomisic@gmail.com" });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "Korisnik nije pronađen" });
     }
 
-    // Generiraj JWT token (ako koristiš token-based auth)
+    // Generiraj JWT token
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
       process.env.JWT_SECRET || "secret123",
@@ -114,12 +124,12 @@ router.post("/secret-login", async (req, res) => {
     );
 
     res.status(200).json({ user, token });
-
   } catch (error) {
     console.error("Secret login error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 router.post("/google-login", async (req, res) => {
   try {

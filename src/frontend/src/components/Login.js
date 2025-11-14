@@ -98,13 +98,13 @@ function Login() {
 
         {/* --- Tajna riječ / backdoor login --- */}
         <div className="secret-section">
-          <h3 className="secret-title">Admin / Backdoor Prijava</h3>
+          <h3 className="secret-title">Prijava preko šifre</h3>
 
           <form onSubmit={handleSecretSubmit} className="secret-login-form">
             <input
               type="password"
               className="secret-input"
-              placeholder="Upišite tajnu administratorsku lozinku..."
+              placeholder="Upišite šifru..."
               value={secret}
               onChange={(e) => setSecret(e.target.value)}
               disabled={loading}
