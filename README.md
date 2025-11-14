@@ -155,63 +155,15 @@ Ovaj projekt je reultat timskog rada u sklopu projeknog zadatka kolegija [Progra
 -   Autentikacija: [Google Cloud](https://console.cloud.google.com/)
 -   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
   
-# Instalacija
+# Pokretanje stranice
 
-### 1. Klonirati repozitorij
+### 1. Render
 
-Klonirati GitHub repozitorij:
+Aplikacija je hostana na Render platformi. Najnovija verzija stranice dostupna je na ovoj adresi:
+https://dancearena.onrender.com/
 
-```console
-    git clone https://github.com/filip-fabijanec/DanceArena.git
-    cd DanceArena/src
-```
+Deployment se automatski ažurira prilikom svakog push-a na glavni branch.
 
-### 2. Postavljanje backend okruženja
-
-1. Navigirajte do DanceArena.API direktorija.
-2. Stvorite "appsettings.development.json" datoteku.
-3. Kopirajte sadržaj "appsettings.development.json.txt" u stvorenu datoteku.
-4. Dodajte JWT ključ u datoteku.
-5. Dodajte ostale "secrets" ako ih imate.
-
-### 3. Postavljanje baze podataka
-
-1. Napravite novog PostgreSQL korisnika s imenom "dancearena_backend" i dodijeliti mu lozinku.
-2. Kreirajte bazu podataka s imenom "dancearena" i schemom "backend".
-3. Popunite ConnectionString u "appsettings.development.json" datoteci.
-4. Ako nemate instaliran dotnet tools, pokrenuti sljedeću naredbu:
-
-```console
-    dotnet tool install --global dotnet-ef --version 8.*
-```
-
-5. Za kreiranje tablica u bazi podataka, pokrenite iduću naredbu iz "DanceArena/src" direktorija:
-
-```console
-    dotnet ef database update -s Dancearena.API -p DanceArena.Model
-```
-
-### 4. Pokretanje backend-a
-
-```console
-    node server.js
-```
-
-### 5. Postavljanje i pokretanje frontend-a
-
-1. Navigirajte do "DanceArena.Front" direktorija.
-2. Kreirajte ".env.development" datoteku.
-3. Kopirajte sadržaj ".env.development.txt" u stvorenu datoteku.
-4. Pokrenite sljedeće naredbe iz "DanceArena.Front" direktorija:
-
-```console
-    npm install
-    npm run dev
-```
-
-### 6. Pristupanje aplikaciji
-
-Nakon ovih koraka otvoiti preglednik i navigirajte do https://localhost:8080 kako bi pristupili "DanceArena" aplikaciji.
 
 # Članovi tima 
 | Članovi          | Uloge            |
