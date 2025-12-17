@@ -47,6 +47,40 @@ router.get("/referees", async (req, res) => {
   }
 });
 
+// ============================================================
+// NOVO: RUTA ZA POPRAVAK BAZE (Dodavanje polja koja fale)
+// ============================================================
+router.get("/fix-database", async (req, res) => {
+  try {
+    // Ovdje definiraš što želiš dodati starim korisnicima
+    const updateResult = await User.updateMany(
+      { 
+        // Kriterij: ažuriraj one koji nemaju polje 'subscriptionStatus'
+        // (Ili makni ovaj red ako želiš pregaziti sve korisnike)
+        subscriptionStatus: { $exists: false } 
+      }, 
+      { 
+        $set: { 
+          // OVDJE UPISUJEŠ SVA NOVA POLJA I DEFAULT VRIJEDNOSTI:
+          subscriptionStatus: 'inactive',
+          subscriptionExpiry: null,
+          jeAktivan: true, // Primjer tvog novog polja
+          adresa: ""       // Primjer tvog novog polja
+        } 
+      }
+    );
+
+    res.json({ 
+      message: "Baza uspješno ažurirana!", 
+      updatedCount: updateResult.modifiedCount 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// ============================================================
+
 // AŽURIRANJE KORISNIKA (Općenito)
 router.put("/:id", async (req, res) => {
   try {
@@ -76,7 +110,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// OBIČAN LOGIN (Provjeri trebaš li ovdje generirati token kao u secret-login?)
+// OBIČAN LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email } = req.body;
@@ -98,7 +132,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// SECRET LOGIN (Za brzi pristup tijekom razvoja)
+// SECRET LOGIN
 router.post("/secret-login", async (req, res) => {
   try {
     const { secret } = req.body;
@@ -149,7 +183,6 @@ router.post("/google-login", async (req, res) => {
       return res.status(400).json({ error: "Google credential je obavezan" });
     }
 
-    // Dekodiranje JWT tokena od Google-a
     const base64Url = credential.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = Buffer.from(base64, 'base64').toString('utf8');
@@ -158,7 +191,6 @@ router.post("/google-login", async (req, res) => {
     let user = await User.findOne({ email: payload.email });
 
     if (!user) {
-      // Ako korisnik ne postoji, kreiraj ga
       user = new User({
         email: payload.email,
         provider: 'google',
@@ -170,7 +202,6 @@ router.post("/google-login", async (req, res) => {
       await user.save();
     }
 
-    // Generiraj JWT
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
       process.env.JWT_SECRET || "secret123",
@@ -188,9 +219,9 @@ router.post("/google-login", async (req, res) => {
 // NOVE RUTE ZA ČLANARINE (ORGANIZATORI)
 // ---------------------------------------------------------
 
-// 1. ORGANIZATOR PLAĆA ČLANARINU (Simulacija)
+// 1. ORGANIZATOR PLAĆA ČLANARINU
 router.post('/pay-subscription', async (req, res) => {
-    const { userId, months } = req.body; // months = 1 (za 30 dana)
+    const { userId, months } = req.body; 
   
     try {
       const user = await User.findById(userId);
@@ -198,19 +229,14 @@ router.post('/pay-subscription', async (req, res) => {
         return res.status(404).json({ error: 'Korisnik nije pronađen' });
       }
   
-      // Izračunaj novi datum
       let newExpiryDate = new Date();
       
-      // Ako je korisnik već aktivan i datum je u budućnosti, dodajemo vrijeme na postojeći datum isteka
-      // Ako je istekao ili neaktivan, dodajemo vrijeme na današnji datum (resetiramo)
       if (user.subscriptionStatus === 'active' && user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date()) {
           newExpiryDate = new Date(user.subscriptionExpiry);
       }
   
-      // Dodajemo 30 dana (ili koliko mjeseci je poslano)
       newExpiryDate.setDate(newExpiryDate.getDate() + (30 * (months || 1)));
   
-      // Ažuriraj korisnika
       user.subscriptionStatus = 'active';
       user.subscriptionExpiry = newExpiryDate;
       user.lastPaymentDate = new Date();
@@ -229,7 +255,7 @@ router.post('/pay-subscription', async (req, res) => {
     }
   });
   
-  // 2. ADMIN RUČNO MIJENJA STATUS (Update)
+  // 2. ADMIN RUČNO MIJENJA STATUS
   router.put('/:id/subscription', async (req, res) => {
     const { id } = req.params;
     const { subscriptionExpiry, subscriptionStatus } = req.body;
@@ -241,7 +267,7 @@ router.post('/pay-subscription', async (req, res) => {
           subscriptionExpiry: new Date(subscriptionExpiry),
           subscriptionStatus: subscriptionStatus 
         },
-        { new: true } // Vraća ažurirani objekt
+        { new: true } 
       );
   
       if (!user) {
