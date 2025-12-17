@@ -7,9 +7,12 @@ function CompetitionPregled() {
   const [competitions, setCompetitions] = useState([]);
   const [filteredCompetitions, setFilteredCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({ status: 'all', search: '' });
+  // Maknuli smo 'search' iz state-a jer adminu ne treba tražilica
+  const [filter, setFilter] = useState({ status: 'all' });
+  
   const [showEditModal, setShowEditModal] = useState({ show: false, competition: null });
   const [showDeleteModal, setShowDeleteModal] = useState({ show: false, competition: null });
+  
   const [editForm, setEditForm] = useState({
     naziv: '',
     opis: '',
@@ -32,11 +35,15 @@ function CompetitionPregled() {
   const fetchCompetitions = async () => {
     try {
       setLoading(true);
-      const userId = localStorage.getItem('userId'); // ili iz contexta
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/organizator/${userId}`);
+      // PROMJENA: Dohvaćamo SVA natjecanja, ne samo za određenog usera
+      // Provjeri na backendu imaš li rutu GET /competitions koja vraća sve
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions`);
+      
       if (response.ok) {
         const data = await response.json();
         setCompetitions(data);
+      } else {
+        console.error('Failed to fetch competitions');
       }
     } catch (error) {
       console.error('Error fetching competitions:', error);
@@ -48,19 +55,18 @@ function CompetitionPregled() {
   const applyFilters = () => {
     let filtered = [...competitions];
     
+    // Zadržao sam samo filter po statusu (npr. da admin vidi samo aktivna)
+    // Ako želiš prikazati apsolutno sve bez ikakvog filtriranja, možeš i ovo maknuti.
     if (filter.status !== 'all') {
       filtered = filtered.filter(c => c.status === filter.status);
     }
     
-    if (filter.search) {
-      filtered = filtered.filter(c => 
-        c.naziv.toLowerCase().includes(filter.search.toLowerCase()) ||
-        c.lokacija.toLowerCase().includes(filter.search.toLowerCase())
-      );
-    }
+    // PROMJENA: Maknuta logika za filter.search
     
     setFilteredCompetitions(filtered);
   };
+
+  // --- Ovi handleri ostaju isti jer admin smije uređivati i brisati ---
 
   const handleEditClick = (competition) => {
     setShowEditModal({ show: true, competition });
@@ -151,7 +157,7 @@ function CompetitionPregled() {
     return (
       <div className="dashboard-container">
         <Link to="/admin" className="back-link">← Natrag na Dashboard</Link>
-        <h1>Moja natjecanja</h1>
+        <h1>Pregled svih natjecanja</h1>
         <p>Učitavanje...</p>
       </div>
     );
@@ -162,28 +168,14 @@ function CompetitionPregled() {
       <Link to="/admin" className="back-link">← Natrag na Dashboard</Link>
       
       <div className="page-header">
-        <h1>Moja natjecanja</h1>
-        <Link to="/admin/natjecanja/novo" className="btn-primary">
-          + Novo natjecanje
-        </Link>
+        <h1>Pregled svih natjecanja</h1>
+        {/* PROMJENA: Maknut gumb za novo natjecanje */}
       </div>
 
-      {/* Filteri */}
+      {/* Filteri - Zadržan samo status, maknuta tražilica */}
       <div className="filters-section">
         <div className="filter-group">
-          <label>Pretraga:</label>
-          <input
-            type="text"
-            placeholder="Pretraži po nazivu ili lokaciji..."
-            value={filter.search}
-            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-            className="filter-select"
-            style={{ minWidth: '300px' }}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Status:</label>
+          <label>Filtriraj po statusu:</label>
           <select 
             value={filter.status} 
             onChange={(e) => setFilter({ ...filter, status: e.target.value })}
@@ -261,9 +253,7 @@ function CompetitionPregled() {
         {filteredCompetitions.length === 0 && (
           <div className="empty-state">
             <p>
-              {filter.search || filter.status !== 'all' 
-                ? 'Nema natjecanja za prikaz s odabranim filterima.' 
-                : 'Još niste kreirali nijedno natjecanje.'}
+               Nema natjecanja za prikaz.
             </p>
           </div>
         )}
@@ -273,7 +263,7 @@ function CompetitionPregled() {
       {showEditModal.show && (
         <div className="modal-overlay" onClick={() => setShowEditModal({ show: false, competition: null })}>
           <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Uredi natjecanje</h3>
+            <h3>Uredi natjecanje (Admin)</h3>
             <form onSubmit={handleUpdateCompetition}>
               <div className="form-group">
                 <label>Naziv *</label>
