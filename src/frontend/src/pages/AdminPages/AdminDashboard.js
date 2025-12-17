@@ -19,13 +19,11 @@ function Dashboard() {
       if (usersRes.ok) {
         usersData = await usersRes.json();
       }
-
       const compsRes = await fetch(`${process.env.REACT_APP_API_URL}/competitions`);
       let compsData = [];
       if (compsRes.ok) {
         compsData = await compsRes.json();
       }
-
       setStats({
         users: {
           total: usersData.length,
@@ -61,7 +59,7 @@ function Dashboard() {
             <div className="stat-label">Natjecanja</div>
           </div>
         </div>
-
+        
         <div className="dashboard-grid">
           <div className="dashboard-card">
             <h3>Upravljanje korisnicima</h3>
@@ -70,7 +68,7 @@ function Dashboard() {
                 Pregled korisnika
             </Link>
           </div>
-
+          
           <div className="dashboard-card">
             <h3>Članarine</h3>
             <p>Postavljanje i upravljanje članarinama.</p>
@@ -78,17 +76,16 @@ function Dashboard() {
                 Upravljaj članarinama
             </Link>
           </div>
-
-          /*
-          <div className="dashboard-card">
+          
+          {/* Sakrivena kartica - ostaje u kodu ali se ne prikazuje */}
+          <div className="dashboard-card" style={{ display: 'none' }}>
             <h3>Pregled sustava</h3>
             <p>Pregledajte sve aktivnosti u sustavu.</p>
              <Link to="/admin/sustav" className="card-button">
                 Pregled aktivnosti
             </Link>
           </div>
-          */
-
+          
           <div className="dashboard-card">
             <h3>Sva natjecanja</h3>
             <p>Pregledajte sva natjecanja u sustavu.</p>
