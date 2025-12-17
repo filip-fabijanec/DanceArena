@@ -79,6 +79,7 @@ function Dashboard() {
             </Link>
           </div>
 
+          /*
           <div className="dashboard-card">
             <h3>Pregled sustava</h3>
             <p>Pregledajte sve aktivnosti u sustavu.</p>
@@ -86,6 +87,7 @@ function Dashboard() {
                 Pregled aktivnosti
             </Link>
           </div>
+          */
 
           <div className="dashboard-card">
             <h3>Sva natjecanja</h3>
