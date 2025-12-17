@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Competition = require("../models/Competition");
-
+const User = require("../models/User"); // <--- OBAVEZNO: Treba nam za provjeru članarine
 
 // GET /competitions/upcoming
 router.get("/upcoming", async (req, res) => {
@@ -39,7 +39,8 @@ router.get("/", async (req, res) => {
       .sort({ date: -1 });
     
     if(!competitions || competitions.length === 0){
-      return res.status(404).json({ error: "No competitions found" });
+      // Vraćamo prazan array umjesto 404 da frontend ne pukne ako nema natjecanja
+      return res.status(200).json([]); 
     }
     
     // Ažuriraj status prije slanja
@@ -55,6 +56,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /judge/:judgeId
 router.get("/judge/:judgeId", async (req, res) => {
   try {
     const competitions = await Competition.find({
@@ -91,15 +93,50 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /competitions (kreiraj novo natjecanje)
+// ---------------------------------------------------------------------
+// POST /competitions (KREIRANJE - S PROVJEROM ČLANARINE)
+// ---------------------------------------------------------------------
 router.post("/", async (req, res) => {
   try {
+    // Dohvaćamo ID organizatora iz tijela zahtjeva
+    // Pazi: Frontend mora poslati polje "organizer" s ID-om korisnika
+    const organizerId = req.body.organizer;
+
+    if (!organizerId) {
+        return res.status(400).json({ error: "Nedostaje ID organizatora (organizer field)." });
+    }
+
+    // 1. Dohvati korisnika iz baze
+    const user = await User.findById(organizerId);
+    if (!user) {
+        return res.status(404).json({ error: "Korisnik nije pronađen." });
+    }
+
+    // 2. PROVJERA: Je li korisnik uopće organizator?
+    if (user.role !== 'organizator') {
+        return res.status(403).json({ error: "Samo organizatori mogu kreirati natjecanja." });
+    }
+
+    // 3. PROVJERA PLAĆANJA (Ključni dio)
+    // Provjeravamo je li status 'active' I je li datum u budućnosti
+    const isSubscriptionActive = user.subscriptionStatus === 'active';
+    const isDateValid = user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date();
+
+    if (!isSubscriptionActive || !isDateValid) {
+        return res.status(403).json({ 
+            error: "Vaša članarina je istekla. Molimo platite članarinu kako biste kreirali novo natjecanje." 
+        });
+    }
+
+    // 4. Ako je sve OK, kreiraj natjecanje
     const newCompetition = new Competition(req.body);
     await newCompetition.save({
       runValidators: true,
       validateBeforeSave: true,
     });
+    
     res.status(201).json(newCompetition);
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

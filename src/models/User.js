@@ -19,11 +19,17 @@ const userSchema = new mongoose.Schema({
 
   email: { type: String, required: true, unique: true },
 
-  clubName: { type: String },
+  clubName: { type: String, default: null },
 
-  clubLocation: { type: String },
+  clubLocation: { type: String, default: null },
 
   approved: { type: Boolean, default: false },
+
+  subscriptionStatus: { type: String, enum: ['active', 'inactive', 'expired'], default: 'inactive' },
+
+  subscriptionExpiry: { type: Date, default: null },
+
+  lastPaymentDate: { type: Date, default: null}
 });
 
 module.exports = mongoose.model("User", userSchema);

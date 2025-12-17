@@ -1,0 +1,177 @@
+/* Pozadina preko cijelog ekrana */
+.subscription-lock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e2e8f0 100%);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    padding: 20px;
+}
+
+/* Glavna kartica */
+.subscription-card {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
+
+/* Ikona lokota */
+.icon-wrapper {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    background: #fff1f2; /* Svijetlo crvena/roza pozadina */
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #ffe4e6;
+}
+
+h1 {
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+}
+
+.user-greeting {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+}
+
+.description {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+/* Prikaz cijene */
+.price-display {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.price-display .amount {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.price-display .currency {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a;
+    vertical-align: top;
+}
+
+.price-display .period {
+    color: #64748b;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+/* Gumb za plaćanje - stiliziran kao Stripe/Primary gumb */
+.stripe-pay-button {
+    width: 100%;
+    padding: 14px 20px;
+    background-color: #635bff; /* Stripe ljubičasta boja */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(99, 91, 255, 0.4);
+}
+
+.stripe-pay-button:hover {
+    background-color: #534feb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(99, 91, 255, 0.5);
+}
+
+.stripe-pay-button:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Spinner za loading (kopirano iz tvog primjera) */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Secure notice */
+.secure-notice {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.error-message {
+    background-color: #fef2f2;
+    color: #ef4444;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    border: 1px solid #fee2e2;
+}
+
+/* Razdjelnika */
+.divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 25px 0;
+}
+
+/* Logout link */
+.logout-link {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.logout-link:hover {
+    color: #ef4444;
+    text-decoration: underline;
+}
