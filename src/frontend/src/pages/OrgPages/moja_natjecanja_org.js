@@ -9,12 +9,51 @@ function MojaNatjecanja() {
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all'); // all, upcoming, ongoing, completed
+  const [filter, setFilter] = useState('all');
   const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
 
   useEffect(() => {
-    fetchMyCompetitions();
+    if (currentUser) {
+      fetchMyCompetitions();
+    }
   }, [currentUser]);
+
+  const checkAndAutoUpdateStatus = async (competitionsList) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const updatedList = await Promise.all(competitionsList.map(async (comp) => {
+      const compDate = new Date(comp.date);
+      compDate.setHours(0, 0, 0, 0);
+
+      let correctStatus = comp.status;
+
+      if (compDate < today) {
+        correctStatus = 'completed';
+      } else if (compDate.getTime() === today.getTime()) {
+        correctStatus = 'ongoing';
+      } else {
+        correctStatus = 'upcoming';
+      }
+
+      if (comp.status !== correctStatus) {
+        try {
+          await fetch(`${process.env.REACT_APP_API_URL}/competitions/${comp._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: correctStatus })
+          });
+          return { ...comp, status: correctStatus };
+        } catch (err) {
+          console.error(err);
+          return comp;
+        }
+      }
+      return comp;
+    }));
+
+    return updatedList;
+  };
 
   const fetchMyCompetitions = async () => {
     try {
@@ -34,10 +73,12 @@ function MojaNatjecanja() {
       }
 
       const data = await response.json();
-      setCompetitions(data);
+      const updatedData = await checkAndAutoUpdateStatus(data);
+      
+      setCompetitions(updatedData);
       setError('');
     } catch (err) {
-      console.error('Error fetching competitions:', err);
+      console.error(err);
       setError('Greška prilikom dohvaćanja natjecanja');
     } finally {
       setLoading(false);
@@ -58,7 +99,7 @@ function MojaNatjecanja() {
         throw new Error('Failed to delete');
       }
     } catch (err) {
-      console.error('Error deleting competition:', err);
+      console.error(err);
       alert('Greška prilikom brisanja natjecanja');
     }
   };
@@ -78,7 +119,7 @@ function MojaNatjecanja() {
       ongoing: { text: 'U tijeku', class: 'status-ongoing' },
       completed: { text: 'Završeno', class: 'status-completed' },
     };
-    return statusMap[status] || { text: status, class: '' };
+    return statusMap[status] || { text: status, class: 'status-default' };
   };
 
   const filteredCompetitions = competitions.filter(comp => {
@@ -118,7 +159,6 @@ function MojaNatjecanja() {
         </Link>
       </div>
 
-      {/* Statistika natjecanja */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-number">{stats.total}</div>
@@ -138,7 +178,6 @@ function MojaNatjecanja() {
         </div>
       </div>
 
-      {/* Filteri */}
       <div className="filters">
         <button
           className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
@@ -166,15 +205,21 @@ function MojaNatjecanja() {
         </button>
       </div>
 
-
-      {/* Lista natjecanja */}
       {filteredCompetitions.length === 0 ? (
         <div className="empty-state">
-          <h3>Nemate kreiranih natjecanja</h3>
-          <p>Kliknite na "Novo natjecanje" da kreirate svoje prvo natjecanje.</p>
-          <Link to="/organizator/kreiranje-natjecanja" className="btn-primary">
-            Kreiraj natjecanje
-          </Link>
+          <h3>
+            {filter === 'all' 
+              ? 'Nemate kreiranih natjecanja' 
+              : `Nemate natjecanja u statusu "${filter}"`}
+          </h3>
+          {filter === 'all' && (
+             <>
+                <p>Kliknite na "Novo natjecanje" da kreirate svoje prvo natjecanje.</p>
+                <Link to="/organizator/kreiranje-natjecanja" className="btn-primary">
+                Kreiraj natjecanje
+                </Link>
+             </>
+          )}
         </div>
       ) : (
         <div className="competitions-grid">
@@ -211,7 +256,7 @@ function MojaNatjecanja() {
                     <div className="category-group">
                       <strong>Dobne kategorije:</strong>
                       <div className="tags">
-                        {competition.ageCategories.map((cat, idx) => (
+                        {competition.ageCategories?.map((cat, idx) => (
                           <span key={idx} className="tag">{cat}</span>
                         ))}
                       </div>
@@ -219,16 +264,8 @@ function MojaNatjecanja() {
                     <div className="category-group">
                       <strong>Stilovi:</strong>
                       <div className="tags">
-                        {competition.danceStyles.map((style, idx) => (
+                        {competition.danceStyles?.map((style, idx) => (
                           <span key={idx} className="tag">{style}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="category-group">
-                      <strong>Veličine grupa:</strong>
-                      <div className="tags">
-                        {competition.groupSizes.map((size, idx) => (
-                          <span key={idx} className="tag">{size}</span>
                         ))}
                       </div>
                     </div>
@@ -265,7 +302,6 @@ function MojaNatjecanja() {
         </div>
       )}
 
-      {/* Brisanje natjecanja */}
       {deleteModal.show && (
         <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, id: null, name: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
