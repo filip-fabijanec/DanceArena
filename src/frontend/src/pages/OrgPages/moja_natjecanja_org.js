@@ -10,7 +10,19 @@ function MojaNatjecanja() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
+  
+  // State za brisanje
   const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
+
+  // State za uređivanje
+  const [editModal, setEditModal] = useState({ show: false, competition: null });
+  const [editForm, setEditForm] = useState({
+    name: '',
+    description: '',
+    date: '',
+    location: '',
+    registrationFee: ''
+  });
 
   useEffect(() => {
     if (currentUser) {
@@ -85,6 +97,7 @@ function MojaNatjecanja() {
     }
   };
 
+  // --- LOGIKA ZA BRISANJE ---
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${id}`, {
@@ -101,6 +114,46 @@ function MojaNatjecanja() {
     } catch (err) {
       console.error(err);
       alert('Greška prilikom brisanja natjecanja');
+    }
+  };
+
+  // --- LOGIKA ZA UREĐIVANJE ---
+  const handleEditClick = (competition) => {
+    setEditModal({ show: true, competition });
+    setEditForm({
+      name: competition.name,
+      description: competition.description || '',
+      date: competition.date ? competition.date.split('T')[0] : '', // Formatiranje za input type="date"
+      location: competition.location,
+      registrationFee: competition.registrationFee
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${editModal.competition._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+
+      if (response.ok) {
+        const updatedCompetition = await response.json();
+        
+        // Ažuriraj lokalno stanje
+        setCompetitions(competitions.map(c => 
+          c._id === editModal.competition._id ? { ...c, ...updatedCompetition } : c
+        ));
+        
+        setEditModal({ show: false, competition: null });
+        alert('Natjecanje uspješno ažurirano!');
+      } else {
+        throw new Error('Failed to update');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Greška prilikom ažuriranja natjecanja');
     }
   };
 
@@ -286,6 +339,13 @@ function MojaNatjecanja() {
                     Suci
                   </Link>
                   <button
+                    onClick={() => handleEditClick(competition)}
+                    className="btn-action btn-edit"
+                    style={{ backgroundColor: '#f39c12', color: 'white', marginRight: '5px' }} // Inline stil ili dodaj u CSS
+                  >
+                    Uredi
+                  </button>
+                  <button
                     onClick={() => setDeleteModal({ 
                       show: true, 
                       id: competition._id, 
@@ -302,6 +362,7 @@ function MojaNatjecanja() {
         </div>
       )}
 
+      {/* --- MODAL ZA BRISANJE --- */}
       {deleteModal.show && (
         <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, id: null, name: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -326,6 +387,81 @@ function MojaNatjecanja() {
           </div>
         </div>
       )}
+
+      {/* --- MODAL ZA UREĐIVANJE --- */}
+      {editModal.show && (
+        <div className="modal-overlay" onClick={() => setEditModal({ show: false, competition: null })}>
+          <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Uredi natjecanje</h3>
+            <form onSubmit={handleUpdate}>
+              <div className="form-group">
+                <label>Naziv natjecanja</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Opis</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Datum</label>
+                  <input
+                    type="date"
+                    value={editForm.date}
+                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Kotizacija (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editForm.registrationFee}
+                    onChange={(e) => setEditForm({ ...editForm, registrationFee: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Lokacija</label>
+                <input
+                  type="text"
+                  value={editForm.location}
+                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={() => setEditModal({ show: false, competition: null })}
+                  className="btn-cancel"
+                >
+                  Odustani
+                </button>
+                <button type="submit" className="btn-primary">
+                  Spremi promjene
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
