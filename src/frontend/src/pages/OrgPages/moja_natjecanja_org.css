@@ -1,3 +1,4 @@
+/* --- OSNOVNI STILOVI STRANICE --- */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -18,12 +19,15 @@
   border-radius: 5px;
   font-weight: 600;
   transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
   background-color: #5568d3;
 }
 
+/* --- STATISTIKA (KARTICE NA VRHU) --- */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -53,6 +57,7 @@
   letter-spacing: 0.5px;
 }
 
+/* --- FILTERI --- */
 .filters {
   display: flex;
   gap: 10px;
@@ -81,6 +86,7 @@
   border-color: #667eea;
 }
 
+/* --- PRAZNO STANJE --- */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -99,6 +105,7 @@
   margin-bottom: 25px;
 }
 
+/* --- GRID NATJECANJA --- */
 .competitions-grid {
   display: grid;
   gap: 25px;
@@ -131,6 +138,7 @@
   font-size: 22px;
 }
 
+/* --- STATUS BADGES --- */
 .status-badge {
   padding: 5px 12px;
   border-radius: 15px;
@@ -139,17 +147,10 @@
   white-space: nowrap;
 }
 
-.status-upcoming {
-  background-color: #4caf50;
-}
-
-.status-ongoing {
-  background-color: #ff9800;
-}
-
-.status-completed {
-  background-color: #9e9e9e;
-}
+.status-upcoming { background-color: #4caf50; color: white; }
+.status-ongoing { background-color: #ff9800; color: white; }
+.status-completed { background-color: #9e9e9e; color: white; }
+.status-default { background-color: #607d8b; color: white; }
 
 .card-body {
   padding: 20px;
@@ -163,7 +164,6 @@
   color: #555;
 }
 
-
 .description {
   margin: 15px 0;
   padding: 15px;
@@ -173,6 +173,7 @@
   line-height: 1.5;
 }
 
+/* --- KATEGORIJE I TAGOVI --- */
 .categories {
   margin-top: 20px;
   padding-top: 20px;
@@ -206,6 +207,7 @@
   font-weight: 500;
 }
 
+/* --- AKCIJSKI GUMBI --- */
 .card-actions {
   display: flex;
   gap: 10px;
@@ -228,6 +230,7 @@
   text-align: center;
   transition: opacity 0.3s, transform 0.2s;
   display: inline-block;
+  color: white; /* Osigurava da je tekst bijeli */
 }
 
 .btn-action:hover {
@@ -235,21 +238,12 @@
   transform: translateY(-1px);
 }
 
-.btn-view {
-  background-color: #4caf50;
-  color: white;
-}
+.btn-view { background-color: #4caf50; }
+.btn-referees { background-color: #3498db; }
+.btn-edit { background-color: #f39c12; }
+.btn-delete { background-color: #f44336; }
 
-.btn-referees {
-  background-color: #ff9800;
-  color: white;
-}
-
-.btn-delete {
-  background-color: #f44336;
-  color: white;
-}
-
+/* --- MODAL --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -270,6 +264,13 @@
   max-width: 500px;
   width: 90%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh; /* Da ne izlazi iz ekrana na mobitelu */
+  overflow-y: auto;
+}
+
+/* Za veći modal kod uređivanja */
+.large-modal {
+  max-width: 700px;
 }
 
 .modal-content h3 {
@@ -290,10 +291,43 @@
   margin-bottom: 25px;
 }
 
+/* --- FORME U MODALU --- */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box; /* Bitan fix za width 100% */
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* --- AKCIJE U MODALU --- */
 .modal-actions {
   display: flex;
   gap: 15px;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 
 .btn-cancel,
@@ -311,18 +345,14 @@
   color: #333;
 }
 
-.btn-cancel:hover {
-  opacity: 0.8;
-}
+.btn-cancel:hover { opacity: 0.8; }
 
 .btn-confirm-delete {
   background-color: #f44336;
   color: white;
 }
 
-.btn-confirm-delete:hover {
-  opacity: 0.9;
-}
+.btn-confirm-delete:hover { opacity: 0.9; }
 
 .loading-spinner {
   text-align: center;
@@ -340,6 +370,59 @@
   border-left: 4px solid #f44336;
 }
 
+/* --- NOVO: LOCK SCREEN ZA ČLANARINU --- */
+.subscription-lock-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 30px;
+  border: 1px solid #eee;
+}
+
+.lock-icon {
+  font-size: 64px;
+  margin-bottom: 25px;
+}
+
+.subscription-lock-screen h1 {
+  color: #e74c3c;
+  margin-bottom: 15px;
+  font-size: 28px;
+}
+
+.subscription-lock-screen p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.subscription-lock-screen .btn-large {
+  margin-top: 30px;
+  padding: 15px 40px;
+  font-size: 18px;
+  background-color: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.subscription-lock-screen .btn-large:hover {
+  background-color: #5568d3;
+  transform: translateY(-2px);
+}
+
+/* --- MEDIA QUERY --- */
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
@@ -353,5 +436,10 @@
 
   .btn-action {
     width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
   }
 }

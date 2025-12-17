@@ -25,11 +25,18 @@ function MojaNatjecanja() {
   });
 
   useEffect(() => {
+    // 1. PROVJERA: Pokrećemo dohvat samo ako je korisnik logiran
+    // Ako nema aktivnu članarinu, loading stavljamo na false da se prikaže Lock Screen
     if (currentUser) {
-      fetchMyCompetitions();
+      if (currentUser.subscriptionStatus === 'active') {
+        fetchMyCompetitions();
+      } else {
+        setLoading(false);
+      }
     }
   }, [currentUser]);
 
+  // Funkcija za automatsko ažuriranje statusa (upcoming -> ongoing -> completed)
   const checkAndAutoUpdateStatus = async (competitionsList) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -123,7 +130,7 @@ function MojaNatjecanja() {
     setEditForm({
       name: competition.name,
       description: competition.description || '',
-      date: competition.date ? competition.date.split('T')[0] : '', // Formatiranje za input type="date"
+      date: competition.date ? competition.date.split('T')[0] : '',
       location: competition.location,
       registrationFee: competition.registrationFee
     });
@@ -191,6 +198,10 @@ function MojaNatjecanja() {
 
   const stats = getStatistics();
 
+  // --------------------------------------------------------
+  // RETURN DIO (RENDERIRANJE)
+  // --------------------------------------------------------
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -201,6 +212,28 @@ function MojaNatjecanja() {
     );
   }
 
+  // 2. BLOKADA: Ako korisnik nije aktivan, prikaži poruku i gumb za plaćanje
+  if (currentUser && currentUser.subscriptionStatus !== 'active') {
+    return (
+      <div className="dashboard-container">
+        <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
+        
+        <div className="subscription-lock-screen">
+          <div className="lock-icon">🔒</div>
+          <h1>Pristup onemogućen</h1>
+          <p>Nažalost, nemate aktivnu članarinu.</p>
+          <p>Za pregled i kreiranje natjecanja potrebno je aktivirati pretplatu.</p>
+          
+          {/* Link vodi na profil ili stranicu za plaćanje */}
+          <Link to="/organizator/profil" className="btn-primary btn-large">
+            Aktiviraj članarinu
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. GLAVNI PRIKAZ (Ako je sve OK)
   return (
     <div className="dashboard-container">
       <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
@@ -341,7 +374,7 @@ function MojaNatjecanja() {
                   <button
                     onClick={() => handleEditClick(competition)}
                     className="btn-action btn-edit"
-                    style={{ backgroundColor: '#f39c12', color: 'white', marginRight: '5px' }} // Inline stil ili dodaj u CSS
+                    style={{ backgroundColor: '#f39c12', color: 'white', marginRight: '5px' }}
                   >
                     Uredi
                   </button>
