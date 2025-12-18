@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom'; // 1. Dodani hookovi
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import '../Dashboard.css';
 import './moja_natjecanja_org.css';
 
 function MojaNatjecanja() {
-  // 2. Uzimamo refreshUser iz konteksta
   const { currentUser, refreshUser } = useAuth(); 
   
   const [competitions, setCompetitions] = useState([]);
@@ -13,14 +12,10 @@ function MojaNatjecanja() {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
   
-  // Hookovi za rutiranje
   const location = useLocation();
   const navigate = useNavigate();
 
-  // State za brisanje
   const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
-
-  // State za uređivanje
   const [editModal, setEditModal] = useState({ show: false, competition: null });
   const [editForm, setEditForm] = useState({
     name: '',
@@ -30,44 +25,77 @@ function MojaNatjecanja() {
     registrationFee: ''
   });
 
+  // ==================================================================
+  // 1. KLJUČNA FUNKCIJA: STROGA PROVJERA NA FRONTENDU
+  // ==================================================================
+  // Ova funkcija ne čeka backend. Ona gleda na sat i blokira pristup ODMAH.
+  const isSubscriptionValid = () => {
+      // Ako nema korisnika ili nije organizator
+      if (!currentUser) return false;
+      if (currentUser.role !== 'organizator') return false;
+      
+      // Ako u bazi eksplicitno piše da nije aktivan
+      if (currentUser.subscriptionStatus !== 'active') return false;
+
+      // PROVJERA DATUMA (Ovo je ono što ti je falilo!)
+      if (currentUser.subscriptionExpiry) {
+          const expiryDate = new Date(currentUser.subscriptionExpiry);
+          const now = new Date();
+          
+          // Ako je trenutno vrijeme veće od vremena isteka -> BLOKIRAJ
+          if (now > expiryDate) {
+              return false; 
+          }
+      } else {
+          // Ako je status 'active', ali nema datuma isteka (greška u podacima)
+          // Možeš vratiti false za svaki slučaj
+          return false;
+      }
+
+      // Samo ako je sve prošlo, vraća true
+      return true;
+  };
+
   // ------------------------------------------------------------------
-  // 🆕 NOVI DIO: DETEKCIJA POVRATKA S PLAĆANJA
+  // 2. DETEKCIJA POVRATKA S PLAĆANJA
   // ------------------------------------------------------------------
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
-    // Ako u URL-u piše ?payment_refresh=true
     if (params.get('payment_refresh')) {
       console.log("Prepoznato plaćanje, osvježavam korisnika...");
-      setLoading(true); // Prikaži loading dok se osvježava
-
+      setLoading(true);
       refreshUser().then(() => {
-        // Kad je gotovo, makni parametar iz URL-a da izgleda čisto
         navigate('/organizator/natjecanja', { replace: true });
-        // Loading će se isključiti u donjem useEffectu kad stigne novi currentUser
       });
+    } else {
+        // Ako samo dolazimo na stranicu, osvježi podatke za svaki slučaj
+        if (currentUser) {
+            refreshUser();
+        }
     }
   }, [location, navigate, refreshUser]);
+
+
   // ------------------------------------------------------------------
-
-
+  // 3. GLAVNI EFFECT ZA UČITAVANJE PODATAKA
+  // ------------------------------------------------------------------
   useEffect(() => {
-    // 1. PROVJERA: Pokrećemo dohvat samo ako je korisnik logiran
-    if (currentUser) {
-      if (currentUser.subscriptionStatus === 'active') {
+    // Koristimo našu novu strogu funkciju
+    if (currentUser && isSubscriptionValid()) {
         fetchMyCompetitions();
-      } else {
-        // Ako NIJE aktivan, ali upravo radimo refresh (imamo parametar u URL-u),
-        // nemoj odmah ugasiti loading, pričekaj da refreshUser završi.
+    } else if (currentUser && !isSubscriptionValid()) {
+        // Ako pretplata nije validna, gasi loading da se pokaže Lock Screen
+        // (Osim ako se upravo vrti refresh nakon plaćanja)
         const params = new URLSearchParams(location.search);
         if (!params.get('payment_refresh')) {
             setLoading(false);
         }
-      }
     }
-  }, [currentUser, location.search]); // Dodali smo location.search u dependency
+  }, [currentUser, location.search]); 
 
-  // Funkcija za automatsko ažuriranje statusa (upcoming -> ongoing -> completed)
+
+  // Funkcija za automatsko ažuriranje statusa
   const checkAndAutoUpdateStatus = async (competitionsList) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -101,7 +129,6 @@ function MojaNatjecanja() {
       }
       return comp;
     }));
-
     return updatedList;
   };
 
@@ -117,10 +144,7 @@ function MojaNatjecanja() {
         setError('');
         return;
       }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch competitions');
-      }
+      if (!response.ok) throw new Error('Failed');
 
       const data = await response.json();
       const updatedData = await checkAndAutoUpdateStatus(data);
@@ -138,14 +162,10 @@ function MojaNatjecanja() {
   // --- LOGIKA ZA BRISANJE ---
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${id}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${id}`, { method: 'DELETE' });
       if (response.ok || response.status === 204) {
         setCompetitions(competitions.filter(comp => comp._id !== id));
         setDeleteModal({ show: false, id: null, name: '' });
-        alert('Natjecanje uspješno obrisano!');
       } else {
         throw new Error('Failed to delete');
       }
@@ -156,39 +176,23 @@ function MojaNatjecanja() {
   };
 
   // --- LOGIKA ZA UREĐIVANJE ---
-  const handleEditClick = (competition) => {
-    setEditModal({ show: true, competition });
-    setEditForm({
-      name: competition.name,
-      description: competition.description || '',
-      date: competition.date ? competition.date.split('T')[0] : '',
-      location: competition.location,
-      registrationFee: competition.registrationFee
-    });
+  const handleEditClick = (c) => {
+    setEditModal({ show: true, competition: c });
+    setEditForm({ name: c.name, description: c.description || '', date: c.date ? c.date.split('T')[0] : '', location: c.location, registrationFee: c.registrationFee });
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${editModal.competition._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm)
       });
-
       if (response.ok) {
         const updatedCompetition = await response.json();
-        
-        // Ažuriraj lokalno stanje
-        setCompetitions(competitions.map(c => 
-          c._id === editModal.competition._id ? { ...c, ...updatedCompetition } : c
-        ));
-        
+        setCompetitions(competitions.map(c => c._id === editModal.competition._id ? { ...c, ...updatedCompetition } : c));
         setEditModal({ show: false, competition: null });
         alert('Natjecanje uspješno ažurirano!');
-      } else {
-        throw new Error('Failed to update');
-      }
+      } else { throw new Error('Failed to update'); }
     } catch (err) {
       console.error(err);
       alert('Greška prilikom ažuriranja natjecanja');
@@ -197,40 +201,24 @@ function MojaNatjecanja() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('hr-HR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString('hr-HR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   const getStatusBadge = (status) => {
-    const statusMap = {
-      upcoming: { text: 'Nadolazeće', class: 'status-upcoming' },
-      ongoing: { text: 'U tijeku', class: 'status-ongoing' },
-      completed: { text: 'Završeno', class: 'status-completed' },
-    };
-    return statusMap[status] || { text: status, class: 'status-default' };
+    const map = { upcoming: { text: 'Nadolazeće', class: 'status-upcoming' }, ongoing: { text: 'U tijeku', class: 'status-ongoing' }, completed: { text: 'Završeno', class: 'status-completed' } };
+    return map[status] || { text: status, class: 'status-default' };
   };
 
-  const filteredCompetitions = competitions.filter(comp => {
-    if (filter === 'all') return true;
-    return comp.status === filter;
-  });
-
-  const getStatistics = () => {
-    return {
+  const filteredCompetitions = competitions.filter(comp => filter === 'all' ? true : comp.status === filter);
+  const stats = {
       total: competitions.length,
       upcoming: competitions.filter(c => c.status === 'upcoming').length,
       ongoing: competitions.filter(c => c.status === 'ongoing').length,
       completed: competitions.filter(c => c.status === 'completed').length,
-    };
   };
 
-  const stats = getStatistics();
-
   // --------------------------------------------------------
-  // RETURN DIO (RENDERIRANJE)
+  // RENDERIRANJE (PRIKAZ)
   // --------------------------------------------------------
 
   if (loading) {
@@ -238,13 +226,14 @@ function MojaNatjecanja() {
       <div className="dashboard-container">
         <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
         <h1>Moja natjecanja</h1>
-        <div className="loading-spinner">Učitavanje podataka...</div>
+        <div className="loading-spinner">Provjera statusa...</div>
       </div>
     );
   }
 
-  // 2. BLOKADA: Ako korisnik nije aktivan, prikaži poruku i gumb za plaćanje
-  if (currentUser && currentUser.subscriptionStatus !== 'active') {
+  // 4. STROGA BLOKADA PRIKAZA
+  // Ovdje koristimo funkciju isSubscriptionValid() umjesto samo provjere stringa
+  if (currentUser && !isSubscriptionValid()) {
     return (
       <div className="dashboard-container">
         <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
@@ -252,19 +241,25 @@ function MojaNatjecanja() {
         <div className="subscription-lock-screen">
           <div className="lock-icon">🔒</div>
           <h1>Pristup onemogućen</h1>
-          <p>Nažalost, nemate aktivnu članarinu.</p>
-          <p>Za pregled i kreiranje natjecanja potrebno je aktivirati pretplatu.</p>
+          <p>Vaša članarina je istekla ili nije aktivna.</p>
           
-          {/* Link vodi na posebnu stranicu za plaćanje */}
+          {currentUser.subscriptionExpiry && (
+             <p style={{fontSize: '0.9rem', color: '#666', marginBottom: '20px'}}>
+               Datum isteka: {formatDate(currentUser.subscriptionExpiry)}
+             </p>
+          )}
+
+          <p>Za nastavak korištenja sustava, molimo obnovite pretplatu.</p>
+          
           <Link to="/organizator/placanje-clanarine" className="btn-primary btn-large">
-            Aktiviraj članarinu
+            Obnovi članarinu
           </Link>
         </div>
       </div>
     );
   }
 
-  // 3. GLAVNI PRIKAZ (Ako je sve OK)
+  // 5. GLAVNI PRIKAZ (Samo ako je isSubscriptionValid == true)
   return (
     <div className="dashboard-container">
       <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
@@ -277,64 +272,26 @@ function MojaNatjecanja() {
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-number">{stats.total}</div>
-          <div className="stat-label">Ukupno</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{stats.upcoming}</div>
-          <div className="stat-label">Nadolazeća</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{stats.ongoing}</div>
-          <div className="stat-label">U tijeku</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{stats.completed}</div>
-          <div className="stat-label">Završena</div>
-        </div>
+        <div className="stat-card"><div className="stat-number">{stats.total}</div><div className="stat-label">Ukupno</div></div>
+        <div className="stat-card"><div className="stat-number">{stats.upcoming}</div><div className="stat-label">Nadolazeća</div></div>
+        <div className="stat-card"><div className="stat-number">{stats.ongoing}</div><div className="stat-label">U tijeku</div></div>
+        <div className="stat-card"><div className="stat-number">{stats.completed}</div><div className="stat-label">Završena</div></div>
       </div>
 
       <div className="filters">
-        <button
-          className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          Sva
-        </button>
-        <button
-          className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`}
-          onClick={() => setFilter('upcoming')}
-        >
-          Nadolazeća
-        </button>
-        <button
-          className={`filter-btn ${filter === 'ongoing' ? 'active' : ''}`}
-          onClick={() => setFilter('ongoing')}
-        >
-          U tijeku
-        </button>
-        <button
-          className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
-          onClick={() => setFilter('completed')}
-        >
-          Završena
-        </button>
+        <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Sva</button>
+        <button className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`} onClick={() => setFilter('upcoming')}>Nadolazeća</button>
+        <button className={`filter-btn ${filter === 'ongoing' ? 'active' : ''}`} onClick={() => setFilter('ongoing')}>U tijeku</button>
+        <button className={`filter-btn ${filter === 'completed' ? 'active' : ''}`} onClick={() => setFilter('completed')}>Završena</button>
       </div>
 
       {filteredCompetitions.length === 0 ? (
         <div className="empty-state">
-          <h3>
-            {filter === 'all' 
-              ? 'Nemate kreiranih natjecanja' 
-              : `Nemate natjecanja u statusu "${filter}"`}
-          </h3>
+          <h3>{filter === 'all' ? 'Nemate kreiranih natjecanja' : `Nemate natjecanja u statusu "${filter}"`}</h3>
           {filter === 'all' && (
              <>
                 <p>Kliknite na "Novo natjecanje" da kreirate svoje prvo natjecanje.</p>
-                <Link to="/organizator/kreiranje-natjecanja" className="btn-primary">
-                Kreiraj natjecanje
-                </Link>
+                <Link to="/organizator/kreiranje-natjecanja" className="btn-primary">Kreiraj natjecanje</Link>
              </>
           )}
         </div>
@@ -346,79 +303,18 @@ function MojaNatjecanja() {
               <div key={competition._id} className="competition-card">
                 <div className="card-header">
                   <h3>{competition.name}</h3>
-                  <span className={`status-badge ${statusBadge.class}`}>
-                    {statusBadge.text}
-                  </span>
+                  <span className={`status-badge ${statusBadge.class}`}>{statusBadge.text}</span>
                 </div>
-
                 <div className="card-body">
-                  <div className="info-row">
-                    <span>Datum: {formatDate(competition.date)}</span>
-                  </div>
-                  <div className="info-row">
-                    <span>Lokacija: {competition.location}</span>
-                  </div>
-                  <div className="info-row">
-                    <span>Kotizacija: {competition.registrationFee} €</span>
-                  </div>
-                  <div className="info-row">
-                    <span>Suci: {competition.referees?.length || 0}</span>
-                  </div>
-
-                  {competition.description && (
-                    <p className="description">{competition.description}</p>
-                  )}
-
-                  <div className="categories">
-                    <div className="category-group">
-                      <strong>Dobne kategorije:</strong>
-                      <div className="tags">
-                        {competition.ageCategories?.map((cat, idx) => (
-                          <span key={idx} className="tag">{cat}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="category-group">
-                      <strong>Stilovi:</strong>
-                      <div className="tags">
-                        {competition.danceStyles?.map((style, idx) => (
-                          <span key={idx} className="tag">{style}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <div className="info-row"><span>Datum: {formatDate(competition.date)}</span></div>
+                  <div className="info-row"><span>Lokacija: {competition.location}</span></div>
+                  <div className="info-row"><span>Kotizacija: {competition.registrationFee} €</span></div>
                 </div>
-
                 <div className="card-actions">
-                  <Link 
-                    to={`/organizator/prijave?competitionId=${competition._id}`}
-                    className="btn-action btn-view"
-                  >
-                    Prijave
-                  </Link>
-                  <Link 
-                    to={`/organizator/suci?competitionId=${competition._id}`}
-                    className="btn-action btn-referees"
-                  >
-                    Suci
-                  </Link>
-                  <button
-                    onClick={() => handleEditClick(competition)}
-                    className="btn-action btn-edit"
-                    style={{ backgroundColor: '#f39c12', color: 'white', marginRight: '5px' }}
-                  >
-                    Uredi
-                  </button>
-                  <button
-                    onClick={() => setDeleteModal({ 
-                      show: true, 
-                      id: competition._id, 
-                      name: competition.name 
-                    })}
-                    className="btn-action btn-delete"
-                  >
-                    Obriši
-                  </button>
+                  <Link to={`/organizator/prijave?competitionId=${competition._id}`} className="btn-action btn-view">Prijave</Link>
+                  <Link to={`/organizator/suci?competitionId=${competition._id}`} className="btn-action btn-referees">Suci</Link>
+                  <button onClick={() => handleEditClick(competition)} className="btn-action btn-edit" style={{ backgroundColor: '#f39c12', color: 'white' }}>Uredi</button>
+                  <button onClick={() => setDeleteModal({ show: true, id: competition._id, name: competition.name })} className="btn-action btn-delete">Obriši</button>
                 </div>
               </div>
             );
@@ -426,106 +322,40 @@ function MojaNatjecanja() {
         </div>
       )}
 
-      {/* --- MODAL ZA BRISANJE --- */}
+      {/* MODALI */}
       {deleteModal.show && (
         <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, id: null, name: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Potvrda brisanja</h3>
-            <p>Jeste li sigurni da želite obrisati natjecanje:</p>
-            <p className="modal-competition-name">"{deleteModal.name}"?</p>
-            <p className="modal-warning">Ova radnja je trajna i ne može se poništiti.</p>
+            <p>Jeste li sigurni da želite obrisati natjecanje "{deleteModal.name}"?</p>
             <div className="modal-actions">
-              <button
-                onClick={() => setDeleteModal({ show: false, id: null, name: '' })}
-                className="btn-cancel"
-              >
-                Odustani
-              </button>
-              <button
-                onClick={() => handleDelete(deleteModal.id)}
-                className="btn-confirm-delete"
-              >
-                Da, obriši
-              </button>
+              <button onClick={() => setDeleteModal({ show: false, id: null, name: '' })} className="btn-cancel">Odustani</button>
+              <button onClick={() => handleDelete(deleteModal.id)} className="btn-confirm-delete">Da, obriši</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- MODAL ZA UREĐIVANJE --- */}
       {editModal.show && (
         <div className="modal-overlay" onClick={() => setEditModal({ show: false, competition: null })}>
           <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Uredi natjecanje</h3>
             <form onSubmit={handleUpdate}>
-              <div className="form-group">
-                <label>Naziv natjecanja</label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Opis</label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  rows="4"
-                />
-              </div>
-
+              <div className="form-group"><label>Naziv</label><input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required /></div>
+              <div className="form-group"><label>Opis</label><textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows="4" /></div>
               <div className="form-row">
-                <div className="form-group">
-                  <label>Datum</label>
-                  <input
-                    type="date"
-                    value={editForm.date}
-                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Kotizacija (€)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.registrationFee}
-                    onChange={(e) => setEditForm({ ...editForm, registrationFee: e.target.value })}
-                    required
-                  />
-                </div>
+                 <div className="form-group"><label>Datum</label><input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} required /></div>
+                 <div className="form-group"><label>Kotizacija (€)</label><input type="number" step="0.01" value={editForm.registrationFee} onChange={(e) => setEditForm({ ...editForm, registrationFee: e.target.value })} required /></div>
               </div>
-
-              <div className="form-group">
-                <label>Lokacija</label>
-                <input
-                  type="text"
-                  value={editForm.location}
-                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                  required
-                />
-              </div>
-
+              <div className="form-group"><label>Lokacija</label><input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} required /></div>
               <div className="modal-actions">
-                <button
-                  type="button"
-                  onClick={() => setEditModal({ show: false, competition: null })}
-                  className="btn-cancel"
-                >
-                  Odustani
-                </button>
-                <button type="submit" className="btn-primary">
-                  Spremi promjene
-                </button>
+                <button type="button" onClick={() => setEditModal({ show: false, competition: null })} className="btn-cancel">Odustani</button>
+                <button type="submit" className="btn-primary">Spremi promjene</button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }

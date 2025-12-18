@@ -1,12 +1,23 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// 1. KREIRANJE KONTEKSTA (Ovo mora postojati)
+const AuthContext = createContext();
+
+// 2. EXPORT HOOKA (Ovo je ono na što se build žali da fali!)
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+// 3. PROVIDER
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1. Definiramo funkciju OVDJE (prije useEffecta)
+  // Funkcija za dohvat korisnika (tvoja logika)
   const refreshUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return null; // Ako nema tokena, vrati null
+      if (!token) return null;
 
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/users/me`, 
@@ -32,36 +43,72 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 2. UseEffect koji se vrti pri startu aplikacije
+  // UseEffect pri startu
   useEffect(() => {
     const initAuth = async () => {
-      // Prvo učitaj iz localStorage da korisnik ne čeka (brzi prikaz)
       const savedUser = localStorage.getItem("currentUser");
       const token = localStorage.getItem("token");
 
       if (savedUser && token) {
-        setCurrentUser(JSON.parse(savedUser)); // Pokaži staro stanje odmah
-        
-        // ALI ODMAH U POZADINI PROVJERI BAZU! 🚀
-        await refreshUser(); 
+        setCurrentUser(JSON.parse(savedUser)); // Odmah prikaži staro stanje
+        await refreshUser(); // U pozadini provjeri bazu
       }
       
       setLoading(false);
     };
 
     initAuth();
-  }, []); // Prazan array = vrti se samo jednom na refresh
+  }, []);
 
-  // ... (loginWithGoogle, loginWithSecret, logout ostaju isti) ...
-  
-  // Zbog preglednosti ih ne kopiram opet, ostavi ih kako jesu
-  const loginWithGoogle = async (googleCredential) => { /* tvoj stari kod */ };
-  const loginWithSecret = async (secret) => { /* tvoj stari kod */ };
+  // --- LOGIN FUNKCIJE (Moraš ih imati definirane da bi ih poslao u value) ---
+
+  const loginWithGoogle = async (googleCredential) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/users/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: googleCredential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      setCurrentUser(data.user);
+      return data.user;
+    } catch (error) {
+      console.error("Google login error:", error);
+      throw error;
+    }
+  };
+
+  const loginWithSecret = async (secret) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/users/secret-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      setCurrentUser(data.user);
+      return data.user;
+    } catch (error) {
+      console.error("Secret login error:", error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
   };
+
+  // --- KRAJ LOGIN FUNKCIJA ---
 
   return (
     <AuthContext.Provider value={{ currentUser, loginWithGoogle, loginWithSecret, logout, loading, refreshUser }}>
