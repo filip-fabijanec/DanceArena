@@ -81,18 +81,25 @@ function MojaNatjecanja() {
   // 3. GLAVNI EFFECT ZA UČITAVANJE PODATAKA
   // ------------------------------------------------------------------
   useEffect(() => {
-    // Koristimo našu novu strogu funkciju
-    if (currentUser && isSubscriptionValid()) {
-        fetchMyCompetitions();
-    } else if (currentUser && !isSubscriptionValid()) {
-        // Ako pretplata nije validna, gasi loading da se pokaže Lock Screen
-        // (Osim ako se upravo vrti refresh nakon plaćanja)
-        const params = new URLSearchParams(location.search);
-        if (!params.get('payment_refresh')) {
-            setLoading(false);
-        }
+    const params = new URLSearchParams(location.search);
+    
+    // 1. Osvježi SAMO ako URL kaže da smo se vratili s plaćanja
+    if (params.get('payment_refresh')) {
+      console.log("Prepoznato plaćanje, osvježavam korisnika...");
+      setLoading(true);
+      
+      refreshUser().then(() => {
+        // Kad server potvrdi uplatu, makni loading i očisti URL
+        navigate('/organizator/natjecanja', { replace: true });
+        // Loading će se sam ugasiti kad se promijeni state
+      });
+
+    } else {
+       // 2. Inače NE RADI NIŠTA sa userom, samo ugasi loading
+       // AuthContext je već učitao korisnika pri pokretanju aplikacije.
+       setLoading(false);
     }
-  }, [currentUser, location.search]); 
+  }, [location, navigate, refreshUser]);
 
 
   // Funkcija za automatsko ažuriranje statusa
