@@ -129,7 +129,7 @@ exports.stripeWebhook = async (req, res) => {
             // 2. Ažuriraj korisnika
             await User.findByIdAndUpdate(userId, { 
                 subscriptionStatus: 'active',
-                subscriptionExpiresAt: expiryDate
+                subscriptionExpiry: expiryDate
             });
             
             console.log(`--> Uspješno ažurirano!`);
