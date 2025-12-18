@@ -108,52 +108,52 @@ exports.stripeWebhook = async (req, res) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], endpointSecret);
   } catch (err) {
-    console.error('Webhook greška potpisa:', err.message);
+    console.error('Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     
-    // --- PROVJERA: JE LI OVO ORGANIZATOR? ---
+    // --- SLUČAJ 1: ČLANARINA ZA ORGANIZATORA ---
     if (session.metadata.type === 'subscription') {
         const { userId } = session.metadata;
-        console.log(`WEBHOOK: Detektirano plaćanje članarine za Organizatora ${userId}`);
         
         try {
-            // Ažuriramo status Organizatora u User modelu
+            // 1. Izračunaj datum isteka (Danas + 30 dana)
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30); 
+
+            console.log(`Aktiviram organizatora ${userId} do datuma: ${expiryDate}`);
+
+            // 2. Ažuriraj korisnika
             await User.findByIdAndUpdate(userId, { 
                 subscriptionStatus: 'active',
-                subscriptionExpiresAt: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)
+                subscriptionExpiresAt: expiryDate
             });
-            console.log(`--> Organizator ${userId} aktiviran.`);
+            
+            console.log(`--> Uspješno ažurirano!`);
         } catch (error) {
-            console.error('Greška pri aktivaciji organizatora:', error);
+            console.error('Greška pri aktivaciji članarine:', error);
         }
     } 
-    
-    // --- PROVJERA: JE LI OVO VODITELJ KLUBA? ---
-    // (Ako nije pretplata, onda je sigurno natjecanje)
+    // --- SLUČAJ 2: VODITELJ KLUBA (Kotizacije) ---
     else {
         const { userId, competitionId, performanceId } = session.metadata;
-        console.log(`WEBHOOK: Detektirano plaćanje natjecanja od strane Voditelja kluba ${userId}`);
-
         if (userId && competitionId) {
-            // Ažuriramo prijavu u Registration modelu
             await Registration.findOneAndUpdate(
               { user: userId, competition: competitionId },
               { paymentStatus: 'paid', stripeSessionId: session.id },
               { upsert: true, new: true }
             );
 
-            // Ako je plaćen specifičan nastup
             if (performanceId) {
               await Performance.findByIdAndUpdate(
                 performanceId,
                 { paid: true, paymentStatus: 'paid' }
               );
             }
-            console.log(`--> Prijava za natjecanje ${competitionId} označena kao plaćena.`);
+            console.log(`Plaćeno natjecanje ${competitionId}`);
         }
     }
   }

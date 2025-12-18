@@ -14,6 +14,44 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // --- 🆕 NOVO: FUNKCIJA ZA OSVJEŽAVANJE KORISNIKA IZ BAZE ---
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      // Pazi: Ovdje pretpostavljam da ti je ruta za dohvat profila '/users/me'
+      // Ako se zove drugačije (npr. '/auth/me'), promijeni ovaj URL.
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/users/me`, 
+        {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // Šaljemo token da backend zna tko pita
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to refresh user");
+      }
+
+      const updatedUser = await response.json();
+
+      // Ažuriramo stanje aplikacije
+      setCurrentUser(updatedUser);
+      // Ažuriramo localStorage da i kod idućeg refresha bude točan
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      
+      console.log("Korisnik osvježen:", updatedUser);
+      return updatedUser;
+
+    } catch (error) {
+      console.error("Greška pri osvježavanju korisnika:", error);
+    }
+  };
+
   // --- LOGIN GOOGLE ---
   const loginWithGoogle = async (googleCredential) => {
     try {
@@ -88,6 +126,7 @@ export const AuthProvider = ({ children }) => {
         loginWithSecret,
         logout,
         loading,
+        refreshUser, // <--- OVO JE DODANO
       }}
     >
       {!loading && children}
