@@ -36,40 +36,49 @@ function Članarine() {
   const fetchClanarine = async () => {
     try {
       setLoading(true);
-      
-      // 1. Dohvati token (prilagodi ključ 'token' onome kako ga ti spremaš pri loginu)
-      const token = localStorage.getItem('token'); 
+      const url = `${process.env.REACT_APP_API_URL}/clanarine`;
+      const token = localStorage.getItem('token'); // Ili kako god zoveš ključ za token
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // 2. OVO NEDOSTAJE: Šaljemo token backendu
-          'Authorization': `Bearer ${token}` 
-        }
+      console.log("--- DEBUG START ---");
+      console.log("1. Šaljem zahtjev na URL:", url);
+      console.log("2. Token prisutan:", token ? "DA" : "NE");
+
+      const response = await fetch(url, {
+         method: 'GET',
+         headers: {
+             'Content-Type': 'application/json',
+             'Authorization': `Bearer ${token}`
+         }
       });
-      
-      // 3. Debugiranje - ispiši što backend vraća
-      console.log("Response status:", response.status);
+
+      console.log("3. Status odgovora:", response.status); // Mora biti 200
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Dohvaćeni podaci:", data); // Provjeri strukturu ovdje!
+        console.log("4. SIROVI PODACI S BACKENDA:", data);
+
+        // Provjera strukture
+        let stvarniPodaci = data;
         
-        // Provjera je li data niz ili objekt
-        if (Array.isArray(data)) {
-            setClanarine(data);
-        } else {
-            console.error("Backend nije vratio niz! Vratio je:", data);
-            // Ako backend vraća { clanarine: [...] }, onda koristi setClanarine(data.clanarine)
+        // Često backend vrati { data: [...] } ili { clanarine: [...] }
+        if (!Array.isArray(data)) {
+             console.log("! PAZI: Backend nije vratio niz, nego objekt.");
+             if (data.data) stvarniPodaci = data.data;
+             else if (data.clanarine) stvarniPodaci = data.clanarine;
         }
+
+        console.log("5. Podaci koji idu u state:", stvarniPodaci);
+        setClanarine(stvarniPodaci);
       } else {
-        console.error("Greška pri dohvatu. Status:", response.status);
+        const text = await response.text();
+        console.error("Greška backend:", text);
       }
+
     } catch (error) {
-      console.error("Greška pri dohvatu članarina:", error);
+      console.error("Greška u fetchu:", error);
     } finally {
       setLoading(false);
+      console.log("--- DEBUG KRAJ ---");
     }
   };
 
