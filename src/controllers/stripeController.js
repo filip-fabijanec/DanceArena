@@ -5,15 +5,19 @@ const Registration = require('../models/Registration');
 const Performance = require('../models/Performance');
 const User = require('../models/User'); 
 
+// =====================================================================
+// 1. FUNKCIJA ZA VODITELJA KLUBA (Plaćanje natjecanja)
+// =====================================================================
+// Ovu funkciju poziva Voditelj kluba kada želi platiti kotizaciju za svoje plesače.
 exports.createCheckoutSession = async (req, res) => {
   try {
     const { competitionId, userId, performanceId } = req.body;
 
-    // 1️⃣ Dohvati natjecanje
+    // Provjera postoji li natjecanje
     const competition = await Competition.findById(competitionId);
     if (!competition) return res.status(404).json({ error: 'Natjecanje nije pronađeno' });
 
-    // 2️⃣ Kreiraj Stripe Checkout session
+    // Kreiranje naplate za Voditelja kluba
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -21,36 +25,44 @@ exports.createCheckoutSession = async (req, res) => {
           price_data: {
             currency: 'eur',
             product_data: { name: `Prijava: ${competition.name}` },
-            unit_amount: competition.registrationFee * 100, // EUR → centi
+            unit_amount: competition.registrationFee * 100, // Cijena natjecanja
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
+      // Vraća Voditelja kluba na stranicu s potvrdom
       success_url: `${process.env.REACT_APP_API_URL}/payment-success?competitionId=${competitionId}&performanceId=${performanceId}`,
       cancel_url: `${process.env.REACT_APP_API_URL}/payment-cancelled?competitionId=${competitionId}`,
-      metadata: { userId, competitionId, performanceId: performanceId || '' },
+      // U metadata spremamo podatke o natjecanju (NE o članarini)
+      metadata: { 
+        role: 'club_leader', // Oznaka da plaća voditelj
+        userId, 
+        competitionId, 
+        performanceId: performanceId || '' 
+      },
     });
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error('Stripe error:', err);
-    res.status(500).json({ error: 'Greška prilikom kreiranja Stripe sessiona' });
+    console.error('Stripe error (Voditelj kluba):', err);
+    res.status(500).json({ error: 'Greška prilikom kreiranja naplate za natjecanje' });
   }
 };
 
+// =====================================================================
+// 2. FUNKCIJA ZA ORGANIZATORA (Plaćanje članarine)
+// =====================================================================
+// Ovu funkciju poziva isključivo Organizator da bi aktivirao svoj profil.
 exports.createSubscriptionCheckoutSession = async (req, res) => {
   try {
     const { userId, price } = req.body;
 
-    // Ovdje uzimamo URL tvoje aplikacije s Rendera
-    // Ako nije postavljen u .env, bacit će grešku ili koristiti fallback (pazi da postaviš ENV varijablu!)
-    const clientUrl = process.env.CLIENT_URL; 
+    // Tvoj frontend link (hardkodiran da izbjegnemo greške na Renderu)
+    // AKO TI SE PROMJENI LINK APLIKACIJE, OVDJE GA AŽURIRAJ:
+    const clientUrl = 'https://dancearena.onrender.com'; 
 
-    if (!clientUrl) {
-        console.error("CLIENT_URL nije postavljen u .env datoteci!");
-        return res.status(500).json({ error: 'Server konfiguracija greška' });
-    }
+    console.log("Organizator plaća članarinu, povratak na:", clientUrl);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -60,7 +72,7 @@ exports.createSubscriptionCheckoutSession = async (req, res) => {
             currency: 'eur',
             product_data: { 
                 name: 'Mjesečna članarina za organizatore',
-                description: 'Aktivacija pristupa (30 dana)'
+                description: 'Aktivacija pristupa organizaciji natjecanja (30 dana)'
             },
             unit_amount: price * 100, 
           },
@@ -68,9 +80,10 @@ exports.createSubscriptionCheckoutSession = async (req, res) => {
         },
       ],
       mode: 'payment',
-      // Vraća na produkcijski URL
+      // Vraća Organizatora na njegove stranice
       success_url: `${clientUrl}/organizator/natjecanja?payment_refresh=true`,
       cancel_url: `${clientUrl}/organizator/placanje-clanarine`,
+      // U metadata spremamo oznaku da je ovo SUBSCRIPTION
       metadata: { 
         type: 'subscription', 
         userId: userId 
@@ -79,12 +92,15 @@ exports.createSubscriptionCheckoutSession = async (req, res) => {
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error('Subscription error:', err);
+    console.error('Stripe error (Organizator):', err);
     res.status(500).json({ error: 'Greška prilikom kreiranja naplate članarine' });
   }
 };
 
-// ---------------- WEBHOOK FUNKCIJA ----------------
+// =====================================================================
+// 3. WEBHOOK (Zajednički prijemni sandučić)
+// =====================================================================
+// Stripe ovdje šalje potvrde za SVA plaćanja. Mi ih razvrstavamo.
 exports.stripeWebhook = async (req, res) => {
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -92,45 +108,52 @@ exports.stripeWebhook = async (req, res) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], endpointSecret);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
+    console.error('Webhook greška potpisa:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     
-    // --- SLUČAJ 1: ČLANARINA ---
+    // --- PROVJERA: JE LI OVO ORGANIZATOR? ---
     if (session.metadata.type === 'subscription') {
         const { userId } = session.metadata;
+        console.log(`WEBHOOK: Detektirano plaćanje članarine za Organizatora ${userId}`);
+        
         try {
+            // Ažuriramo status Organizatora u User modelu
             await User.findByIdAndUpdate(userId, { 
                 subscriptionStatus: 'active',
                 subscriptionExpiresAt: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)
             });
-            console.log(`Članarina aktivirana za korisnika ${userId}`);
+            console.log(`--> Organizator ${userId} aktiviran.`);
         } catch (error) {
-            console.error('Greška pri aktivaciji članarine:', error);
+            console.error('Greška pri aktivaciji organizatora:', error);
         }
     } 
-    // --- SLUČAJ 2: NATJECANJA (STARO) ---
+    
+    // --- PROVJERA: JE LI OVO VODITELJ KLUBA? ---
+    // (Ako nije pretplata, onda je sigurno natjecanje)
     else {
         const { userId, competitionId, performanceId } = session.metadata;
+        console.log(`WEBHOOK: Detektirano plaćanje natjecanja od strane Voditelja kluba ${userId}`);
 
-        // Provjera da ne pukne ako je slučajno stari tip metadata
         if (userId && competitionId) {
+            // Ažuriramo prijavu u Registration modelu
             await Registration.findOneAndUpdate(
               { user: userId, competition: competitionId },
               { paymentStatus: 'paid', stripeSessionId: session.id },
               { upsert: true, new: true }
             );
 
+            // Ako je plaćen specifičan nastup
             if (performanceId) {
               await Performance.findByIdAndUpdate(
                 performanceId,
                 { paid: true, paymentStatus: 'paid' }
               );
             }
-            console.log(`Registracija plaćena za natjecanje ID: ${competitionId}`);
+            console.log(`--> Prijava za natjecanje ${competitionId} označena kao plaćena.`);
         }
     }
   }
