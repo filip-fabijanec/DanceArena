@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // 1. Dodani hookovi
 import { useAuth } from '../../context/AuthContext';
 import '../Dashboard.css';
 import './moja_natjecanja_org.css';
 
 function MojaNatjecanja() {
-  const { currentUser } = useAuth();
+  // 2. Uzimamo refreshUser iz konteksta
+  const { currentUser, refreshUser } = useAuth(); 
+  
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
   
+  // Hookovi za rutiranje
+  const location = useLocation();
+  const navigate = useNavigate();
+
   // State za brisanje
   const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
 
@@ -24,17 +30,42 @@ function MojaNatjecanja() {
     registrationFee: ''
   });
 
+  // ------------------------------------------------------------------
+  // 🆕 NOVI DIO: DETEKCIJA POVRATKA S PLAĆANJA
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    // Ako u URL-u piše ?payment_refresh=true
+    if (params.get('payment_refresh')) {
+      console.log("Prepoznato plaćanje, osvježavam korisnika...");
+      setLoading(true); // Prikaži loading dok se osvježava
+
+      refreshUser().then(() => {
+        // Kad je gotovo, makni parametar iz URL-a da izgleda čisto
+        navigate('/organizator/natjecanja', { replace: true });
+        // Loading će se isključiti u donjem useEffectu kad stigne novi currentUser
+      });
+    }
+  }, [location, navigate, refreshUser]);
+  // ------------------------------------------------------------------
+
+
   useEffect(() => {
     // 1. PROVJERA: Pokrećemo dohvat samo ako je korisnik logiran
-    // Ako nema aktivnu članarinu, loading stavljamo na false da se prikaže Lock Screen
     if (currentUser) {
       if (currentUser.subscriptionStatus === 'active') {
         fetchMyCompetitions();
       } else {
-        setLoading(false);
+        // Ako NIJE aktivan, ali upravo radimo refresh (imamo parametar u URL-u),
+        // nemoj odmah ugasiti loading, pričekaj da refreshUser završi.
+        const params = new URLSearchParams(location.search);
+        if (!params.get('payment_refresh')) {
+            setLoading(false);
+        }
       }
     }
-  }, [currentUser]);
+  }, [currentUser, location.search]); // Dodali smo location.search u dependency
 
   // Funkcija za automatsko ažuriranje statusa (upcoming -> ongoing -> completed)
   const checkAndAutoUpdateStatus = async (competitionsList) => {
@@ -207,7 +238,7 @@ function MojaNatjecanja() {
       <div className="dashboard-container">
         <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
         <h1>Moja natjecanja</h1>
-        <div className="loading-spinner">Učitavanje...</div>
+        <div className="loading-spinner">Učitavanje podataka...</div>
       </div>
     );
   }
