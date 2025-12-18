@@ -84,32 +84,42 @@ function MojaNatjecanja() {
   // 2. & 3. GLAVNI EFFECT: DETEKCIJA PLAĆANJA I UČITAVANJE PODATAKA
   // ------------------------------------------------------------------
   useEffect(() => {
+    // Koristimo window.location ili postojeći location objekt, ali ga NE stavljamo u dependency array
     const params = new URLSearchParams(location.search);
-    
-    // SCENARIJ A: Povratak s plaćanja (treba osvježiti usera)
-    if (params.get('payment_refresh')) {
-      console.log("Prepoznato plaćanje, osvježavam korisnika...");
-      setLoading(true);
-      
-      refreshUser().then(() => {
-        navigate('/organizator/natjecanja', { replace: true });
-        // Nakon osvježavanja usera, povuci i natjecanja
-        fetchMyCompetitions(); 
-      });
 
-    } 
-    // SCENARIJ B: Normalan dolazak na stranicu
-    else {
-       // Ako imamo korisnika, IDEMO PO NATJECANJA
-       if (currentUser) {
-           fetchMyCompetitions();
-       } else {
-           // Ako nema usera (npr. logout ili čekamo auth), samo ugasi loading da ne vrti vječno
-           setLoading(false); 
-       }
-    }
+    const initPage = async () => {
+      // SCENARIJ A: Povratak s plaćanja
+      if (params.get('payment_refresh')) {
+        console.log("Prepoznato plaćanje, osvježavam korisnika...");
+        setLoading(true);
+
+        try {
+          await refreshUser(); // Prvo osvježi usera
+          // Zatim očisti URL da se ovo ne ponovi (replace mode)
+          navigate('/organizator/natjecanja', { replace: true });
+          // Na kraju povuci natjecanja
+          await fetchMyCompetitions();
+        } catch (error) {
+          console.error("Greška pri osvježavanju:", error);
+        }
+
+      } 
+      // SCENARIJ B: Normalan dolazak na stranicu
+      else {
+         // Ovdje moramo biti oprezni: ako user još nije učitan (null), možda nećemo dohvatiti podatke.
+         // Ali budući da želiš "samo jednom na refresh", ovo je logika:
+         if (currentUser) {
+             fetchMyCompetitions();
+         } else {
+             setLoading(false);
+         }
+      }
+    };
+
+    initPage();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, navigate, refreshUser, currentUser?._id]);
+  }, []); // <--- OVO JE KLJUČNO: Prazan niz znači "samo jednom pri montiranju"
 
 
   // Funkcija za automatsko ažuriranje statusa
