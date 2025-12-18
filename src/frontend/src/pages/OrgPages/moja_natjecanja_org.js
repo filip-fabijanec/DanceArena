@@ -80,26 +80,36 @@ function MojaNatjecanja() {
   // ------------------------------------------------------------------
   // 3. GLAVNI EFFECT ZA UČITAVANJE PODATAKA
   // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+  // 2. & 3. GLAVNI EFFECT: DETEKCIJA PLAĆANJA I UČITAVANJE PODATAKA
+  // ------------------------------------------------------------------
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
-    // 1. Osvježi SAMO ako URL kaže da smo se vratili s plaćanja
+    // SCENARIJ A: Povratak s plaćanja (treba osvježiti usera)
     if (params.get('payment_refresh')) {
       console.log("Prepoznato plaćanje, osvježavam korisnika...");
       setLoading(true);
       
       refreshUser().then(() => {
-        // Kad server potvrdi uplatu, makni loading i očisti URL
         navigate('/organizator/natjecanja', { replace: true });
-        // Loading će se sam ugasiti kad se promijeni state
+        // Nakon osvježavanja usera, povuci i natjecanja
+        fetchMyCompetitions(); 
       });
 
-    } else {
-       // 2. Inače NE RADI NIŠTA sa userom, samo ugasi loading
-       // AuthContext je već učitao korisnika pri pokretanju aplikacije.
-       setLoading(false);
+    } 
+    // SCENARIJ B: Normalan dolazak na stranicu
+    else {
+       // Ako imamo korisnika, IDEMO PO NATJECANJA
+       if (currentUser) {
+           fetchMyCompetitions();
+       } else {
+           // Ako nema usera (npr. logout ili čekamo auth), samo ugasi loading da ne vrti vječno
+           setLoading(false); 
+       }
     }
-  }, [location, navigate, refreshUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, navigate, refreshUser, currentUser?._id]);
 
 
   // Funkcija za automatsko ažuriranje statusa
