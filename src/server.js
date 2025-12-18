@@ -22,6 +22,7 @@ app.use('/api/competitions', require('./routes/competitionRoutes'));
 app.use('/api/scores', require('./routes/scoreRoutes'));
 app.use('/api/performances', require('./routes/performanceRoutes'));
 app.use('/api/stripe', require('./routes/stripeRoutes'));
+app.use('/api/clanarine', require('./routes/clanarineRoutes'));
 
 // === SERVE FRONTEND LAST ===
 app.use(express.static(path.join(__dirname, 'frontend/build')));
