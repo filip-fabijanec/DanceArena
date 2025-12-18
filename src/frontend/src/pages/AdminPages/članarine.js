@@ -36,12 +36,35 @@ function Članarine() {
   const fetchClanarine = async () => {
     try {
       setLoading(true);
-      // Prilagodi URL svom backendu
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`);
       
+      // 1. Dohvati token (prilagodi ključ 'token' onome kako ga ti spremaš pri loginu)
+      const token = localStorage.getItem('token'); 
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // 2. OVO NEDOSTAJE: Šaljemo token backendu
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+      
+      // 3. Debugiranje - ispiši što backend vraća
+      console.log("Response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
-        setClanarine(data);
+        console.log("Dohvaćeni podaci:", data); // Provjeri strukturu ovdje!
+        
+        // Provjera je li data niz ili objekt
+        if (Array.isArray(data)) {
+            setClanarine(data);
+        } else {
+            console.error("Backend nije vratio niz! Vratio je:", data);
+            // Ako backend vraća { clanarine: [...] }, onda koristi setClanarine(data.clanarine)
+        }
+      } else {
+        console.error("Greška pri dohvatu. Status:", response.status);
       }
     } catch (error) {
       console.error("Greška pri dohvatu članarina:", error);
