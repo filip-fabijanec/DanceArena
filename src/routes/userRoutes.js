@@ -282,4 +282,51 @@ router.post('/pay-subscription', async (req, res) => {
     }
   });
 
+  // ============================================================
+  // 3. DOHVAT TRENUTNOG KORISNIKA (ME) + PROVJERA ISTEKA
+  // ============================================================
+  router.get("/me", async (req, res) => {
+    try {
+      // 1. Provjera tokena (jer ova ruta mora biti zaštićena)
+      const tokenHeader = req.headers.authorization;
+      if (!tokenHeader) return res.status(401).json({ error: "Nema tokena" });
+
+      const token = tokenHeader.split(" ")[1];
+      // Pazi da secret bude isti kao kod logina!
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret123"); 
+
+      // 2. Nađi korisnika u bazi
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ error: "Korisnik nije pronađen" });
+      }
+
+      // -----------------------------------------------------------
+      // ⏰ KLJUČNI DIO: AUTOMATSKA PROVJERA ISTEKA ČLANARINE
+      // -----------------------------------------------------------
+      if (user.role === 'organizator' && user.subscriptionStatus === 'active') {
+          const now = new Date();
+          const expiryDate = new Date(user.subscriptionExpiry);
+
+          // Ako nema datuma ili je "danas" veće od "datuma isteka"
+          if (!user.subscriptionExpiry || now > expiryDate) {
+              console.log(`⏳ ISTEKLA ČLANARINA za ${user.email}. Prebacujem u inactive.`);
+              
+              user.subscriptionStatus = 'inactive';
+              // Opcionalno: user.subscriptionExpiry = null; 
+              
+              await user.save(); // Spremi promjenu u bazu odmah!
+          }
+      }
+      // -----------------------------------------------------------
+
+      // Vrati (potencijalno ažuriranog) korisnika
+      res.status(200).json(user);
+
+    } catch (error) {
+      console.error("Greška u /me ruti:", error);
+      res.status(401).json({ error: "Nevaljan token" });
+    }
+  });
+
 module.exports = router;
