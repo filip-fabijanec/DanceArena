@@ -7,6 +7,7 @@ import MojaNatjecanja from '../pages/OrgPages/moja_natjecanja_org';
 import KreirajNatjecanje from '../pages/OrgPages/kreiraj_natjecanje';
 import UpravljanjePrijavama from '../pages/OrgPages/prijave_org';
 import OdabirSudaca from '../pages/OrgPages/odabir_sudaca';
+import PlacanjeClanarine from '../pages/OrgPages/placanje_clanarine';
 
 function OrganizatorRoutes() {
   return (
@@ -18,6 +19,7 @@ function OrganizatorRoutes() {
         <Route path="/kreiranje-natjecanja" element={<KreirajNatjecanje />} />
         <Route path="/prijave" element={<UpravljanjePrijavama />} />
         <Route path="/suci" element={<OdabirSudaca />} />
+        <Route path="/placanje-clanarine" element={<PlacanjeClanarine />} />
       </Routes>
     </div>
   );

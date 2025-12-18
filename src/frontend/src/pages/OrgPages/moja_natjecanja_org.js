@@ -224,8 +224,8 @@ function MojaNatjecanja() {
           <p>Nažalost, nemate aktivnu članarinu.</p>
           <p>Za pregled i kreiranje natjecanja potrebno je aktivirati pretplatu.</p>
           
-          {/* Link vodi na profil ili stranicu za plaćanje */}
-          <Link to="/organizator/profil" className="btn-primary btn-large">
+          {/* Link vodi na posebnu stranicu za plaćanje */}
+          <Link to="/organizator/placanje-clanarine" className="btn-primary btn-large">
             Aktiviraj članarinu
           </Link>
         </div>
