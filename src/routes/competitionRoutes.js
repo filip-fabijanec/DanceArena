@@ -26,6 +26,29 @@ router.get("/upcoming", async (req, res) => {
   }
 });
 
+// GET /competitions/upcoming/after-2-days
+router.get("/upcoming/after-2-days", async (req, res) => {
+  try {
+    const dateFrom = new Date();
+    dateFrom.setHours(0, 0, 0, 0);
+    dateFrom.setDate(dateFrom.getDate() + 2);
+
+    const competitions = await Competition.find({
+      date: { $gt: dateFrom }
+    })
+      .populate("organizer", "name surname")
+      .sort({ date: 1 });
+
+    // dodatna sigurnost – filtriraj samo upcoming
+    const filtered = competitions.filter(comp => comp.autoStatus === 'upcoming');
+
+    res.status(200).json(filtered);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+
 // GET /competitions (sa query params)
 router.get("/", async (req, res) => {
   try {

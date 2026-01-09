@@ -329,3 +329,13 @@
     width: 100%;
   }
 }
+
+.payment-warning {
+  color: #c0392b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: #fdecea;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-right: 10px;
+}

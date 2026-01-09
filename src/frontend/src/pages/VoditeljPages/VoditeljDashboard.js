@@ -20,7 +20,7 @@ function VoditeljDashboard() {
       setLoading(true);
       
       // Dohvati nadolazeća natjecanja
-      const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`);
+      const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming/after-2-days`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
         setCompetitions(compData);

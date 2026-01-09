@@ -50,23 +50,29 @@ router.post("/", async (req, res) => {
 // ← DODAJ NOVI ENDPOINT za odobravanje
 router.put("/:id/approve", async (req, res) => {
   try {
-    const performance = await Performance.findByIdAndUpdate(
-      req.params.id,
-      { approved: true },
-      { new: true, runValidators: true }
-    )
-      .populate("clubId", "name surname clubName clubLocation")
+    const performance = await Performance.findById(req.params.id)
+      .populate("clubId", "name surname clubName")
       .populate("competitionId", "name date location");
-    
+
     if (!performance) {
       return res.status(404).json({ error: "Performance not found" });
     }
-    
+
+    if (!performance.paid) {
+      return res.status(403).json({
+        error: "Prijava nije plaćena i ne može se prihvatiti"
+      });
+    }
+
+    performance.approved = true;
+    await performance.save();
+
     res.status(200).json(performance);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // PUT - Ažuriraj performance (opcionalno)
 router.put("/:id", async (req, res) => {
@@ -101,6 +107,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// GENERIRANJE PDF-A 
 router.get("/competition/:competitionId", async (req, res) => {
   try {
     const { competitionId } = req.params;
@@ -124,27 +131,77 @@ router.get("/competition/:competitionId", async (req, res) => {
 router.get('/export-pdf/:competitionId', async (req, res) => {
   try {
     const { competitionId } = req.params;
+
     const competition = await Competition.findById(competitionId);
-    const performances = await Performance.find({ competitionId });
 
-    const doc = new PDFDocument();
+    const performances = await Performance.find({
+      competitionId,
+      approved: true
+    })
+      .populate("clubId", "clubName name surname")
+      .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
+
+    const doc = new PDFDocument({ margin: 40 });
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="natjecanje_${competitionId}.pdf"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="startna_lista_${competitionId}.pdf"`
+    );
 
-    doc.pipe(res); // prvo pipe
+    doc.pipe(res);
 
-    doc.fontSize(16).text(`Natjecanje: ${competition?.name || ''}`);
-    doc.fontSize(14).text(`Organizator: ${competition?.organizer || ''}`);
-    doc.fontSize(12).text(`Datum: ${competition?.date || ''}`);
+    // ===== HEADER =====
+    doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
     doc.moveDown();
 
-    performances.forEach((perf, idx) => {
-      doc.text(`${idx + 1}. ${perf.choreographyName} (${perf.clubId?.clubName || 'N/A'})`);
+    doc.fontSize(12).text(`Natjecanje: ${competition?.name || ''}`);
+    doc.text(`Datum: ${competition?.date?.toLocaleDateString('hr-HR') || ''}`);
+    doc.text(`Lokacija: ${competition?.location || ''}`);
+    doc.moveDown(2);
+
+    // ===== GRUPIRANJE PO KATEGORIJAMA =====
+    const grouped = {};
+
+    performances.forEach(perf => {
+      const key = `${perf.ageCategory} | ${perf.danceStyle} | ${perf.groupSize}`;
+
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+
+      grouped[key].push(perf);
     });
 
-    doc.end(); // na kraju end
+    // ===== ISPIS U PDF =====
+    Object.keys(grouped).forEach(category => {
+      doc
+        .fontSize(14)
+        .text(`KATEGORIJA: ${category}`, { underline: true });
+
+      doc.moveDown(0.5);
+
+      grouped[category].forEach((perf, index) => {
+        const mins = Math.floor(perf.performanceDuration / 60);
+        const secs = perf.performanceDuration % 60;
+
+        doc
+          .fontSize(11)
+          .text(
+            `${index + 1}. ${perf.choreographyName} – ${perf.clubId?.clubName || 'N/A'} (${mins}:${secs
+              .toString()
+              .padStart(2, '0')})`
+          );
+      });
+
+      doc.moveDown(2);
+    });
+
+    doc.end(); 
+
   } catch (err) {
-    res.status(500).send('Greška pri generiranju PDF-a');
+    console.error(err);
+    res.status(500).send("Greška pri generiranju PDF-a");
   }
 });
 

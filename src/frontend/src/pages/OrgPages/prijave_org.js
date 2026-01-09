@@ -151,6 +151,14 @@ function UpravljanjePrijavama() {
         </div>
       )}
 
+      <a href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-export"
+      >
+            Preuzmi startnu listu (PDF)
+      </a>
+
       {/* Lista prijava */}
       {performances.length === 0 ? (
         <div className="empty-state">
@@ -210,7 +218,8 @@ function UpravljanjePrijavama() {
               </div>
 
               <div className="performance-actions">
-                {!perf.approved && (
+                {/* PRIHVATI – samo ako je plaćeno */}
+                {!perf.approved && perf.paid && (
                   <button
                     onClick={() => handleApprove(perf._id)}
                     className="btn-approve"
@@ -218,6 +227,15 @@ function UpravljanjePrijavama() {
                     Prihvati
                   </button>
                 )}
+
+                {/* UPOZORENJE ako nije plaćeno */}
+                {!perf.approved && !perf.paid && (
+                  <span className="payment-warning">
+                    Kotizacija nije plaćena
+                  </span>
+                )}
+
+                {/* OBRIŠI – samo dok nije prihvaćeno */}
                 {!perf.approved && (
                   <button
                     onClick={() => setDeleteModal({
@@ -230,12 +248,13 @@ function UpravljanjePrijavama() {
                     Obriši
                   </button>
                 )}
+
                 {perf.approved && (
                   <span className="approved-message">
                     Prijava je prihvaćena i ne može se obrisati
                   </span>
                 )}
-              </div>
+                </div>
             </div>
           ))}
         </div>
@@ -266,9 +285,6 @@ function UpravljanjePrijavama() {
           </div>
         </div>
       )}
-      <a href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`} target="_blank" rel="noopener noreferrer" className="btn-export">
-         Preuzmi PDF
-      </a>
     </div>
   );
 }

@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
 const performanceSchema = new mongoose.Schema({
-  clubId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // id voditelja kluba
+  clubId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
   competitionId: { type: mongoose.Schema.Types.ObjectId, ref: "Competition", required: true },
 
   choreographyName: { type: String, required: true },
 
-  performanceDuration: { type: Number, required: true }, // trajanje u sekundama
+  performanceDuration: { type: Number, required: true },
 
   choreographer: { type: String },
 
@@ -19,6 +19,7 @@ const performanceSchema = new mongoose.Schema({
 
   groupSize: { type: String, required: true },
 
+  // PLAĆANJE
   paid: { type: Boolean, default: false },
 
   paymentStatus: { 
@@ -27,7 +28,14 @@ const performanceSchema = new mongoose.Schema({
     default: "pending" 
   },
 
+  // ODOBRENJE ORGANIZATORA 
+  approved: {
+    type: Boolean,
+    default: false
+  },
+
   createdAt: { type: Date, default: Date.now }
 });
+
 
 module.exports = mongoose.model("Performance", performanceSchema);
