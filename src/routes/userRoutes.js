@@ -1,140 +1,123 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Invite = require("../models/Invite");
+const Competition = require("../models/Competition");
 const jwt = require("jsonwebtoken");
 
-// ============================================================
-// 1. DOHVAT TRENUTNOG KORISNIKA (ME) + PROVJERA ISTEKA
-// ⚠️ OVO MORA BITI NA VRHU (prije svih ruta s /:id) ⚠️
-// ============================================================
-router.get("/me", async (req, res) => {
-  try {
-    // 1. Provjera tokena
-    const tokenHeader = req.headers.authorization;
-    if (!tokenHeader) return res.status(401).json({ error: "Nema tokena" });
 
-    const token = tokenHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret123"); 
-
-    // 2. Nađi korisnika
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ error: "Korisnik nije pronađen" });
-    }
-
-    // -----------------------------------------------------------
-    // ⏰ PROVJERA ISTEKA ČLANARINE
-    // -----------------------------------------------------------
-    if (user.role === 'organizator' && user.subscriptionStatus === 'active') {
-        const now = new Date();
-        const expiryDate = new Date(user.subscriptionExpiry);
-
-        // Ako nema datuma ili je "danas" veće od "datuma isteka"
-        if (!user.subscriptionExpiry || now > expiryDate) {
-            console.log(`⏳ ISTEKLA ČLANARINA za ${user.email}. Mijenjam u inactive.`);
-            
-            user.subscriptionStatus = 'inactive';
-            // user.subscriptionExpiry = null; // (Opcionalno brisanje datuma)
-            
-            await user.save(); // Spremi u bazu ODMAH
-            console.log("✅ Spremljeno u bazu.");
-        }
-    }
-    // -----------------------------------------------------------
-
-    res.status(200).json(user);
-
-  } catch (error) {
-    console.error("Greška u /me ruti:", error);
-    res.status(401).json({ error: "Nevaljan token" });
-  }
-});
-
-// ============================================================
-// OSTALE RUTE
-// ============================================================
-
-// 2. KREIRANJE KORISNIKA
+// =======================
+// CREATE USER (REGISTRACIJA)
+// =======================
 router.post("/", async (req, res) => {
   try {
+    const { inviteToken, email, role } = req.body;
+
+    let invite = null;
+
+    // Ako postoji invite → validacija
+    if (inviteToken) {
+      invite = await Invite.findOne({ token: inviteToken });
+
+      if (!invite)
+        return res.status(400).json({ error: "Neispravan invite token" });
+
+      if (invite.used)
+        return res.status(400).json({ error: "Invite je već iskorišten" });
+
+      if (invite.status !== "pending")
+        return res.status(400).json({ error: "Invite više nije validan" });
+
+      if (new Date() > invite.expiresAt)
+        return res.status(400).json({ error: "Invite je istekao" });
+
+      if (invite.email !== email || invite.role !== role)
+        return res.status(403).json({ error: "Invite podaci se ne podudaraju" });
+    }
+
     const newUser = new User(req.body);
     await newUser.save({
       runValidators: true,
       validateBeforeSave: true,
-    }); 
+    });
+
+    // Ako je invite → poveži suca s natjecanjem
+    if (invite) {
+      await Competition.findByIdAndUpdate(
+        invite.competition,
+        { $addToSet: { referees: newUser._id } }
+      );
+
+      invite.used = true;
+      invite.status = "accepted";
+      invite.acceptedBy = newUser._id;
+      invite.acceptedAt = new Date();
+      await invite.save();
+    }
+
     res.status(201).json(newUser);
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// 3. DOHVAT SVIH KORISNIKA
+
+// =======================
+// GET ALL USERS
+// =======================
 router.get("/", async (req, res) => {
   try {
-    const { role } = req.query;
-    const filter = role ? { role } : {};
-    
-    const users = await User.find(filter);
-    if (!users) {
-      return res.status(404).json({ error: "No users found" });
-    }
+    const users = await User. find();
     res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// GET /users/referees - samo suci
+
+// =======================
+// GET REFEREES
+// =======================
 router.get("/referees", async (req, res) => {
   try {
     const referees = await User.find({ role: "sudac" });
-    if (!referees || referees.length === 0) {
-      return res.status(404).json({ error: "No referees found" });
-    }
     res.status(200).json(referees);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// RUTA ZA POPRAVAK BAZE
-router.get("/fix-database", async (req, res) => {
-  try {
-    const updateResult = await User.updateMany(
-      { subscriptionStatus: { $exists: false } }, 
-      { 
-        $set: { 
-          subscriptionStatus: 'inactive',
-          subscriptionExpiry: null,
-          jeAktivan: true, 
-          adresa: "" 
-        } 
-      }
-    );
-    res.json({ message: "Baza ažurirana!", updatedCount: updateResult.modifiedCount });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
-// AŽURIRANJE KORISNIKA (Općenito)
-router.put("/:id", async (req, res) => {
+// =======================
+// UPDATE USER
+// =======================
+router. put("/:id", async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-      { runValidators: true, validateBeforeSave: true, context: "query" }
+      req. params.id,
+      req. body,
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      }
     );
-    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+
+    if (!updatedUser)
+      return res.status(404).json({ error: "User not found" });
+
     res.status(200).json(updatedUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// BRISANJE KORISNIKA
-router.delete("/:id", async (req, res) => {
+
+// =======================
+// DELETE USER
+// =======================
+router.delete("/: id", async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.status(204).send();
@@ -143,39 +126,28 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// OBIČAN LOGIN
-router.post("/login", async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: "Email je obavezan" });
 
-    const user = await User.findOne({ email: email });
-    if (!user) return res.status(404).json({ error: "Korisnik ne postoji" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// SECRET LOGIN
-router.post("/secret-login", async (req, res) => {
+// =======================
+// SECRET LOGIN (DEBUG)
+// =======================
+router. post("/secret-login", async (req, res) => {
   try {
     const { secret } = req.body;
-    if (!secret) return res.status(400).json({ error: "Tajna riječ je obavezna" });
 
     const secretMap = {
-      "admin123": "martin.tomisic@gmail.com",
-      "sudac123": "vitocindori@gmail.com",
-      "org123": "fico241@gmail.com",
-      "vodklub123": "clashofdubravica@gmail.com"
+      admin123: "martin.tomisic@gmail.com",
+      sudac123: "vitocindori@gmail.com",
+      org123: "fico241@gmail.com",
+      vodklub123: "clashofdubravica@gmail.com",
     };
 
     const email = secretMap[secret];
-    if (!email) return res.status(401).json({ error: "Neispravna tajna riječ" });
+    if (!email)
+      return res.status(401).json({ error: "Neispravna tajna riječ" });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "Korisnik nije pronađen" });
+    if (!user)
+      return res.status(404).json({ error: "Korisnik nije pronađen" });
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
@@ -184,108 +156,45 @@ router.post("/secret-login", async (req, res) => {
     );
 
     res.status(200).json({ user, token });
+
   } catch (error) {
-    console.error("Secret login error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
+
+// =======================
 // GOOGLE LOGIN
-router.post("/google-login", async (req, res) => {
+// =======================
+router. post("/google-login", async (req, res) => {
   try {
     const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: "Google credential obavezan" });
+    if (!credential)
+      return res.status(400).json({ error: "Credential missing" });
 
-    const base64Url = credential.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = Buffer.from(base64, 'base64').toString('utf8');
-    const payload = JSON.parse(jsonPayload);
+    const base64Url = credential.split(". ")[1];
+    const jsonPayload = Buffer.from(base64Url, "base64").toString("utf8");
+    const payload = JSON. parse(jsonPayload);
 
-    let user = await User.findOne({ email: payload.email });
+    const user = await User.findOne({ email: payload.email });
 
+    // 🔴 AKO USER NE POSTOJI → FRONTEND REDIRECTA NA REGISTRACIJU
     if (!user) {
-      user = new User({
-        email: payload.email,
-        provider: 'google',
-        providerId: payload.sub,
-        name: payload.given_name || '',
-        surname: payload.family_name || '',
-        role: 'voditeljKluba',
-      });
-      await user.save();
+      return res.status(404).json({ error: "USER_NOT_FOUND" });
     }
 
-    const token = jwt.sign(
+    const token = jwt. sign(
       { id: user._id, role: user.role, email: user.email },
       process.env.JWT_SECRET || "secret123",
       { expiresIn: "7d" }
     );
 
     res.status(200).json({ user, token });
-  } catch (err) {
-    console.error("Google login error:", err);
+
+  } catch (error) {
+    console.error("Google login error:", error);
     res.status(500).json({ error: "Google login failed" });
   }
 });
-
-// ---------------------------------------------------------
-// RUTE ZA ČLANARINE
-// ---------------------------------------------------------
-
-// 1. ORGANIZATOR PLAĆA ČLANARINU
-router.post('/pay-subscription', async (req, res) => {
-   const { userId, months } = req.body; 
-   try {
-     const user = await User.findById(userId);
-     if (!user) return res.status(404).json({ error: 'Korisnik nije pronađen' });
- 
-     let newExpiryDate = new Date();
-     if (user.subscriptionStatus === 'active' && user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date()) {
-         newExpiryDate = new Date(user.subscriptionExpiry);
-     }
- 
-     newExpiryDate.setDate(newExpiryDate.getDate() + (30 * (months || 1)));
- 
-     user.subscriptionStatus = 'active';
-     user.subscriptionExpiry = newExpiryDate;
-     user.lastPaymentDate = new Date();
- 
-     await user.save();
- 
-     res.json({ 
-       message: 'Članarina uspješno plaćena', 
-       subscriptionExpiry: user.subscriptionExpiry,
-       subscriptionStatus: user.subscriptionStatus
-     });
- 
-   } catch (err) {
-     console.error(err);
-     res.status(500).json({ error: 'Greška na serveru' });
-   }
- });
- 
- // 2. ADMIN RUČNO MIJENJA STATUS
- router.put('/:id/subscription', async (req, res) => {
-   const { id } = req.params;
-   const { subscriptionExpiry, subscriptionStatus } = req.body;
- 
-   try {
-     const user = await User.findByIdAndUpdate(
-       id,
-       { 
-         subscriptionExpiry: new Date(subscriptionExpiry),
-         subscriptionStatus: subscriptionStatus 
-       },
-       { new: true } 
-     );
- 
-     if (!user) return res.status(404).json({ error: 'Korisnik nije pronađen' });
-     res.json(user);
- 
-   } catch (err) {
-     console.error(err);
-     res.status(500).json({ error: 'Greška prilikom ažuriranja' });
-   }
- });
 
 module.exports = router;

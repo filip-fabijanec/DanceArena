@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './Registracija.css';
 
@@ -7,6 +7,9 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3500";
 function Registracija() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const inviteToken = params.get('invite');
+
   const emailFromLogin = location.state?.email || '';
   const providerIdFromLogin = location.state?.providerId || '';
   const providerFromLogin = location.state?.provider || 'google';
@@ -20,11 +23,56 @@ function Registracija() {
     email: emailFromLogin,
     clubName: "",
     clubLocation: "",
+    inviteToken: inviteToken || null,
   });
 
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [inviteData, setInviteData] = useState(null);
+  const [inviteLoading, setInviteLoading] = useState(!! inviteToken);
+
+  // Validacija invite tokena pri učitavanju
+  useEffect(() => {
+    if (inviteToken) {
+      validateInvite();
+    }
+  }, [inviteToken]);
+
+  const validateInvite = async () => {
+    try {
+      setInviteLoading(true);
+      const res = await fetch(`${API_URL}/invites/validate/${inviteToken}`);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setMessage(errorData.error || "Neispravan poziv");
+        setIsError(true);
+        setInviteLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      setInviteData(data);
+
+      // Automatski popuni email i role iz invite-a
+      setFormData(prev => ({
+        ...prev,
+        email: data.email,
+        role: data.role,
+        inviteToken: inviteToken,
+      }));
+
+      setMessage("Poziv je validan! Molimo dovršite registraciju.");
+      setIsError(false);
+    } catch (error) {
+      console.error("Error validating invite:", error);
+      setMessage("Greška pri validaciji poziva");
+      setIsError(true);
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -54,23 +102,36 @@ function Registracija() {
 
       const data = await response.json();
       console.log("User created:", data);
-      
-      setMessage(`Korisnik uspješno kreiran! Preusmjeravanje na login...`);
+
+      if (inviteToken) {
+        setMessage(`Sudac uspješno kreiran! Preusmjeravanje... `);
+      } else {
+        setMessage(`Korisnik uspješno kreiran!  Preusmjeravanje na login...`);
+      }
       setIsError(false);
 
-      // Redirect na login nakon 2 sekunde
       setTimeout(() => {
         navigate('/login');
       }, 2000);
 
     } catch (error) {
       console.error("Error creating user:", error);
-      setMessage(`Greška: ${error.message}`);
+      setMessage(`Greška:  ${error.message}`);
       setIsError(true);
     } finally {
       setLoading(false);
     }
   };
+
+  if (inviteLoading) {
+    return (
+      <div className="registracija-container">
+        <div className="registracija-box">
+          <p>Provjera poziva...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="registracija-container">
@@ -81,11 +142,17 @@ function Registracija() {
 
         <h1>DANCE ARENA</h1>
         <h2>Registracija novog korisnika</h2>
-        
-        {emailFromLogin && (
+
+        {emailFromLogin && ! inviteToken && (
           <div className="info-message">
             Korisnik s emailom <strong>{emailFromLogin}</strong> ne postoji u sustavu.
             Molimo ispunite formu za registraciju.
+          </div>
+        )}
+
+        {inviteToken && inviteData && (
+          <div className="info-message success">
+            Pozvani ste kao sudac!  Molimo dovršite registraciju s emailom <strong>{inviteData.email}</strong>.
           </div>
         )}
 
@@ -93,6 +160,7 @@ function Registracija() {
           {/* HIDDEN POLJA ZA PROVIDER I PROVIDER ID */}
           <input type="hidden" name="provider" value={formData.provider} />
           <input type="hidden" name="providerId" value={formData.providerId} />
+          <input type="hidden" name="inviteToken" value={formData.inviteToken} />
 
           <div className="form-group">
             <label htmlFor="role">Uloga *</label>
@@ -102,7 +170,7 @@ function Registracija() {
               value={formData.role}
               onChange={handleChange}
               required
-              disabled={loading}
+              disabled={loading || inviteToken} // Ako je invite, uloga je zaključana
             >
               <option value="voditeljKluba">Voditelj kluba</option>
               <option value="organizator">Organizator</option>
@@ -148,16 +216,16 @@ function Registracija() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="vas.email@example.com"
+              placeholder="vas. email@example.com"
               required
-              disabled={loading}
-              className={emailFromLogin ? "readonly-field" : ""}
-              readOnly={!!emailFromLogin}
+              disabled={loading || !!inviteToken}
+              className={emailFromLogin || inviteToken ? "readonly-field" : ""}
+              readOnly={! !(emailFromLogin || inviteToken)}
             />
           </div>
 
-          {/* Prikaži club polja SAMO ako je role voditeljKluba */}
-          {formData.role === "voditeljKluba" && (
+          {/* Prikaži club polja SAMO ako je role voditeljKluba i NIJE invite */}
+          {formData.role === "voditeljKluba" && ! inviteToken && (
             <>
               <div className="form-group">
                 <label htmlFor="clubName">Naziv kluba</label>
