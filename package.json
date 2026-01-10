@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.966.0",
+    "@aws-sdk/s3-request-presigner": "^3.966.0",
     "cors": "^2.8.5",
+    "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
     "pdfkit": "^0.17.2",
     "stripe": "^19.3.0"
