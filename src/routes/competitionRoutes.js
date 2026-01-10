@@ -164,4 +164,28 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// PUT /competitions/:id/lock
+router.put("/:id/lock", async (req, res) => {
+  try {
+    const competition = await Competition.findById(req.params.id);
+
+    if (!competition) {
+      return res.status(404).json({ error: "Competition not found" });
+    }
+
+    if (competition.isLocked) {
+      return res.status(400).json({ error: "Prijave su već zaključane" });
+    }
+
+    competition.isLocked = true;
+    await competition.save();
+
+    res.status(200).json(competition);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Greška pri zaključavanju" });
+  }
+});
+
+
 module.exports = router;

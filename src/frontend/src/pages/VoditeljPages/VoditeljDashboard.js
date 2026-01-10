@@ -223,6 +223,17 @@ function VoditeljDashboard() {
                       <span className="detail-label">Plaćeno:</span>
                       <span className="detail-value">{perf.paid ? 'Da' : 'Ne'}</span>
                     </div>
+                    {perf.competitionId?.isLocked && (
+                    <a
+                      href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${perf.competitionId._id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-secondary"
+                    >
+                      Preuzmi startnu listu (PDF)
+                    </a>
+                  )}
+
                   </div>
                 </div>
               ))}
