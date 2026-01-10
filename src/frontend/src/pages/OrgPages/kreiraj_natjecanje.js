@@ -22,7 +22,6 @@ function KreirajNatjecanje() {
   const [referees, setReferees] = useState([]);
   const [refereesLoading, setRefereesLoading] = useState(true);
 
-  // 🆕 invite email state
   const [invitedRefereeEmails, setInvitedRefereeEmails] = useState([]);
   const [emailInput, setEmailInput] = useState("");
 
@@ -104,7 +103,7 @@ function KreirajNatjecanje() {
     setLoading(true);
     setMessage("");
 
-    if (! refereesValidation.valid) {
+    if (!refereesValidation.valid) {
       setMessage(refereesValidation.message);
       setIsError(true);
       setLoading(false);
@@ -115,13 +114,13 @@ function KreirajNatjecanje() {
       const competitionData = {
         ... formData,
         ageCategories: selectedAgeCategories,
-        groupSizes:  selectedGroupSizes,
+        groupSizes: selectedGroupSizes,
         danceStyles: formData.danceStyles
           . split(/[,\n]/)
           .map(s => s.trim())
           .filter(Boolean),
         registrationFee: Number(formData.registrationFee),
-        organizer: currentUser._id,
+        organizer:  currentUser._id,
         referees: selectedReferees,
         invitedRefereeEmails,
       };
@@ -156,7 +155,7 @@ function KreirajNatjecanje() {
 
         {/* OSTATAK FORME OSTAVLJEN KAKAV JE BIO */}
 
-        {/* SUCI */}
+        {/* SUCI - SEKCIJA 1: ODABIR IZ BAZE */}
         <div className="form-section">
           <h3>Odabir sudaca</h3>
 
@@ -168,42 +167,8 @@ function KreirajNatjecanje() {
                   checked={selectedReferees.includes(ref._id)}
                   onChange={() => handleRefereeToggle(ref._id)}
                 />
-                {ref.name} {ref.surname}
+                {ref.name} {ref. surname}
               </label>
-            ))}
-          </div>
-
-          {/* 🆕 EMAIL INVITES */}
-          <div className="form-section">
-            <h4>Dodaj sudce putem emaila (opcionalno)</h4>
-
-            <div className="form-row">
-              <input
-                type="email"
-                placeholder="email sudca"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEmail())}
-              />
-              <button
-                type="button"
-                onClick={handleAddEmail}
-              >
-                Dodaj
-              </button>
-            </div>
-
-            {invitedRefereeEmails. map(email => (
-              <div key={email} className="invited-email-item">
-                <span>{email}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveEmail(email)}
-                  className="remove-btn"
-                >
-                  ✕
-                </button>
-              </div>
             ))}
           </div>
 
@@ -212,7 +177,46 @@ function KreirajNatjecanje() {
           </div>
         </div>
 
-        {message && <div className={isError ? "error" : "success"}>{message}</div>}
+        {/* EMAIL INVITES - SEKCIJA 2: POZIVANJE PUTEM EMAILA */}
+        <div className="form-section">
+          <h3>Dodaj sudce putem emaila (opcionalno)</h3>
+
+          <div className="form-row">
+            <input
+              type="email"
+              placeholder="email sudca"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onKeyPress={(e) => e. key === 'Enter' && (e.preventDefault(), handleAddEmail())}
+            />
+            <button
+              type="button"
+              onClick={handleAddEmail}
+            >
+              Dodaj
+            </button>
+          </div>
+
+          {invitedRefereeEmails.length > 0 && (
+            <div className="invited-emails-list">
+              <h4>Pozvani sudci:</h4>
+              {invitedRefereeEmails. map(email => (
+                <div key={email} className="invited-email-item">
+                  <span>{email}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveEmail(email)}
+                    className="remove-btn"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {message && <div className={isError ?  "error" : "success"}>{message}</div>}
 
         <button type="submit" disabled={loading}>
           {loading ? "Kreiranje..." : "Kreiraj natjecanje"}
