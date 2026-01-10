@@ -5,20 +5,19 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,              // Port 587 je standard za Render
-    secure: false,          // Mora biti false za 587
+    port: 465,              // VRAĆAMO SE NA 465
+    secure: true,           // ZA PORT 465 OVO MORA BITI TRUE
     auth: {
       user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS, // Tvoja App Password
+      pass: process.env.MAIL_PASS,
     },
+    // Ovi dodaci su ključni za Render:
     tls: {
-      // OVO JE PROMJENA: Maknuli smo "SSLv3" jer to Gmail blokira!
-      rejectUnauthorized: false, 
+      rejectUnauthorized: false 
     },
-    // Timeout postavke (bitno da se ne vrti beskonačno)
-    connectionTimeout: 10000, // 10 sekundi
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    // Povećavamo timeout na 20 sekundi
+    connectionTimeout: 20000, 
+    socketTimeout: 20000,
   });
 
   try {

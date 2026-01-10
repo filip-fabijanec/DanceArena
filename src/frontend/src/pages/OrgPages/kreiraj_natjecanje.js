@@ -7,39 +7,45 @@ function KreirajNatjecanje() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  // --- STATE ---
   const [formData, setFormData] = useState({
     name: '', date: '', location: '', description: '', danceStyles: '', registrationFee: '',
   });
 
-  // State varijable
   const [selectedAgeCategories, setSelectedAgeCategories] = useState([]);
   const [selectedGroupSizes, setSelectedGroupSizes] = useState([]);
   
-  // SUCI
-  const [selectedReferees, setSelectedReferees] = useState([]); // ID-evi iz baze
-  const [invitedRefereeEmails, setInvitedRefereeEmails] = useState([]); // Emailovi
+  // SUCI STATE
+  const [selectedReferees, setSelectedReferees] = useState([]); // ID-evi iz baze (checkbox)
+  const [invitedRefereeEmails, setInvitedRefereeEmails] = useState([]); // Emailovi (stringovi)
   
-  const [referees, setReferees] = useState([]);
+  const [referees, setReferees] = useState([]); // Svi suci iz baze za prikaz
   const [emailInput, setEmailInput] = useState("");
+  
+  // UI STATE
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Opcije (skraćeno radi preglednosti)
+  // OPCIJE
   const ageCategoryOptions = ['Cicibani (2-7 god.)', 'Djeca (8-11 god.)', 'Juniori (12-16 god.)', 'Seniori (17+ god.)'];
   const groupSizeOptions = ['Solo (1)', 'Duo (2)', 'Trio (3)', 'Kvartet (4)', 'Grupa (5-12)', 'Formacija (13+)'];
 
+  // --- EFFECT ---
   useEffect(() => {
+    const fetchReferees = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/users/referees`);
+        if (res.ok) setReferees(await res.json());
+        else setReferees([]);
+      } catch { 
+        setReferees([]); 
+      }
+    };
     fetchReferees();
   }, []);
 
-  const fetchReferees = async () => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/users/referees`);
-      if (res.ok) setReferees(await res.json());
-    } catch { setReferees([]); }
-  };
-
+  // --- HANDLERS ---
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const toggleCheckbox = (value, setFn, state) => {
@@ -54,9 +60,21 @@ function KreirajNatjecanje() {
 
   const handleAddEmail = () => {
     const email = emailInput.trim();
-    if (email && !invitedRefereeEmails.includes(email)) {
+    // Jednostavna regex provjera za email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!email) return;
+    
+    if (!emailRegex.test(email)) {
+        alert("Unesite ispravan format email adrese.");
+        return;
+    }
+
+    if (!invitedRefereeEmails.includes(email)) {
       setInvitedRefereeEmails([...invitedRefereeEmails, email]);
       setEmailInput(""); // Očisti input
+    } else {
+        alert("Ovaj email je već dodan.");
     }
   };
 
@@ -64,33 +82,36 @@ function KreirajNatjecanje() {
     setInvitedRefereeEmails(invitedRefereeEmails.filter(e => e !== email));
   };
 
-  // --- VALIDACIJA SUDACA ---
-  // Izračunavamo ukupan broj
+  // --- VALIDACIJA LOGIKA (KLJUČNI DIO) ---
+  // Računamo ovo pri svakom renderu da bi UI bio odmah ažuriran
   const totalJudges = selectedReferees.length + invitedRefereeEmails.length;
-  
-  const getValidationMessage = () => {
-    if (totalJudges < 3) return { valid: false, text: `⚠️ Nedostaje sudaca! (Trenutno: ${totalJudges}, Min: 3)` };
-    if (totalJudges % 2 === 0) return { valid: false, text: `⚠️ Broj sudaca mora biti neparan! (Trenutno: ${totalJudges})` };
-    return { valid: true, text: `✅ Validno: ${totalJudges} sudaca` };
-  };
+  const isRefereesValid = totalJudges >= 3 && totalJudges % 2 !== 0;
 
-  const validation = getValidationMessage();
+  let validationText = "";
+  if (totalJudges < 3) {
+      validationText = `⚠️ Minimalno 3 suca (Trenutno: ${totalJudges})`;
+  } else if (totalJudges % 2 === 0) {
+      validationText = `⚠️ Broj sudaca mora biti neparan (Trenutno: ${totalJudges})`;
+  } else {
+      validationText = `✅ Odabrano ${totalJudges} sudaca`;
+  }
 
+  // --- SUBMIT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    // 1. PROVJERA: Je li ostao mail u inputu koji nije dodan?
+    // 1. PROVJERA: Zaboravljen email u inputu?
     if (emailInput.trim().length > 0) {
       alert("Upisali ste email ali niste kliknuli 'Dodaj'! Kliknite gumb 'Dodaj' pa pokušajte ponovno.");
       setLoading(false);
       return;
     }
 
-    // 2. PROVJERA: Valjanost sudaca
-    if (!validation.valid) {
-      setMessage(validation.text);
+    // 2. PROVJERA: Validacija sudaca (koristimo izračunate varijable)
+    if (!isRefereesValid) {
+      setMessage(totalJudges < 3 ? "Nedostaje sudaca!" : "Broj sudaca mora biti neparan!");
       setIsError(true);
       setLoading(false);
       return;
@@ -119,9 +140,11 @@ function KreirajNatjecanje() {
         throw new Error(errData.error || "Greška pri kreiranju");
       }
 
-      setMessage("Natjecanje uspješno kreirano!");
+      setMessage("Natjecanje uspješno kreirano! Pozivnice se šalju...");
       setIsError(false);
-      setTimeout(() => navigate("/organizator/natjecanja"), 1500);
+      
+      // Preusmjeravanje nakon 2 sekunde
+      setTimeout(() => navigate("/organizator/natjecanja"), 2000);
       
     } catch (err) {
       console.error(err);
@@ -138,96 +161,131 @@ function KreirajNatjecanje() {
       <h1>Kreiraj natjecanje</h1>
 
       <form onSubmit={handleSubmit}>
-        {/* ... INPUTI ZA NAZIV, DATUM, LOKACIJU ISTI KAO PRIJE ... */}
+        
+        {/* --- OSNOVNI PODACI --- */}
         <div className="form-section">
              <div className="form-group">
                 <label>Naziv natjecanja *</label>
-                <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="npr. Zimski Kup" />
              </div>
-             {/* Skraćujem ovaj dio jer je isti, kopiraj svoje inpute ovdje */}
              <div className="form-row">
-                <input type="date" name="date" value={formData.date} onChange={handleChange} required />
-                <input type="text" name="location" value={formData.location} onChange={handleChange} required placeholder="Lokacija" />
+                <div className="form-group">
+                    <label>Datum *</label>
+                    <input type="date" name="date" value={formData.date} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label>Lokacija *</label>
+                    <input type="text" name="location" value={formData.location} onChange={handleChange} required placeholder="Grad, Adresa" />
+                </div>
              </div>
-             <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Opis..." />
+             <div className="form-group">
+                <label>Opis</label>
+                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Detalji natjecanja..." rows="3" />
+             </div>
              <div className="form-row">
-                <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} placeholder="Stilovi..." />
-                <input type="number" name="registrationFee" value={formData.registrationFee} onChange={handleChange} placeholder="Cijena" />
+                <div className="form-group">
+                    <label>Stilovi (odvojeni zarezom)</label>
+                    <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} placeholder="Jazz, Hip Hop, Show..." rows="2" />
+                </div>
+                <div className="form-group">
+                    <label>Kotizacija (€)</label>
+                    <input type="number" name="registrationFee" value={formData.registrationFee} onChange={handleChange} placeholder="0.00" step="0.01" />
+                </div>
              </div>
         </div>
 
-        {/* ... CHECKBOXOVI ZA GODINE I GRUPE ISTI KAO PRIJE ... */}
+        {/* --- KATEGORIJE --- */}
         <div className="form-section">
             <h3>Dobne kategorije</h3>
             <div className="checkbox-grid">
                 {ageCategoryOptions.map(o => (
-                    <label key={o}><input type="checkbox" checked={selectedAgeCategories.includes(o)} onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} /> {o}</label>
+                    <label key={o} className="checkbox-label">
+                        <input type="checkbox" checked={selectedAgeCategories.includes(o)} onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} /> 
+                        <span>{o}</span>
+                    </label>
                 ))}
             </div>
         </div>
+
         <div className="form-section">
             <h3>Veličine grupa</h3>
             <div className="checkbox-grid">
                 {groupSizeOptions.map(o => (
-                    <label key={o}><input type="checkbox" checked={selectedGroupSizes.includes(o)} onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} /> {o}</label>
+                    <label key={o} className="checkbox-label">
+                        <input type="checkbox" checked={selectedGroupSizes.includes(o)} onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} /> 
+                        <span>{o}</span>
+                    </label>
                 ))}
             </div>
         </div>
 
-        {/* --- SUCI SEKCIJA (POBOLJŠANA) --- */}
-        <div className="form-section" style={{ border: validation.valid ? '2px solid green' : '2px solid red', padding: '15px' }}>
+        {/* --- SUCI (POPRAVLJENO) --- */}
+        <div className="form-section">
           <h3>Odabir sudaca (Ukupno: {totalJudges})</h3>
           
-          {/* DIO 1: IZ BAZE */}
-          <h4>1. Odaberi iz baze ({selectedReferees.length})</h4>
+          {/* 1. SUCI IZ BAZE */}
+          <h4 style={{marginTop: '15px', marginBottom: '10px'}}>1. Odaberi iz baze ({selectedReferees.length})</h4>
           <div className="referees-grid">
-            {referees.map(ref => (
-              <div key={ref._id} className={`referee-card ${selectedReferees.includes(ref._id) ? 'selected' : ''}`}>
-                <input type="checkbox" checked={selectedReferees.includes(ref._id)} onChange={() => handleRefereeToggle(ref._id)} />
-                <span>{ref.name} {ref.surname}</span>
+            {referees.length > 0 ? referees.map(ref => (
+              <div key={ref._id} className={`referee-card ${selectedReferees.includes(ref._id) ? 'selected' : ''}`} onClick={() => handleRefereeToggle(ref._id)}>
+                <input type="checkbox" checked={selectedReferees.includes(ref._id)} onChange={() => {}} />
+                <div className="referee-info">
+                    <span className="referee-name">{ref.name} {ref.surname}</span>
+                    <span className="referee-email">{ref.email}</span>
+                </div>
               </div>
-            ))}
+            )) : <p>Nema sudaca u bazi.</p>}
           </div>
 
-          {/* DIO 2: EMAIL */}
-          <h4>2. Dodaj putem emaila ({invitedRefereeEmails.length})</h4>
-          <div className="form-row">
-            <input 
-              type="email" 
-              placeholder="email sudca" 
-              value={emailInput} 
-              onChange={(e) => setEmailInput(e.target.value)}
-              onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddEmail(); }}} 
-            />
-            <button type="button" onClick={handleAddEmail} style={{backgroundColor: '#4CAF50', color: 'white'}}>Dodaj na listu</button>
+          {/* 2. SUCI PUTEM EMAILA */}
+          <h4 style={{marginTop: '20px', marginBottom: '10px'}}>2. Dodaj putem emaila ({invitedRefereeEmails.length})</h4>
+          <div className="form-row" style={{alignItems: 'flex-end'}}>
+            <div className="form-group" style={{flex: 1}}>
+                <input 
+                  type="email" 
+                  placeholder="Unesi email suca (npr. sudac@mail.com)" 
+                  value={emailInput} 
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddEmail(); }}} 
+                />
+            </div>
+            <button type="button" onClick={handleAddEmail} className="add-email-btn" style={{marginBottom: '10px', height: '40px'}}>
+                Dodaj
+            </button>
           </div>
 
-          {/* LISTA DODANIH EMAILOVA */}
+          {/* LISTA POZVANIH */}
           {invitedRefereeEmails.length > 0 && (
-            <div style={{marginTop: '10px', background: '#f0f0f0', padding: '10px'}}>
-              <strong>Lista za slanje pozivnica:</strong>
-              <ul>
-                {invitedRefereeEmails.map(email => (
-                  <li key={email} style={{display: 'flex', justifyContent: 'space-between', width: '300px'}}>
-                    {email} 
-                    <span onClick={() => handleRemoveEmail(email)} style={{cursor: 'pointer', color: 'red', fontWeight: 'bold'}}> [Obriši]</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="invited-list">
+              {invitedRefereeEmails.map(email => (
+                <div key={email} className="invited-item">
+                  <span>{email}</span>
+                  <button type="button" onClick={() => handleRemoveEmail(email)} className="remove-btn">✕</button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* PORUKA VALIDACIJE */}
-          <div style={{ marginTop: '15px', fontWeight: 'bold', color: validation.valid ? 'green' : 'red' }}>
-            {validation.text}
+          {/* STATUS VALIDACIJE */}
+          <div style={{ 
+              marginTop: '20px', 
+              padding: '10px', 
+              borderRadius: '5px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              backgroundColor: isRefereesValid ? '#d4edda' : '#fff3cd',
+              color: isRefereesValid ? '#155724' : '#856404',
+              border: `1px solid ${isRefereesValid ? '#c3e6cb' : '#ffeeba'}`
+          }}>
+            {validationText}
           </div>
         </div>
 
-        {/* ERROR/SUCCESS MESSAGES */}
+        {/* MESSAGE & SUBMIT */}
         {message && <div className={`message ${isError ? "error" : "success"}`}>{message}</div>}
 
         <button type="submit" className="submit-button" disabled={loading}>
-          {loading ? "Kreiranje (šaljem mailove)..." : "Kreiraj natjecanje"}
+          {loading ? "Slanje..." : "Kreiraj natjecanje"}
         </button>
       </form>
     </div>
