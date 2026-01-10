@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" type="text/css" href="css/site.css">
+</head>
+<body>
+   <div class="maincontainer">
+  <%- include('partials/header'); %>
+
+  <div class="welcometext" id="welcometext">
+    Upravljanje korisnicima
+  </div>
+  <div class="info-text">Ovdje možete pregledavati i upravljati korisnicima sustava.</div>
+  <% for(let i=0; i<users.length; i++) { %>
+    <div class="user-card">
+      <div><strong>Ime:</strong> <%= users[i].ime %></div>
+      <div><strong>Prezime:</strong> <%= users[i].prezime %></div>
+      <div><strong>E-mail:</strong> <%= users[i].email %></div>
+      <div><strong>Tip korisnika:</strong> <%= users[i].tip %></div>
+      <% if(users[i].odobren) { %>
+        <div><strong>Status:</strong> Prihvaćen</div>
+        <form action="/users/unapprove" method="POST">
+        <input type="hidden" name="email" value="<%= users[i].email %>">
+        <input class="deletebutton" type="submit" value="Odbi korisnika">
+        </form>
+      <% } else { %>
+        <div><strong>Status:</strong> Ne prihvaćen</div>
+      <form action="/users/approve" method="POST">
+        <input type="hidden" name="email" value="<%= users[i].email %>">
+        <input class="deletebutton" type="submit" value="Prihvati korisnika">
+      </form>
+      <% } %>
+      <form action="/users/delete" method="POST" onsubmit="return confirm('Jeste li sigurni da želite izbrisati ovog korisnika?');">
+        <input type="hidden" name="email" value="<%= users[i].email %>">
+        <input class="deletebutton" type="submit" value="Izbriši korisnika">
+      </form>
+    </div>
+  <% } %>
+  <form action="/users/main" method="POST">
+    <input class="mainbutton" type="submit" value="Natrag">
+  </form>
+</div>
+
+</body>
+</html>

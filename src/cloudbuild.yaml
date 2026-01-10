@@ -1,6 +1,10 @@
 steps:
   - name: 'gcr.io/cloud-builders/gcloud'
+<<<<<<< HEAD
     args: ['app', 'deploy', 'src/app.yaml']
+=======
+    args: ['app', 'deploy', '--quiet']
+>>>>>>> 325f5c2a93dfb6def093b5121d1c7405516c8d9f
 
 options:
   logging: CLOUD_LOGGING_ONLY

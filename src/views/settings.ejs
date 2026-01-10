@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" type="text/css" href="css/site.css">
+</head>
+<body>
+   <div class="maincontainer">
+  <%- include('partials/header'); %>
+
+    <div class="welcometext" id="welcometext">
+      Ovdje možete upravljati svojim računom, <%= user.ime %>!
+    </div>
+    <form action="/settings/changePassword" method="POST">
+      <input type="hidden" name="email" value="<%= user.email %>">
+      <label class="textlabel">Stara lozinka</label>
+      <input type="password" name="oldPassword" required>
+      <br>
+      <label class="textlabel">Nova lozinka</label>
+      <input type="password" name="newPassword" required>
+      <br>
+      <% if(error) { %>
+      <%= error %>
+      <br>
+      <% } %>
+      <input class="submitbutton" type="submit" value="Promijeni lozinku">
+    </form>
+    <form action="/settings/logout" method="POST">
+      <input class="mainbutton" type="submit" value="Odjava">
+    </form>
+    <form action="/settings/back" method="POST">
+      <input class="mainbutton" type="submit" value="Natrag">
+    </form>
+</div>
+
+</body>
+</html>

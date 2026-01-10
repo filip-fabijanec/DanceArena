@@ -1,5 +1,6 @@
 runtime: nodejs20
 instance_class: F1
+<<<<<<< HEAD
 env: standard
 
 env_variables:
@@ -9,3 +10,6 @@ env_variables:
 automatic_scaling:
   min_instances: 0
   max_instances: 1
+=======
+env: standard
+>>>>>>> 325f5c2a93dfb6def093b5121d1c7405516c8d9f
