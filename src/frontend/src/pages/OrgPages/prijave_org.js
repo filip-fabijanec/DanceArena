@@ -98,6 +98,34 @@ function UpravljanjePrijavama() {
     }
   };
 
+  const handleLock = async () => {
+  if (!window.confirm("Zaključavanjem prijava više nema izmjena. Nastaviti?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/lock`,
+      { method: "PUT" }
+    );
+
+    const text = await response.text();
+    console.log("STATUS:", response.status);
+    console.log("RESPONSE:", text);
+
+    if (response.ok) {
+      alert("Prijave su zaključane");
+      fetchData();
+    } else {
+      alert("Greška pri zaključavanju: " + text);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('hr-HR', {
@@ -151,13 +179,26 @@ function UpravljanjePrijavama() {
         </div>
       )}
 
-      <a href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-export"
-      >
-            Preuzmi startnu listu (PDF)
-      </a>
+
+      {/* 🔒 LOCK / PDF AKCIJE – TOČNO OVDJE */}
+      {competition && !competition.isLocked && (
+        <button className="btn-lock" onClick={handleLock}>
+          Zaključi prijave
+        </button>
+      )}
+
+      {competition?.isLocked && (
+        <a
+          href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-export"
+        >
+          Preuzmi startnu listu (PDF)
+        </a>
+      )}
+
+
 
       {/* Lista prijava */}
       {performances.length === 0 ? (
@@ -219,7 +260,7 @@ function UpravljanjePrijavama() {
 
               <div className="performance-actions">
                 {/* PRIHVATI – samo ako je plaćeno */}
-                {!perf.approved && perf.paid && (
+                {!competition.isLocked && !perf.approved && perf.paid && (
                   <button
                     onClick={() => handleApprove(perf._id)}
                     className="btn-approve"
@@ -236,7 +277,7 @@ function UpravljanjePrijavama() {
                 )}
 
                 {/* OBRIŠI – samo dok nije prihvaćeno */}
-                {!perf.approved && (
+                {!competition.isLocked && !perf.approved && (
                   <button
                     onClick={() => setDeleteModal({
                       show: true,

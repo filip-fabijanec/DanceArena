@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
     
     // ← DODAJ POPULATE prije slanja odgovora
     await newPerformance.populate("clubId", "name surname clubName clubLocation");
-    await newPerformance.populate("competitionId", "name date location");
+    await newPerformance.populate("competitionId", "name date location isLocked");
     
     res.status(201).json(newPerformance);
   } catch (error) {
@@ -52,7 +52,7 @@ router.put("/:id/approve", async (req, res) => {
   try {
     const performance = await Performance.findById(req.params.id)
       .populate("clubId", "name surname clubName")
-      .populate("competitionId", "name date location");
+      .populate("competitionId", "name date location isLocked");
 
     if (!performance) {
       return res.status(404).json({ error: "Performance not found" });

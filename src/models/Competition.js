@@ -29,6 +29,12 @@ const competitionSchema = new mongoose.Schema({
     default: "upcoming",
   },
 
+  isLocked: {
+  type: Boolean,
+  default: false,
+  },
+
+
   referees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
@@ -51,5 +57,4 @@ competitionSchema.virtual('autoStatus').get(function() {
 competitionSchema.set('toJSON', { virtuals: true });
 competitionSchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.model("Competition", competitionSchema);
 module.exports = mongoose.model("Competition", competitionSchema);
