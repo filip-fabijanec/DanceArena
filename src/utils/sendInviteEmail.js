@@ -1,20 +1,31 @@
 const nodemailer = require("nodemailer");
 
 const sendInviteEmail = async ({ to, token, competitionName }) => {
-  // Pazi da link odgovara tvojoj Frontend ruti
+  // Pazi da ovaj link odgovara tvom frontendu
   const inviteLink = `https://dancearena.onrender.com/registracija?invite=${token}`;
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 465,              // <--- PROMJENA: SSL port je stabilniji na Renderu
-    secure: true,           // <--- PROMJENA: Mora biti true za port 465
+    port: 587,              // <--- PROMJENA: Koristimo 587 umjesto 465
+    secure: false,          // <--- PROMJENA: Mora biti false za port 587
     auth: {
-      user: process.env.MAIL_USER, // Provjeri zove li se varijabla ovako u .env
-      pass: process.env.MAIL_PASS, // Ovo mora biti Google App Password
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false, // Pomaže kod problema s certifikatima na Renderu
+      ciphers: "SSLv3"
+    },
+    // Dodajemo timeout da se server ne smrzne ako Gmail ne odgovara
+    connectionTimeout: 10000, // 10 sekundi
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 
   try {
+    // Provjera konekcije prije slanja (opcionalno, ali korisno za debug)
+    await transporter.verify();
+
     await transporter.sendMail({
       from: `"Dance Arena" <${process.env.MAIL_USER}>`,
       to,
@@ -32,10 +43,11 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
         </div>
       `,
     });
-    console.log(`Email poslan na: ${to}`);
+    console.log(`✅ Email uspješno poslan na: ${to}`);
   } catch (error) {
-    console.error(`Greška pri slanju na ${to}:`, error);
-    // Ne bacamo error ovdje da ne srušimo cijeli request ako jedan mail ne prođe
+    console.error(`❌ Greška pri slanju na ${to}:`, error.message);
+    // Ovdje NE bacamo error (throw error) kako se kreiranje natjecanja ne bi prekinulo
+    // ako jedan mail ne prođe.
   }
 };
 

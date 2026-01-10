@@ -79,11 +79,13 @@ function KreirajNatjecanje() {
   };
 
   const validateReferees = () => {
-    const count = selectedReferees.length;
-    if (count < 3) return { valid: false, message: "Minimalno 3 suca" };
-    if (count % 2 === 0) return { valid: false, message: "Broj sudaca mora biti neparan" };
-    return { valid:  true, message: `✅ Odabrano ${count} sudaca` };
-  };
+    // OVDJE JE PROMJENA: Zbrajamo odabrane sudce (iz baze) I pozvane (emailom)
+    const count = selectedReferees.length + invitedRefereeEmails.length;
+
+    if (count < 3) return { valid: false, message: "Minimalno 3 suca" };
+    if (count % 2 === 0) return { valid: false, message: "Broj sudaca mora biti neparan" };
+    return { valid:  true, message: `✅ Odabrano ${count} sudaca` };
+  };
 
   const refereesValidation = validateReferees();
 
