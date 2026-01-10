@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const Competition = require("../models/Competition");
 const User = require("../models/User");
 const Invite = require("../models/Invite");
-const sendInviteEmail = require("../utils/SendInviteEmail.js");
+const sendInviteEmail = require("../utils/SendInviteEmail");
 
 
 // =======================
