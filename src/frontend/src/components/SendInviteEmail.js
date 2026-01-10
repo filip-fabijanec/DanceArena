@@ -4,10 +4,12 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
   const inviteLink = `https://dancearena.onrender.com/registracija?invite=${token}`;
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth:  {
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
       user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS, // app password
+      pass: process. env.MAIL_PASS,
     },
   });
 
@@ -15,7 +17,7 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
     from: `"Dance Arena" <${process.env. MAIL_USER}>`,
     to,
     subject: "Poziv za suđenje na plesnom natjecanju",
-    html: `
+    html:  `
       <h2>Pozvani ste kao sudac</h2>
       <p>Pozvani ste kao sudac za natjecanje <strong>${competitionName || "Dance Arena"}</strong></p>
       <p>Kliknite na link ispod kako biste dovršili registraciju:</p>
@@ -23,7 +25,7 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
         Prihvati poziv
       </a>
       <p style="margin-top: 20px; font-size: 12px; color: #666;">
-        Ili kopirajte ovaj link: ${inviteLink}
+        Ili kopirajte ovaj link:  ${inviteLink}
       </p>
       <p style="font-size: 12px; color: #999;">Link vrijedi 7 dana. </p>
     `,
