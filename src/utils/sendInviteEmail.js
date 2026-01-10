@@ -1,30 +1,32 @@
 const nodemailer = require("nodemailer");
 
 const sendInviteEmail = async ({ to, token, competitionName }) => {
-  // Pazi da ovaj link odgovara tvom frontendu
   const inviteLink = `https://dancearena.onrender.com/registracija?invite=${token}`;
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,              // <--- PROMJENA: Koristimo 587 umjesto 465
-    secure: false,          // <--- PROMJENA: Mora biti false za port 587
+    port: 587,              // Port 587 je standard za Render
+    secure: false,          // Mora biti false za 587
     auth: {
       user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
+      pass: process.env.MAIL_PASS, // Tvoja App Password
     },
     tls: {
-      rejectUnauthorized: false, // Pomaže kod problema s certifikatima na Renderu
-      ciphers: "SSLv3"
+      // OVO JE PROMJENA: Maknuli smo "SSLv3" jer to Gmail blokira!
+      rejectUnauthorized: false, 
     },
-    // Dodajemo timeout da se server ne smrzne ako Gmail ne odgovara
+    // Timeout postavke (bitno da se ne vrti beskonačno)
     connectionTimeout: 10000, // 10 sekundi
     greetingTimeout: 10000,
     socketTimeout: 10000,
   });
 
   try {
-    // Provjera konekcije prije slanja (opcionalno, ali korisno za debug)
+    console.log(`⏳ Pokušavam spojiti na Gmail za: ${to}...`);
+    
+    // Provjera konekcije prije slanja
     await transporter.verify();
+    console.log("✅ SMTP Konekcija uspješna!");
 
     await transporter.sendMail({
       from: `"Dance Arena" <${process.env.MAIL_USER}>`,
@@ -45,9 +47,8 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
     });
     console.log(`✅ Email uspješno poslan na: ${to}`);
   } catch (error) {
-    console.error(`❌ Greška pri slanju na ${to}:`, error.message);
-    // Ovdje NE bacamo error (throw error) kako se kreiranje natjecanja ne bi prekinulo
-    // ako jedan mail ne prođe.
+    console.error(`❌ GREŠKA pri slanju na ${to}:`, error.message);
+    // Ne bacamo error da se kreiranje natjecanja nastavi
   }
 };
 
