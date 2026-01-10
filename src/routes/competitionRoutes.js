@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 
+// Modeli
 const Competition = require("../models/Competition");
 const User = require("../models/User");
 const Invite = require("../models/Invite");
-const sendInviteEmail = require("../utils/SendInviteEmail");
 
+// Utility za slanje maila
+const sendInviteEmail = require("../utils/sendInviteEmail");
 
 // =======================
 // GET /competitions/upcoming
@@ -22,7 +24,7 @@ router.get("/upcoming", async (req, res) => {
       .populate("organizer", "name surname")
       .sort({ date: 1 });
 
-    const upcomingCompetitions = competitions. filter(comp => {
+    const upcomingCompetitions = competitions.filter(comp => {
       return comp.autoStatus === 'upcoming' || comp.autoStatus === 'ongoing';
     });
 
@@ -31,7 +33,6 @@ router.get("/upcoming", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // =======================
 // GET /competitions/upcoming/after-2-days
@@ -56,9 +57,8 @@ router.get("/upcoming/after-2-days", async (req, res) => {
   }
 });
 
-
 // =======================
-// GET /competitions/judge/: judgeId
+// GET /competitions/judge/:judgeId
 // =======================
 router.get("/judge/:judgeId", async (req, res) => {
   try {
@@ -79,13 +79,12 @@ router.get("/judge/:judgeId", async (req, res) => {
   }
 });
 
-
 // =======================
 // GET /competitions/:id (pojedinačno natjecanje)
 // =======================
 router.get("/:id", async (req, res) => {
   try {
-    const competition = await Competition.findById(req. params.id)
+    const competition = await Competition.findById(req.params.id)
       .populate("organizer", "name surname email")
       .populate("referees", "name surname email");
 
@@ -99,16 +98,14 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
 // =======================
 // GET /competitions (sa query params)
-// NAPOMENA: OVO MORA BITI ZADNJE GET PRIJE POST! 
 // =======================
 router.get("/", async (req, res) => {
   try {
-    const query = req.query. organizerId
-      ? { organizer: req. query.organizerId }
-      :  {};
+    const query = req.query.organizerId
+      ? { organizer: req.query.organizerId }
+      : {};
 
     const competitions = await Competition.find(query)
       .populate("organizer", "name surname")
@@ -116,7 +113,7 @@ router.get("/", async (req, res) => {
       .sort({ date: -1 });
 
     if (!competitions || competitions.length === 0) {
-      return res. status(200).json([]);
+      return res.status(200).json([]);
     }
 
     const competitionsWithStatus = competitions.map(comp => {
@@ -130,7 +127,6 @@ router.get("/", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // =======================
 // POST /competitions (KREIRANJE)
@@ -152,8 +148,8 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     // Osnovna validacija
-    if (!name || !date || !location || ! organizer) {
-      return res. status(400).json({ error: "Nedostaju obavezna polja" });
+    if (!name || !date || !location || !organizer) {
+      return res.status(400).json({ error: "Nedostaju obavezna polja" });
     }
 
     // 1. Dohvati korisnika iz baze
@@ -162,18 +158,18 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Korisnik nije pronađen." });
     }
 
-    // 2. PROVJERA:  Je li korisnik uopće organizator?
-    if (user. role !== 'organizator') {
-      return res. status(403).json({ error: "Samo organizatori mogu kreirati natjecanja." });
+    // 2. PROVJERA: Je li korisnik uopće organizator?
+    if (user.role !== 'organizator') {
+      return res.status(403).json({ error: "Samo organizatori mogu kreirati natjecanja." });
     }
 
-    // 3. PROVJERA PLAĆANJA (Ključni dio)
+    // 3. PROVJERA PLAĆANJA
     const isSubscriptionActive = user.subscriptionStatus === 'active';
     const isDateValid = user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date();
 
     if (!isSubscriptionActive || !isDateValid) {
       return res.status(403).json({
-        error: "Vaša članarina je istekla.  Molimo platite članarinu kako biste kreirali novo natjecanje."
+        error: "Vaša članarina je istekla. Molimo platite članarinu kako biste kreirali novo natjecanje."
       });
     }
 
@@ -188,7 +184,7 @@ router.post("/", async (req, res) => {
       groupSizes,
       registrationFee,
       organizer,
-      referees:  referees || [],
+      referees: referees || [],
     });
 
     await competition.save();
@@ -197,31 +193,33 @@ router.post("/", async (req, res) => {
     // INVITE REFEREE EMAILS
     // =======================
     if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
+      
       for (const rawEmail of invitedRefereeEmails) {
         const email = rawEmail.toLowerCase().trim();
+        if (!email) continue;
 
-        if (! email) continue;
-
-        // Ako user već postoji kao sudac → samo ga dodaj
+        // A) Ako user već postoji kao sudac -> samo ga dodaj u natjecanje
         const existingUser = await User.findOne({ email });
 
         if (existingUser && existingUser.role === "sudac") {
           if (!competition.referees.includes(existingUser._id)) {
             competition.referees.push(existingUser._id);
           }
-          continue;
+          continue; 
         }
 
-        // Ako već postoji aktivni invite → preskoči
+        // B) Ako user ne postoji ili nije sudac -> šaljemo INVITE
+        
+        // Provjeri postoji li već aktivni invite
         const existingInvite = await Invite.findOne({
           email,
           competition: competition._id,
           status: "pending",
         });
 
-        if (existingInvite) continue;
+        if (existingInvite) continue; // Već je pozvan
 
-        // Kreiraj token
+        // Kreiraj token (32 bajta hex)
         const token = crypto.randomBytes(32).toString("hex");
 
         const invite = new Invite({
@@ -239,16 +237,16 @@ router.post("/", async (req, res) => {
         try {
           await sendInviteEmail({
             to: email,
-            token,
+            token, // Ovo šaljemo u e-mailu kao ?invite=token
             competitionName: name,
           });
         } catch (emailError) {
           console.error(`Greška pri slanju emaila za ${email}:`, emailError);
-          // Invite se sprema čak i ako mail fail-a
+          // Ne prekidamo petlju, samo logiramo grešku
         }
       }
 
-      // Spremi dodane suce
+      // Spremi promjene na natjecanju (ako smo dodali postojeće suce)
       await competition.save();
     }
 
@@ -260,13 +258,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 // =======================
-// PUT /competitions/: id (ažuriraj natjecanje)
+// PUT /competitions/:id (ažuriraj natjecanje)
 // =======================
-router.put("/: id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const updatedCompetition = await Competition. findByIdAndUpdate(
+    const updatedCompetition = await Competition.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
@@ -282,13 +279,12 @@ router.put("/: id", async (req, res) => {
   }
 });
 
-
 // =======================
 // PUT /competitions/:id/lock
 // =======================
 router.put("/:id/lock", async (req, res) => {
   try {
-    const competition = await Competition.findById(req.params. id);
+    const competition = await Competition.findById(req.params.id);
 
     if (!competition) {
       return res.status(404).json({ error: "Competition not found" });
@@ -308,11 +304,10 @@ router.put("/:id/lock", async (req, res) => {
   }
 });
 
-
 // =======================
-// DELETE /competitions/: id (obriši natjecanje)
+// DELETE /competitions/:id (obriši natjecanje)
 // =======================
-router.delete("/: id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await Competition.findByIdAndDelete(req.params.id);
     res.status(204).send();
@@ -320,6 +315,5 @@ router.delete("/: id", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 module.exports = router;
