@@ -33,7 +33,7 @@ function KreirajNatjecanje() {
     'Cicibani (2-7 god. )',
     'Djeca (8-11 god.)',
     'Juniori (12-16 god.)',
-    'Seniori (17 + god.)'
+    'Seniori (17+ god.)'
   ];
 
   const groupSizeOptions = [
@@ -42,7 +42,7 @@ function KreirajNatjecanje() {
     'Trio (3 plesača)',
     'Kvartet (4 plesača)',
     'Grupa (5-12 plesača)',
-    'Formacija/produkcija (13 + plesača)'
+    'Formacija/produkcija (13+ plesača)'
   ];
 
   useEffect(() => {
@@ -88,7 +88,7 @@ function KreirajNatjecanje() {
   const refereesValidation = validateReferees();
 
   const handleAddEmail = () => {
-    if (emailInput.trim() && !invitedRefereeEmails.includes(emailInput.trim())) {
+    if (emailInput.trim() && !invitedRefereeEmails. includes(emailInput.trim())) {
       setInvitedRefereeEmails([...invitedRefereeEmails, emailInput.trim()]);
       setEmailInput("");
     }
@@ -114,14 +114,14 @@ function KreirajNatjecanje() {
       const competitionData = {
         ... formData,
         ageCategories: selectedAgeCategories,
-        groupSizes: selectedGroupSizes,
+        groupSizes:  selectedGroupSizes,
         danceStyles: formData.danceStyles
           . split(/[,\n]/)
           .map(s => s.trim())
           .filter(Boolean),
         registrationFee: Number(formData.registrationFee),
         organizer:  currentUser._id,
-        referees: selectedReferees,
+        referees:  selectedReferees,
         invitedRefereeEmails,
       };
 
@@ -153,26 +153,146 @@ function KreirajNatjecanje() {
 
       <form onSubmit={handleSubmit}>
 
-        {/* OSTATAK FORME OSTAVLJEN KAKAV JE BIO */}
-
-        {/* SUCI - SEKCIJA 1: ODABIR IZ BAZE */}
+        {/* NAZIV NATJECANJA */}
         <div className="form-section">
-          <h3>Odabir sudaca</h3>
+          <div className="form-group">
+            <label htmlFor="name">Naziv natjecanja *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData. name}
+              onChange={handleChange}
+              placeholder="npr. Festival suvremenog plesa 2024"
+              required
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="date">Datum *</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="location">Lokacija *</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                value={formData. location}
+                onChange={handleChange}
+                placeholder="Grad, Država"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Opis natjecanja</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Detaljan opis natjecanja..."
+              rows="4"
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="danceStyles">Plesni stilovi (odvojeni zarezom)</label>
+              <textarea
+                id="danceStyles"
+                name="danceStyles"
+                value={formData. danceStyles}
+                onChange={handleChange}
+                placeholder="npr. Hip-Hop, Jazz, Contemporary"
+                rows="2"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="registrationFee">Cijena registracije (€)</label>
+              <input
+                type="number"
+                id="registrationFee"
+                name="registrationFee"
+                value={formData.registrationFee}
+                onChange={handleChange}
+                placeholder="0. 00"
+                step="0.01"
+                min="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* GODINE */}
+        <div className="form-section">
+          <h3>Odaberi dobne kategorije</h3>
+          <div className="checkbox-grid">
+            {ageCategoryOptions.map(option => (
+              <label key={option} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={selectedAgeCategories.includes(option)}
+                  onChange={() => toggleCheckbox(option, setSelectedAgeCategories, selectedAgeCategories)}
+                />
+                <span>{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* VELIČINE GRUPA */}
+        <div className="form-section">
+          <h3>Odaberi veličine grupa</h3>
+          <div className="checkbox-grid">
+            {groupSizeOptions. map(option => (
+              <label key={option} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={selectedGroupSizes. includes(option)}
+                  onChange={() => toggleCheckbox(option, setSelectedGroupSizes, selectedGroupSizes)}
+                />
+                <span>{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* SUCI - SEKCIJA 1:  ODABIR IZ BAZE */}
+        <div className="form-section">
+          <h3>Odabir sudaca *</h3>
 
           <div className="referees-grid">
             {referees.map(ref => (
-              <label key={ref._id} className={selectedReferees.includes(ref._id) ? "selected" : ""}>
+              <div
+                key={ref._id}
+                className={`referee-card ${selectedReferees.includes(ref._id) ? 'selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   checked={selectedReferees.includes(ref._id)}
                   onChange={() => handleRefereeToggle(ref._id)}
                 />
-                {ref.name} {ref. surname}
-              </label>
+                <div className="referee-info">
+                  <span className="referee-name">{ref.name} {ref.surname}</span>
+                  <span className="referee-email">{ref.email}</span>
+                </div>
+                {selectedReferees.includes(ref._id) && <span className="checkmark">✓</span>}
+              </div>
             ))}
           </div>
 
-          <div className={refereesValidation.valid ? "valid" : "invalid"}>
+          <div className={`referee-validation ${refereesValidation.valid ? 'valid' : 'invalid'}`}>
             {refereesValidation.message}
           </div>
         </div>
@@ -186,8 +306,8 @@ function KreirajNatjecanje() {
               type="email"
               placeholder="email sudca"
               value={emailInput}
-              onChange={(e) => setEmailInput(e.target.value)}
-              onKeyPress={(e) => e. key === 'Enter' && (e.preventDefault(), handleAddEmail())}
+              onChange={(e) => setEmailInput(e.target. value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEmail())}
             />
             <button
               type="button"
@@ -200,7 +320,7 @@ function KreirajNatjecanje() {
           {invitedRefereeEmails.length > 0 && (
             <div className="invited-emails-list">
               <h4>Pozvani sudci:</h4>
-              {invitedRefereeEmails. map(email => (
+              {invitedRefereeEmails.map(email => (
                 <div key={email} className="invited-email-item">
                   <span>{email}</span>
                   <button
@@ -216,10 +336,10 @@ function KreirajNatjecanje() {
           )}
         </div>
 
-        {message && <div className={isError ?  "error" : "success"}>{message}</div>}
+        {message && <div className={`message ${isError ? "error" : "success"}`}>{message}</div>}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Kreiranje..." : "Kreiraj natjecanje"}
+        <button type="submit" className="submit-button" disabled={loading}>
+          {loading ? "Kreiranje..." :  "Kreiraj natjecanje"}
         </button>
       </form>
     </div>
