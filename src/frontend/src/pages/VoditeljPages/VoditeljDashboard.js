@@ -144,12 +144,19 @@ function VoditeljDashboard() {
                       </div>
                     </div>
 
-                    <Link 
-                      to={`/voditelj/prijavi-nastup/${comp._id}`} 
-                      className="btn-primary full-width"
-                    >
-                      Prijavi nastup
-                    </Link>
+                    {!comp.isLocked ? (
+                      <Link 
+                        to={`/voditelj/prijavi-nastup/${comp._id}`} 
+                        className="btn-primary full-width"
+                      >
+                        Prijavi nastup
+                      </Link>
+                    ) : (
+                      <button className="btn-disabled full-width" disabled>
+                        Prijave su zaključane
+                      </button>
+                    )}
+
                   </div>
                 </div>
               ))}
@@ -225,7 +232,7 @@ function VoditeljDashboard() {
                     </div>
                     {perf.competitionId?.isLocked && (
                     <a
-                      href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${perf.competitionId._id}`}
+                      href={`${process.env.REACT_APP_API_URL}/competitions/${perf.competitionId._id}/pdf`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-secondary"

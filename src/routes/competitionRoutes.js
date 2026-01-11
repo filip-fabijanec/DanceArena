@@ -8,6 +8,7 @@ const Invite = require("../models/Invite");
 const sendInviteEmail = require("../utils/sendInviteEmail");
 
 
+
 // =======================
 // GET /competitions/upcoming
 // =======================
@@ -264,7 +265,7 @@ router.post("/", async (req, res) => {
 // =======================
 // PUT /competitions/: id (ažuriraj natjecanje)
 // =======================
-router.put("/: id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const updatedCompetition = await Competition. findByIdAndUpdate(
       req.params.id,
@@ -312,12 +313,109 @@ router.put("/:id/lock", async (req, res) => {
 // =======================
 // DELETE /competitions/: id (obriši natjecanje)
 // =======================
-router.delete("/: id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await Competition.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+const authMiddleware = require("../middleware/authMiddleware");
+const PDFDocument = require("pdfkit");
+const Performance = require("../models/Performance");
+
+router.get("/:id/pdf", authMiddleware, async (req, res) => {
+  try {
+    const competition = await Competition.findById(req.params.id);
+    if (!competition || !competition.isLocked) {
+      return res.status(403).json({ error: "Natjecanje nije zaključano" });
+    }
+
+    const user = req.user;
+
+    // ❌ ADMIN NEMA PRAVO
+    if (user.role === "administrator") {
+      return res.status(403).json({ error: "Administrator nema pristup PDF-u" });
+    }
+
+    // ✅ ORGANIZATOR
+    const isOrganizer =
+      competition.organizer.toString() === user._id.toString();
+
+    // ✅ SUDAC
+    const isReferee =
+      competition.referees.some(
+        ref => ref.toString() === user._id.toString()
+      );
+
+    // ✅ VODITELJ S PRIJAVOM
+    const hasPerformance =
+      user.role === "voditelj" &&
+      await Performance.exists({
+        competitionId: competition._id,
+        clubId: user._id
+      });
+
+    if (!isOrganizer && !isReferee && !hasPerformance) {
+      return res.status(403).json({ error: "Nemaš pravo na PDF" });
+    }
+
+    const performances = await Performance.find({
+      competitionId: competition._id,
+      approved: true
+    })
+      .populate("clubId", "clubName")
+      .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
+
+    const doc = new PDFDocument({ margin: 40 });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="startna_lista_${competition._id}.pdf"`
+    );
+
+    doc.pipe(res);
+
+    doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
+    doc.moveDown();
+
+    doc.text(`Natjecanje: ${competition.name}`);
+    doc.text(`Datum: ${competition.date.toLocaleDateString("hr-HR")}`);
+    doc.text(`Lokacija: ${competition.location}`);
+    doc.moveDown(2);
+
+    const grouped = {};
+
+    performances.forEach(p => {
+      const key = `${p.ageCategory} | ${p.danceStyle} | ${p.groupSize}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(p);
+    });
+
+    for (const category in grouped) {
+      doc.fontSize(14).text(category, { underline: true });
+      doc.moveDown(0.5);
+
+      grouped[category].forEach((p, i) => {
+        const mins = Math.floor(p.performanceDuration / 60);
+        const secs = p.performanceDuration % 60;
+        doc.fontSize(11).text(
+          `${i + 1}. ${p.choreographyName} – ${p.clubId.clubName} (${mins}:${secs
+            .toString()
+            .padStart(2, "0")})`
+        );
+      });
+
+      doc.moveDown(1.5);
+    }
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Greška pri generiranju PDF-a");
   }
 });
 

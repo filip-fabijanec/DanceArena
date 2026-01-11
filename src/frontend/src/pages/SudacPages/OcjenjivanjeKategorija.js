@@ -186,6 +186,18 @@ function OcjenjivanjeKategorija() {
           })}
         </div>
       )}
+      {competition.isLocked && (
+        <a
+          href={`${process.env.REACT_APP_API_URL}/competitions/${competition._id}/pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="card-button"
+          style={{ marginTop: '30px', display: 'inline-block' }}
+        >
+          📄 Preuzmi startnu listu (PDF)
+        </a>
+      )}
+
     </div>
   );
 }
