@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
     
     const performances = await Performance.find(query)
       .populate("clubId", "name surname clubName clubLocation")  // ← DODAJ POPULATE
-      .populate("competitionId", "name date location")           // ← DODAJ POPULATE
+      .populate("competitionId", "name date location isLocked")           // ← DODAJ POPULATE
       .sort({ createdAt: -1 });
     
     if(!performances || performances.length === 0){
@@ -98,7 +98,7 @@ router.put("/:id", async (req, res) => {
       { new: true, runValidators: true }
     )
       .populate("clubId", "name surname clubName clubLocation")
-      .populate("competitionId", "name date location");
+      .populate("competitionId", "name date location isLocked");
     
     if (!updatedPerformance) {
       return res.status(404).json({ error: "Performance not found" });

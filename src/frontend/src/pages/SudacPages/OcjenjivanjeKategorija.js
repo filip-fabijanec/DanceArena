@@ -83,6 +83,39 @@ function OcjenjivanjeKategorija() {
     }
   };
 
+    const downloadPdf = async (competitionId) => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        alert("Greška pri preuzimanju PDF-a: " + text);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "startna_lista.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Greška pri preuzimanju PDF-a");
+    }
+  };
+
+
   if (loading) return <p>Učitavanje...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!competition) return null;
@@ -186,17 +219,18 @@ function OcjenjivanjeKategorija() {
           })}
         </div>
       )}
-      {competition.isLocked && (
-        <a
-          href={`${process.env.REACT_APP_API_URL}/competitions/${competition._id}/pdf`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="card-button"
-          style={{ marginTop: '30px', display: 'inline-block' }}
-        >
-          📄 Preuzmi startnu listu (PDF)
-        </a>
+
+
+      {competition?.isLocked && (
+          <button
+            onClick={() => downloadPdf(competition._id)}
+            className="card-button"
+            style={{ marginTop: "30px" }}
+          >
+            📄 Preuzmi startnu listu (PDF)
+          </button>
       )}
+      
 
     </div>
   );

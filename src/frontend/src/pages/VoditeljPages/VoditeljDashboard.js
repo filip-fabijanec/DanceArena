@@ -57,6 +57,39 @@ function VoditeljDashboard() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+    const downloadPdf = async (competitionId) => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        alert("Greška pri preuzimanju PDF-a: " + text);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "startna_lista.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Greška pri preuzimanju PDF-a");
+    }
+  };
+
+
   if (loading) {
     return (
       <div>
@@ -231,15 +264,13 @@ function VoditeljDashboard() {
                       <span className="detail-value">{perf.paid ? 'Da' : 'Ne'}</span>
                     </div>
                     {perf.competitionId?.isLocked && (
-                    <a
-                      href={`${process.env.REACT_APP_API_URL}/competitions/${perf.competitionId._id}/pdf`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-secondary"
-                    >
-                      Preuzmi startnu listu (PDF)
-                    </a>
-                  )}
+                      <button
+                        onClick={() => downloadPdf(perf.competitionId._id)}
+                        className="btn-secondary"
+                      >
+                        Preuzmi startnu listu (PDF)
+                      </button>
+                    )}
 
                   </div>
                 </div>
