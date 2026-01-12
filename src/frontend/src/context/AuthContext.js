@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 1. KREIRANJE KONTEKSTA (Ovo mora postojati)
+// 1.  KREIRANJE KONTEKSTA (Ovo mora postojati)
 const AuthContext = createContext();
 
 // 2. EXPORT HOOKA (Ovo je ono na što se build žali da fali!)
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/users/me`, 
         {
-          method: "GET",
+          method:  "GET",
           headers: { 
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
@@ -67,12 +67,12 @@ export const AuthProvider = ({ children }) => {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/users/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: googleCredential }),
+        body: JSON.stringify({ credential: googleCredential }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (! res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data. token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       setCurrentUser(data.user);
       return data.user;
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data. token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       setCurrentUser(data.user);
       return data.user;
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ currentUser, loginWithGoogle, loginWithSecret, logout, loading, refreshUser }}>
-      {!loading && children}
+      {! loading && children}
     </AuthContext.Provider>
   );
 };
