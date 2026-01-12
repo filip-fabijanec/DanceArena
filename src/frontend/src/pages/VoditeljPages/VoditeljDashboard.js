@@ -10,8 +10,27 @@ function VoditeljDashboard() {
   const [competitions, setCompetitions] = useState([]);
   const [myPerformances, setMyPerformances] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
 
   useEffect(() => {
+    // Provjeri payment success
+    const params = new URLSearchParams(window. location.search);
+    if (params.get('payment_success') === 'true') {
+      setMessage('✅ Plaćanje uspješno! Vaš nastup je registriran.');
+      setMessageType('success');
+      // Očisti URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Ukloni poruku nakon 5 sekundi
+      setTimeout(() => setMessage(''), 5000);
+    }
+    if (params.get('payment_cancelled') === 'true') {
+      setMessage('❌ Plaćanje je otkazano. Pokušajte ponovno.');
+      setMessageType('error');
+      window.history.replaceState({}, document.title, window.location. pathname);
+      setTimeout(() => setMessage(''), 5000);
+    }
+
     fetchData();
   }, [currentUser]);
 
@@ -27,8 +46,8 @@ function VoditeljDashboard() {
       }
 
       // Dohvati moje prijave
-      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances?clubId=${currentUser._id}`);
-      if (perfResponse.ok) {
+      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances? clubId=${currentUser._id}`);
+      if (perfResponse. ok) {
         const perfData = await perfResponse.json();
         setMyPerformances(perfData);
       } else if (perfResponse.status === 404) {
@@ -57,7 +76,7 @@ function VoditeljDashboard() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-    const downloadPdf = async (competitionId) => {
+  const downloadPdf = async (competitionId) => {
     try {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
@@ -66,14 +85,14 @@ function VoditeljDashboard() {
         }
       );
 
-      if (!res.ok) {
+      if (! res.ok) {
         const text = await res.text();
         alert("Greška pri preuzimanju PDF-a: " + text);
         return;
       }
 
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      const url = window. URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
@@ -88,7 +107,6 @@ function VoditeljDashboard() {
       alert("Greška pri preuzimanju PDF-a");
     }
   };
-
 
   if (loading) {
     return (
@@ -107,7 +125,14 @@ function VoditeljDashboard() {
       <Navbar />
       <div className="dashboard-container">
         <h1>Voditelj Kluba Dashboard</h1>
-        <p className="welcome-text">Dobrodošli! Upravljajte prijavama i pratite natjecanja.</p>
+        <p className="welcome-text">Dobrodošli!  Upravljajte prijavama i pratite natjecanja.</p>
+
+        {/* ========== PORUKA ZA PLAĆANJE ========== */}
+        {message && (
+          <div className={`message-banner ${messageType}`}>
+            {message}
+          </div>
+        )}
 
         {/* ========== SEKCIJA 1: MOJ KLUB ========== */}
         <section className="dashboard-section">
@@ -125,7 +150,6 @@ function VoditeljDashboard() {
               <span className="info-label">Voditelj:</span>
               <span className="info-value">{currentUser.name} {currentUser.surname}</span>
             </div>
-            {/* <button className="btn-edit-club" disabled>✏️ Uredi podatke (uskoro)</button> */}
           </div>
         </section>
 
@@ -147,7 +171,7 @@ function VoditeljDashboard() {
                   <div className="card-body">
                     <div className="info-item">
                       <span className="icon"></span>
-                      <span>Datum: {formatDate(comp.date)}</span>
+                      <span>Datum:  {formatDate(comp.date)}</span>
                     </div>
                     <div className="info-item">
                       <span className="icon"></span>
@@ -165,7 +189,7 @@ function VoditeljDashboard() {
                     <div className="categories-summary">
                       <div className="category-item">
                         <strong>Dobne kategorije:</strong>
-                        <span>{comp.ageCategories.length} dostupnih</span>
+                        <span>{comp.ageCategories. length} dostupnih</span>
                       </div>
                       <div className="category-item">
                         <strong>Stilovi:</strong>
@@ -177,7 +201,7 @@ function VoditeljDashboard() {
                       </div>
                     </div>
 
-                    {!comp.isLocked ? (
+                    {! comp.isLocked ?  (
                       <Link 
                         to={`/voditelj/prijavi-nastup/${comp._id}`} 
                         className="btn-primary full-width"
@@ -205,12 +229,12 @@ function VoditeljDashboard() {
             <div className="empty-state">
               <p>Nemate prijavljenih nastupa.</p>
               <p style={{ fontSize: '14px', color: '#999' }}>
-                Prijavite se na natjecanje iznad!
+                Prijavite se na natjecanje iznad! 
               </p>
             </div>
           ) : (
             <div className="performances-list">
-              {myPerformances.map((perf) => (
+              {myPerformances. map((perf) => (
                 <div key={perf._id} className="performance-card">
                   <div className="performance-header">
                     <div>
@@ -219,7 +243,7 @@ function VoditeljDashboard() {
                         Natjecanje: {perf.competitionId?.name || 'N/A'}
                       </p>
                     </div>
-                    <span className={`status-badge ${perf.approved ? 'approved' : 'pending'}`}>
+                    <span className={`status-badge ${perf.approved ? 'approved' :  'pending'}`}>
                       {perf.approved ? 'Prihvaćeno' : 'Na čekanju'}
                     </span>
                   </div>
@@ -240,7 +264,7 @@ function VoditeljDashboard() {
                     <div className="detail-row">
                       <span className="detail-label">Kategorija:</span>
                       <span className="detail-value">
-                        {perf.ageCategory} / {perf.danceStyle} / {perf.groupSize}
+                        {perf. ageCategory} / {perf.danceStyle} / {perf.groupSize}
                       </span>
                     </div>
                     <div className="detail-row">
