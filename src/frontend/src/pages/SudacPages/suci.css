@@ -1,0 +1,141 @@
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.radio-label {
+  margin-right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  transition: all .15s ease;
+}
+
+.radio-label:hover {
+  background: #faf7fb;
+  transform: translateY(-1px);
+}
+
+.radio-label input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+/* Use navbar color for checked state (slightly lighter inner dot) */
+.radio-label input[type="radio"]:checked {
+  border-color: #667eea;
+  background: radial-gradient(circle,#fff 40%, rgba(0,0,0,0) 41%), #667eea;
+}
+
+.radio-label input[type="radio"]:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Polished styles for judge category layout */
+.age-category-container {
+  border: 1.5px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 18px;
+  background: linear-gradient(180deg, #fff, #fff);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.age-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 18px;
+  color: #0f1724;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+  background: #fff;
+}
+
+.age-header .age-icon { font-size: 20px; display: inline-flex; align-items: center; justify-content: center; }
+
+.group-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* group item card look */
+.group-item {
+  background: white;
+  padding: 12px 14px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: transform .12s ease, box-shadow .12s ease;
+  border: 1px solid rgba(15,15,20,0.04);
+}
+
+.group-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.06);
+}
+
+.group-left { flex: 1; }
+.group-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+
+.group-name {
+  font-weight: 600;
+  font-size: 1.04rem;
+}
+
+.group-meta {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.score-label { font-weight: 700; margin-bottom: 6px; display: block; }
+
+.radio-group.compact-radio { gap: 6px 8px; }
+
+.radio-label.small { padding: 6px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; }
+
+.radio-label.small input[type="radio"] { width: 16px; height: 16px; }
+
+/* show numeric labels beside small radios */
+.radio-num { font-size: 0.95rem; color: #111827; min-width: 14px; text-align: center; }
+
+.group-size-badge {
+  min-width: 36px;
+  min-height: 24px;
+  border-radius: 14px;
+  border: 1px solid #000;
+  padding: 4px 8px;
+  text-align: center;
+  color: #000;
+  font-weight: 700;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+/* responsive tweaks */
+@media (max-width: 640px) {
+  .radio-group { gap: 6px; }
+  .radio-label { padding: 4px 6px; }
+  .age-header { font-size: 1rem; }
+  .group-item { flex-direction: column; align-items: flex-start; }
+  .group-size-badge { margin-top: 8px; }
+}

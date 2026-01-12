@@ -1,31 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import './suci.css';
 
 function OcjenjivanjeKategorija() {
   const { competitionId } = useParams();
-  const auth = useAuth();
+  const auth = useAuth(); // Dodaj ovu liniju
   const [competition, setCompetition] = useState(null);
+  const [performances, setPerformances] = useState([]);
   const [scores, setScores] = useState({});
   const [status, setStatus] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [canJudge, setCanJudge] = useState(false); // only true when competition is 'ongoing'
 
   useEffect(() => {
-    const fetchCompetition = async () => {
+    const fetchCompetitionAndPerformances = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
-        if (!res.ok) throw new Error('Greška pri dohvaćanju podataka');
-        const data = await res.json();
-        setCompetition(data);
+        const [compRes, perfRes] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`),
+          axios.get(`${process.env.REACT_APP_API_URL}/performances/competition/${competitionId}`)
+        ].map(p => p.catch(e => e)));
+
+        if (compRes instanceof Error) {
+          throw compRes;
+        }
+        setCompetition(compRes.data);
+        setIsCompleted(compRes.data?.autoStatus === 'completed');
+        // only allow judging when competition is currently ongoing
+        setCanJudge(compRes.data?.autoStatus === 'ongoing');
+
+        if (perfRes instanceof Error) {
+          // 404 for no performances is okay — set empty array
+          if (perfRes.response && perfRes.response.status === 404) {
+            setPerformances([]);
+          } else {
+            console.error('Greška pri dohvaćanju nastupa:', perfRes);
+            setPerformances([]);
+          }
+        } else {
+          setPerformances(perfRes.data || []);
+        }
       } catch (err) {
+        console.error('Greška pri učitavanju natjecanja ili nastupa:', err);
         setError("Nije moguće učitati podatke za natjecanje.");
       } finally {
         setLoading(false);
       }
     };
-    fetchCompetition();
+    fetchCompetitionAndPerformances();
   }, [competitionId]);
 
   const handleScoreChange = (key, criterion, value) => {
@@ -43,78 +69,50 @@ function OcjenjivanjeKategorija() {
 
   const handleSubmit = async (key) => {
     const scoreData = scores[key];
-    // Provjeri da su sve tri ocjene unesene
-    if (
-      !scoreData ||
-      typeof scoreData.choreography !== 'number' ||
-      typeof scoreData.performance !== 'number' ||
-      typeof scoreData.rhythm !== 'number'
-    ) {
-      alert("Unesite sve ocjene od 1 do 10.");
+    // Allow submitting a single 'choreography' score, a single 'score', or all three criteria
+    if (!scoreData) {
+      alert("Unesite ocjenu prije slanja.");
       return;
     }
+
+    // Prevent submitting if competition is not ongoing
+    if (!canJudge) {
+      alert('Ocjenjivanje nije dopušteno — natjecanje nije u tijeku.');
+      return;
+    }
+
     setStatus(prev => ({ ...prev, [key]: 'Slanje...' }));
 
-    // Zbroji ocjene
-    const totalScore = scoreData.choreography + scoreData.performance + scoreData.rhythm;
+    // Odredi totalScore (prioritet: score -> single choreography -> sum of three)
+    let totalScore;
+    if (typeof scoreData.score === 'number') {
+      totalScore = scoreData.score;
+    } else if (typeof scoreData.choreography === 'number' && typeof scoreData.performance !== 'number' && typeof scoreData.rhythm !== 'number') {
+      totalScore = scoreData.choreography;
+    } else if (
+      typeof scoreData.choreography === 'number' &&
+      typeof scoreData.performance === 'number' &&
+      typeof scoreData.rhythm === 'number'
+    ) {
+      totalScore = scoreData.choreography + scoreData.performance + scoreData.rhythm;
+    } else {
+      alert("Unesite valjanu ocjenu (1-10) ili sve kriterije od 1 do 10.");
+      setStatus(prev => ({ ...prev, [key]: 'Greška pri slanju.' }));
+      return;
+    }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/scores`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          performanceId: key,
-          judgeId: auth?.currentUser?._id,
-          score: totalScore
-        })
+      await axios.post(`${process.env.REACT_APP_API_URL}/scores`, {
+        performanceId: key,
+        judgeId: auth?.currentUser?._id,
+        score: totalScore
       });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Greška pri slanju');
-      }
-      
       setStatus(prev => ({ ...prev, [key]: 'Uspješno poslano!' }));
     } catch (err) {
       setStatus(prev => ({ ...prev, [key]: 'Greška pri slanju.' }));
-      console.error("Greška pri slanju ocjene:", err.message);
+      console.error("Greška pri slanju ocjene:", err.response?.data || err.message);
     }
   };
-
-    const downloadPdf = async (competitionId) => {
-    try {
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
-        alert("Greška pri preuzimanju PDF-a: " + text);
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "startna_lista.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("Greška pri preuzimanju PDF-a");
-    }
-  };
-
 
   if (loading) return <p>Učitavanje...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -122,116 +120,99 @@ function OcjenjivanjeKategorija() {
 
   return (
     <div className="dashboard-container">
-      <Link to="/sudac/moja-natjecanja" className="card-button" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
+      <Link to="/sudac/moja-natjecanja" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
         ← Nazad na Moja Natjecanja
       </Link>
-      <h1>Ocjenjivanje po kategorijama i veličinama grupa</h1>
-      {competition.ageCategories.map(cat => (
-        <div key={cat}>
-          <h2>{cat}</h2>
-          {competition.groupSizes.map(size => {
-            const key = `${cat}_${size}`;
-            const perfStatus = status[key];
-            if (perfStatus === 'Uspješno poslano!') return null; // Sakrij ocjenjeno
-            const currentScores = scores[key] || {};
-            return (
-              <div key={size} style={{ marginLeft: '20px', marginBottom: '20px' }}>
-                <h3>Veličina grupe: {size}</h3>
-                <div className="score-form">
-                  <div className="score-input-group">
-                    <label>Koreografija (1-10):</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={currentScores.choreography || ''}
-                      onChange={e => handleScoreChange(key, 'choreography', e.target.value)}
-                      disabled={perfStatus === 'Uspješno poslano!'}
-                    />
-                  </div>
-                  <div className="score-input-group">
-                    <label>Nastup (1-10):</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={currentScores.performance || ''}
-                      onChange={e => handleScoreChange(key, 'performance', e.target.value)}
-                      disabled={perfStatus === 'Uspješno poslano!'}
-                    />
-                  </div>
-                  <div className="score-input-group">
-                    <label>Ritam (1-10):</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={currentScores.rhythm || ''}
-                      onChange={e => handleScoreChange(key, 'rhythm', e.target.value)}
-                      disabled={perfStatus === 'Uspješno poslano!'}
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleSubmit(key)}
-                    className="card-button"
-                    disabled={perfStatus === 'Slanje...' || perfStatus === 'Uspješno poslano!'}
-                  >
-                    {perfStatus || 'Pošalji ocjenu'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ))}
-      {competition.performances && (
-        <div style={{ marginTop: '40px' }}>
-          <h2>Ocjenjivanje nastupa</h2>
-          {competition.performances.map(perf => {
-            const currentScore = scores[perf._id]?.score || '';
-            const perfStatus = status[perf._id];
-            return (
-              <div key={perf._id} className="dashboard-card">
-                <h4>{perf.choreographyName}</h4>
-                <div>
-                  <label>Ocjena (0-30):</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="30"
-                    value={currentScore}
-                    onChange={e => setScores(prev => ({
-                      ...prev,
-                      [perf._id]: { score: Number(e.target.value) }
-                    }))}
-                    disabled={perfStatus === 'Uspješno poslano!'}
-                  />
-                  <button
-                    onClick={() => handleSubmit(perf._id)}
-                    className="card-button"
-                    disabled={perfStatus === 'Slanje...' || perfStatus === 'Uspješno poslano!'}
-                  >
-                    {perfStatus || 'Pošalji ocjenu'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <h1>Ocjenjivanje nastupa</h1>
+
+      {/* show message when not ongoing */}
+      {!canJudge && (
+        <p style={{ color: 'red' }}>Ocjenjivanje je moguće samo za natjecanja koja su u tijeku.</p>
       )}
 
-
-      {competition?.isLocked && (
-          <button
-            onClick={() => downloadPdf(competition._id)}
-            className="card-button"
-            style={{ marginTop: "30px" }}
-          >
-            📄 Preuzmi startnu listu (PDF)
-          </button>
+      {isCompleted && (
+        <p style={{ color: 'red' }}>Natjecanje je završeno. Ocjenjivanje nije dozvoljeno.</p>
       )}
-      
 
+ 
+
+      {/* Grupiraj izvedbe prema dobnoj kategoriji (godine) i sortiraj unutar kategorije po veličini grupe (solo prvo) */}
+      <div style={{ marginTop: '20px' }}>
+        {performances.length === 0 ? (
+          <p>Nema prijavljenih nastupa za ovo natjecanje.</p>
+        ) : (
+          (() => {
+            const groupedByAge = {};
+            performances.forEach(perf => {
+              const age = perf.ageCategory || 'Nepoznata kategorija';
+              if (!groupedByAge[age]) groupedByAge[age] = [];
+              groupedByAge[age].push(perf);
+            });
+
+            // sortiraj kategorije numerički ako je moguće, inače leksički
+            const ageKeys = Object.keys(groupedByAge).sort((a, b) => {
+              const na = Number(a), nb = Number(b);
+              if (!isNaN(na) && !isNaN(nb)) return na - nb;
+              return a.localeCompare(b);
+            });
+
+            return ageKeys.map(age => {
+              const perfs = groupedByAge[age].slice().sort((p1, p2) => {
+                // solo (groupSize === 1) prvo, pa rastuće prema veličini
+                return (p1.groupSize || 0) - (p2.groupSize || 0);
+              });
+
+              return (
+                <div key={age} className="age-category-container judging-container" style={{ marginBottom: 24 }}>
+                  <div className="age-header"><span className="age-icon">🎯</span>{age}</div>
+                  <div className="group-list">
+                    {perfs.map(perf => {
+                      const perfStatus = status[perf._id];
+                      return (
+                        <div key={perf._id} className="group-item" style={{ marginBottom: 12 }}>
+                          <div className="group-left">
+                            <div className="group-name">{perf.choreographyName || 'Bez naziva'}</div>
+                            <div className="group-meta">Veličina: {perf.groupSize || '-'}{perf.participants ? ` • Sudionici: ${perf.participants.length}` : ''}</div>
+
+                            <div className="score-form" style={{ marginTop: 8 }}>
+                              <label className="score-label">Ocjena (1-10):</label>
+                              <div className="radio-group compact-radio">
+                                {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                                  <label key={`${perf._id}-c-${n}`} className="radio-label small">
+                                    <input
+                                      type="radio"
+                                      name={`${perf._id}-choreography`}
+                                      value={n}
+                                      checked={Number(scores[perf._id]?.choreography) === n}
+                                      onChange={() => handleScoreChange(perf._id, 'choreography', n)}
+                                      disabled={isCompleted || perfStatus === 'Uspješno poslano!'}
+                                    />
+                                    <span className="radio-num">{n}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="group-right">
+                            <button
+                              onClick={() => handleSubmit(perf._id)}
+                              className="card-button btn-primary-blue"
+                              disabled={isCompleted || perfStatus === 'Slanje...' || perfStatus === 'Uspješno poslano!'}
+                            >
+                              {perfStatus || 'Pošalji ocjenu'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            });
+          })()
+        )}
+      </div>
     </div>
   );
 }

@@ -20,16 +20,25 @@ function SudacFolder() {
     }
 
     const fetchCompetitions = async () => {
-      // --- DIJAGNOSTIČKI BLOK ---
       const urlToFetch = `${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`;
       console.log("Pokušavam dohvatiti podatke s URL-a:", urlToFetch);
-      // --- KRAJ DIJAGNOSTIČKOG BLOKA ---
 
       try {
         const res = await fetch(urlToFetch);
-        if (!res.ok) throw new Error('Greška pri dohvaćanju podataka');
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-        setCompetitions(data || []);
+        // sort so that 'ongoing' competitions appear first, then 'upcoming', then 'completed'
+        const order = { ongoing: 0, upcoming: 1, completed: 2 };
+        const sorted = (data || []).slice().sort((a, b) => {
+          const sa = a.status || a.autoStatus || '';
+          const sb = b.status || b.autoStatus || '';
+          const diff = (order[sa] ?? 3) - (order[sb] ?? 3);
+          if (diff !== 0) return diff;
+          // fallback: earlier date first
+          return new Date(a.date) - new Date(b.date);
+        });
+
+        setCompetitions(sorted);
       } catch (err) {
         console.error("Greška pri dohvaćanju natjecanja:", err);
         setError("Nije moguće dohvatiti natjecanja. Provjerite konzolu za detalje.");
@@ -43,7 +52,7 @@ function SudacFolder() {
 
   return (
     <div className="dashboard-container">
-      <Link to="/sudac" className="card-button" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
+      <Link to="/sudac" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
         ← Nazad na Dashboard
       </Link>
       
@@ -61,12 +70,22 @@ function SudacFolder() {
                 <h3>{comp.name}</h3>
                 <p>📅 Datum: {new Date(comp.date).toLocaleDateString('hr-HR')}</p>
                 <p>📍 Lokacija: {comp.location}</p>
-                <button
-                  onClick={() => navigate(`/sudac/ocjenjivanje/${comp._id}`)}
-                  className="card-button"
-                >
-                  Ocijeni nastupe
-                </button>
+                {comp.status === 'completed' ? (
+                  <button className="card-button btn-danger" disabled>
+                    Natjecanje završeno
+                  </button>
+                ) : comp.status === 'upcoming' ? (
+                  <button className="card-button btn-danger" disabled>
+                    Nadolazeće
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate(`/sudac/ocjenjivanje/${comp._id}`)}
+                    className="card-button btn-success"
+                  >
+                    Ocijeni nastupe
+                  </button>
+                )}
               </div>
             ))}
           </div>

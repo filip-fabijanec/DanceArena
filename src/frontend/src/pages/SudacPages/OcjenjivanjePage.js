@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import '../Dashboard.css';
@@ -23,10 +24,8 @@ function OcjenjivanjePage() {
       try {
         setLoading(true);
         // Dohvati sva natjecanja na kojima je sudac ocjenjivao
-        const compsRes = await fetch(`${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`);
-        if (!compsRes.ok) throw new Error('Greška pri dohvaćanju natjecanja');
-        const compsData = await compsRes.json();
-        setCompetitions(compsData || []);
+        const compsRes = await axios.get(`${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`);
+        setCompetitions(compsRes.data || []);
       } catch (err) {
         setError("Nije moguće dohvatiti podatke. Provjerite konzolu za detalje.");
       } finally {
@@ -41,10 +40,8 @@ function OcjenjivanjePage() {
     if (!judgeId) return;
     const fetchScores = async () => {
       try {
-        const scoresRes = await fetch(`${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`);
-        if (!scoresRes.ok) throw new Error('Greška pri dohvaćanju ocjena');
-        const scoresData = await scoresRes.json();
-        setScores(scoresData || []);
+        const scoresRes = await axios.get(`${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`);
+        setScores(scoresRes.data || []);
       } catch (err) {
         setError("Nije moguće dohvatiti ocjene.");
       }
@@ -54,7 +51,7 @@ function OcjenjivanjePage() {
 
   return (
     <div className="dashboard-container">
-      <Link to="/sudac" className="card-button" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
+      <Link to="/sudac" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
         ← Nazad na Dashboard
       </Link>
       <h1>Moje Ocjene</h1>
@@ -72,16 +69,23 @@ function OcjenjivanjePage() {
                 <p>📅 Datum: {new Date(comp.date).toLocaleDateString('hr-HR')}</p>
                 <p>📍 Lokacija: {comp.location}</p>
                 <h4>Ocjene:</h4>
-                {scores.length > 0 ? (
-                  <ul>
-                    {scores.map(score => (
-                      <li key={score._id}>
-                        Natjecanje: {score.competitionId} <br />
-                        Dob: {score.ageCategory}, Veličina grupe: {score.groupSize} <br />
-                        Koreografija: {score.choreography}, Nastup: {score.performance}, Ritam: {score.rhythm}
-                      </li>
-                    ))}
-                  </ul>
+                {Array.isArray(scores) && scores.length > 0 ? (
+                  (() => {
+                    const scoresForComp = scores.filter(s => s.performanceId && s.performanceId.competitionId && String(s.performanceId.competitionId._id) === String(comp._id));
+                    return scoresForComp.length > 0 ? (
+                      <ul>
+                        {scoresForComp.map(score => (
+                          <li key={score._id}>
+                            Nastup: {score.performanceId?.choreographyName || 'N/A'} <br />
+                            Ocjena: {typeof score.score === 'number' ? score.score : ((Number(score.choreography)||0) + (Number(score.performance)||0) + (Number(score.rhythm)||0))} <br />
+                            Datum: {score.performanceId?.competitionId?.date ? new Date(score.performanceId.competitionId.date).toLocaleDateString('hr-HR') : 'N/A'}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Još niste ocijenili nastupe za ovo natjecanje.</p>
+                    );
+                  })()
                 ) : (
                   <p>Još niste ocijenili nastupe za ovo natjecanje.</p>
                 )}
