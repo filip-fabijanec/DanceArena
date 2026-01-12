@@ -11,6 +11,10 @@ const Invite = require("../models/Invite");
 const sendInviteEmail = require("../utils/sendInviteEmail");
 
 
+const authMiddleware = require("../backend/middleware/authMiddleware");
+const PDFDocument = require("pdfkit");
+const Performance = require("../models/Performance");
+
 // =======================
 // GET /competitions/upcoming
 // =======================
@@ -316,10 +320,6 @@ router.delete("/:id", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
-const authMiddleware = require("../backend/middleware/authMiddleware");
-const PDFDocument = require("pdfkit");
-const Performance = require("../models/Performance");
 
 router.get("/:id/pdf", authMiddleware, async (req, res) => {
   try {
