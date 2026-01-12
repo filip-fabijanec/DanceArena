@@ -289,7 +289,6 @@ function MojaNatjecanja() {
   // 5. GLAVNI PRIKAZ (Samo ako je isSubscriptionValid == true)
   return (
     <div className="dashboard-container">
-      <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
       
       <div className="page-header">
         <h1>Moja natjecanja</h1>
