@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 1.  KREIRANJE KONTEKSTA (Ovo mora postojati)
+// 1. KREIRANJE KONTEKSTA
 const AuthContext = createContext();
 
-// 2. EXPORT HOOKA (Ovo je ono na što se build žali da fali!)
+// 2. EXPORT HOOKA
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Funkcija za dohvat korisnika (tvoja logika)
+  // --- KLJUČNA FUNKCIJA: OSVJEŽI KORISNIKA S BACKENDA ---
   const refreshUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/users/me`, 
         {
-          method:  "GET",
+          method: "GET",
           headers: { 
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
@@ -30,11 +30,15 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed");
+      if (!response.ok) throw new Error("Failed to fetch user");
 
       const updatedUser = await response.json();
+      
+      // Ažuriraj stanje i localStorage
       setCurrentUser(updatedUser);
       localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      
+      console.log("🔄 AuthContext: Korisnik osvježen. Status:", updatedUser.subscriptionStatus);
       return updatedUser;
 
     } catch (error) {
@@ -43,15 +47,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // UseEffect pri startu
+  // UseEffect pri startu aplikacije
   useEffect(() => {
     const initAuth = async () => {
       const savedUser = localStorage.getItem("currentUser");
       const token = localStorage.getItem("token");
 
       if (savedUser && token) {
-        setCurrentUser(JSON.parse(savedUser)); // Odmah prikaži staro stanje
-        await refreshUser(); // U pozadini provjeri bazu
+        // Prvo postavi ono što imamo u memoriji da bude brzo
+        setCurrentUser(JSON.parse(savedUser)); 
+        // Zatim u pozadini provjeri je li se nešto promijenilo (npr. plaćanje)
+        await refreshUser(); 
       }
       
       setLoading(false);
@@ -60,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // --- LOGIN FUNKCIJE (Moraš ih imati definirane da bi ih poslao u value) ---
+  // --- LOGIN FUNKCIJE ---
 
   const loginWithGoogle = async (googleCredential) => {
     try {
@@ -70,9 +76,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ credential: googleCredential }),
       });
       const data = await res.json();
-      if (! res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data. token);
+      localStorage.setItem("token", data.token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       setCurrentUser(data.user);
       return data.user;
@@ -92,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      localStorage.setItem("token", data. token);
+      localStorage.setItem("token", data.token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       setCurrentUser(data.user);
       return data.user;
@@ -106,13 +112,12 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
+    window.location.href = '/login'; // Opcionalno: preusmjeri na login
   };
-
-  // --- KRAJ LOGIN FUNKCIJA ---
 
   return (
     <AuthContext.Provider value={{ currentUser, loginWithGoogle, loginWithSecret, logout, loading, refreshUser }}>
-      {! loading && children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

@@ -5,9 +5,44 @@ const Invite = require("../models/Invite");
 const Competition = require("../models/Competition");
 const jwt = require("jsonwebtoken");
 
+// --- MIDDLEWARE ZA PROVJERU TOKENA (Potreban za /me rutu) ---
+const authenticateToken = (req, res, next) => {
+  try {
+    const tokenHeader = req.headers.authorization;
+    if (!tokenHeader) return res.status(401).json({ error: "Nema tokena" });
+
+    const token = tokenHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret123");
+    
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error("Token greška:", error);
+    return res.status(401).json({ error: "Nevaljan token" });
+  }
+};
+
+// =======================================================
+// 1. GET CURRENT USER (DOHVATI SVJEŽE PODATKE) - NOVO!
+// =======================================================
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    // req.user.id dolazi iz tokena
+    const user = await User.findById(req.user.id).select("-password"); 
+    
+    if (!user) {
+      return res.status(404).json({ error: "Korisnik nije pronađen" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Greška /me:", error);
+    res.status(500).json({ error: "Greška na serveru" });
+  }
+});
 
 // =======================
-// CREATE USER (REGISTRACIJA)
+// 2. CREATE USER (REGISTRACIJA)
 // =======================
 router.post("/", async (req, res) => {
   try {
@@ -19,20 +54,11 @@ router.post("/", async (req, res) => {
     if (inviteToken) {
       invite = await Invite.findOne({ token: inviteToken });
 
-      if (!invite)
-        return res.status(400).json({ error: "Neispravan invite token" });
-
-      if (invite.used)
-        return res.status(400).json({ error: "Invite je već iskorišten" });
-
-      if (invite.status !== "pending")
-        return res.status(400).json({ error: "Invite više nije validan" });
-
-      if (new Date() > invite.expiresAt)
-        return res.status(400).json({ error: "Invite je istekao" });
-
-      if (invite.email !== email || invite.role !== role)
-        return res.status(403).json({ error: "Invite podaci se ne podudaraju" });
+      if (!invite) return res.status(400).json({ error: "Neispravan invite token" });
+      if (invite.used) return res.status(400).json({ error: "Invite je već iskorišten" });
+      if (invite.status !== "pending") return res.status(400).json({ error: "Invite više nije validan" });
+      if (new Date() > invite.expiresAt) return res.status(400).json({ error: "Invite je istekao" });
+      if (invite.email !== email || invite.role !== role) return res.status(403).json({ error: "Invite podaci se ne podudaraju" });
     }
 
     const newUser = new User(req.body);
@@ -62,19 +88,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 // =======================
 // GET ALL USERS
 // =======================
 router.get("/", async (req, res) => {
   try {
-    const users = await User. find();
+    const users = await User.find();
     res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // =======================
 // GET REFEREES
@@ -88,15 +112,14 @@ router.get("/referees", async (req, res) => {
   }
 });
 
-
 // =======================
 // UPDATE USER
 // =======================
-router. put("/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
-      req. params.id,
-      req. body,
+      req.params.id,
+      req.body,
       {
         new: true,
         runValidators: true,
@@ -104,15 +127,13 @@ router. put("/:id", async (req, res) => {
       }
     );
 
-    if (!updatedUser)
-      return res.status(404).json({ error: "User not found" });
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
 
     res.status(200).json(updatedUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // =======================
 // DELETE USER
@@ -126,11 +147,10 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-
 // =======================
 // SECRET LOGIN (DEBUG)
 // =======================
-router. post("/secret-login", async (req, res) => {
+router.post("/secret-login", async (req, res) => {
   try {
     const { secret } = req.body;
 
@@ -142,12 +162,10 @@ router. post("/secret-login", async (req, res) => {
     };
 
     const email = secretMap[secret];
-    if (!email)
-      return res.status(401).json({ error: "Neispravna tajna riječ" });
+    if (!email) return res.status(401).json({ error: "Neispravna tajna riječ" });
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(404).json({ error: "Korisnik nije pronađen" });
+    if (!user) return res.status(404).json({ error: "Korisnik nije pronađen" });
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
@@ -162,38 +180,26 @@ router. post("/secret-login", async (req, res) => {
   }
 });
 
-
-// =======================
-// GOOGLE LOGIN
-// =======================
 // =======================
 // GOOGLE LOGIN
 // =======================
 router.post("/google-login", async (req, res) => {
   try {
     const { credential } = req.body;
-    console.log("🔍 RECEIVED credential:", credential);  // 🔴 DODAJ OVO
     
-    if (!credential)
-      return res.status(400).json({ error: "Credential missing" });
+    if (!credential) return res.status(400).json({ error: "Credential missing" });
 
-    const base64Url = credential.split(".")[1];  // ISPRAVKA:  bez razmaka
-    console.log("🔍 base64Url:", base64Url);  // 🔴 DODAJ OVO
-    
+    const base64Url = credential.split(".")[1];
     const jsonPayload = Buffer.from(base64Url, "base64").toString("utf8");
-    console.log("🔍 jsonPayload:", jsonPayload);  // 🔴 DODAJ OVO
-    
     const payload = JSON.parse(jsonPayload);
-    console.log("🔍 payload:", payload);  // 🔴 DODAJ OVO
 
     const user = await User.findOne({ email: payload.email });
-    console.log("🔍 user found:", user);  // 🔴 DODAJ OVO
 
     if (!user) {
       return res.status(404).json({ error: "USER_NOT_FOUND" });
     }
 
-    const token = jwt. sign(
+    const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
       process.env.JWT_SECRET || "secret123",
       { expiresIn: "7d" }
@@ -202,8 +208,9 @@ router.post("/google-login", async (req, res) => {
     res.status(200).json({ user, token });
 
   } catch (error) {
-    console.error("❌ Google login error:", error);  // 🔴 DETALJNIJA GREŠKA
+    console.error("❌ Google login error:", error);
     res.status(500).json({ error: error.message || "Google login failed" });
   }
 });
+
 module.exports = router;

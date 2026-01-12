@@ -26,89 +26,64 @@ function MojaNatjecanja() {
   });
 
   // ==================================================================
-  // 1. KLJUČNA FUNKCIJA: STROGA PROVJERA NA FRONTENDU
+  // 1. PROVJERA PRETPLATE (Blokira prikaz ako nije active)
   // ==================================================================
-  // Ova funkcija ne čeka backend. Ona gleda na sat i blokira pristup ODMAH.
   const isSubscriptionValid = () => {
-      // Ako nema korisnika ili nije organizator
       if (!currentUser) return false;
       if (currentUser.role !== 'organizator') return false;
       
-      // Ako u bazi eksplicitno piše da nije aktivan
+      // Ako je inactive, odmah blokiraj
       if (currentUser.subscriptionStatus !== 'active') return false;
 
-      // PROVJERA DATUMA (Ovo je ono što ti je falilo!)
+      // Ako je active, provjeri datum
       if (currentUser.subscriptionExpiry) {
           const expiryDate = new Date(currentUser.subscriptionExpiry);
           const now = new Date();
-          
-          // Ako je trenutno vrijeme veće od vremena isteka -> BLOKIRAJ
-          if (now > expiryDate) {
-              return false; 
-          }
+          if (now > expiryDate) return false; 
       } else {
-          // Ako je status 'active', ali nema datuma isteka (greška u podacima)
-          // Možeš vratiti false za svaki slučaj
-          return false;
+          return false; // Ako nema datuma, nešto je krivo
       }
 
-      // Samo ako je sve prošlo, vraća true
       return true;
   };
 
-  // ------------------------------------------------------------------
-  // 2. DETEKCIJA POVRATKA S PLAĆANJA
-  // ------------------------------------------------------------------
+  // ==================================================================
+  // 2. GLAVNI EFFECT: DETEKCIJA PLAĆANJA I UČITAVANJE
+  // ==================================================================
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     
-    if (params.get('payment_refresh')) {
-      console.log("Prepoznato plaćanje, osvježavam korisnika...");
-      setLoading(true);
-      refreshUser().then(() => {
-        navigate('/organizator/natjecanja', { replace: true });
-      });
-    } else {
-        // Ako samo dolazimo na stranicu, osvježi podatke za svaki slučaj
-        if (currentUser) {
-            refreshUser();
-        }
-    }
-  }, [location, navigate, refreshUser]);
-
-
-  // ------------------------------------------------------------------
-  // 3. GLAVNI EFFECT ZA UČITAVANJE PODATAKA
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
-  // 2. & 3. GLAVNI EFFECT: DETEKCIJA PLAĆANJA I UČITAVANJE PODATAKA
-  // ------------------------------------------------------------------
-  useEffect(() => {
-    // Koristimo window.location ili postojeći location objekt, ali ga NE stavljamo u dependency array
-    const params = new URLSearchParams(location.search);
+    // Provjeri parametar 'payment_success' (Stripe ga šalje ovako)
+    const justPaid = params.get('payment_success') === 'true';
 
     const initPage = async () => {
-      // SCENARIJ A: Povratak s plaćanja
-      if (params.get('payment_refresh')) {
-        console.log("Prepoznato plaćanje, osvježavam korisnika...");
+      // SCENARIJ A: Upravo plaćeno -> Forsiraj osvježavanje
+      if (justPaid) {
+        console.log("💰 Plaćanje detektirano! Osvježavam podatke...");
         setLoading(true);
 
         try {
-          await refreshUser(); // Prvo osvježi usera
-          // Zatim očisti URL da se ovo ne ponovi (replace mode)
+          // 1. Osvježi usera (ovo povlači 'active' iz baze)
+          await refreshUser(); 
+          
+          // 2. Makni ružan URL
           navigate('/organizator/natjecanja', { replace: true });
-          // Na kraju povuci natjecanja
+          
+          // 3. Učitaj natjecanja (sada bi trebalo proći jer je user active)
           await fetchMyCompetitions();
         } catch (error) {
-          console.error("Greška pri osvježavanju:", error);
+          console.error("Greška nakon plaćanja:", error);
         }
 
       } 
-      // SCENARIJ B: Normalan dolazak na stranicu
+      // SCENARIJ B: Normalan dolazak
       else {
-         // Ovdje moramo biti oprezni: ako user još nije učitan (null), možda nećemo dohvatiti podatke.
-         // Ali budući da želiš "samo jednom na refresh", ovo je logika:
          if (currentUser) {
+             // Čak i ako nije plaćanje, dobro je osvježiti status u pozadini
+             // da user ne bude blokiran ako je platio na drugom tabu
+             if (currentUser.subscriptionStatus !== 'active') {
+                 await refreshUser();
+             }
              fetchMyCompetitions();
          } else {
              setLoading(false);
@@ -117,12 +92,12 @@ function MojaNatjecanja() {
     };
 
     initPage();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // <--- OVO JE KLJUČNO: Prazan niz znači "samo jednom pri montiranju"
+  }, []); 
 
 
-  // Funkcija za automatsko ažuriranje statusa
+  // --- OSTATAK LOGIKE (Isto kao prije) ---
+
   const checkAndAutoUpdateStatus = async (competitionsList) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -150,7 +125,6 @@ function MojaNatjecanja() {
           });
           return { ...comp, status: correctStatus };
         } catch (err) {
-          console.error(err);
           return comp;
         }
       }
@@ -162,6 +136,11 @@ function MojaNatjecanja() {
   const fetchMyCompetitions = async () => {
     try {
       setLoading(true);
+      // Pazi: ako user još nije osvježen u Contextu, ovdje koristimo currentUser._id
+      // Ako je refreshUser() prošao gore, currentUser u contextu se možda asinkrono updatea,
+      // ali za fetch natjecanja ID se ne mijenja, pa je sigurno.
+      if (!currentUser) return; 
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/competitions?organizerId=${currentUser._id}`
       );
@@ -186,26 +165,15 @@ function MojaNatjecanja() {
     }
   };
 
-  // --- LOGIKA ZA BRISANJE ---
+  // --- BRISANJE I EDITIRANJE ---
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${id}`, { method: 'DELETE' });
       if (response.ok || response.status === 204) {
         setCompetitions(competitions.filter(comp => comp._id !== id));
         setDeleteModal({ show: false, id: null, name: '' });
-      } else {
-        throw new Error('Failed to delete');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Greška prilikom brisanja natjecanja');
-    }
-  };
-
-  // --- LOGIKA ZA UREĐIVANJE ---
-  const handleEditClick = (c) => {
-    setEditModal({ show: true, competition: c });
-    setEditForm({ name: c.name, description: c.description || '', date: c.date ? c.date.split('T')[0] : '', location: c.location, registrationFee: c.registrationFee });
+      } else { throw new Error('Failed to delete'); }
+    } catch (err) { alert('Greška prilikom brisanja'); }
   };
 
   const handleUpdate = async (e) => {
@@ -220,23 +188,17 @@ function MojaNatjecanja() {
         setEditModal({ show: false, competition: null });
         alert('Natjecanje uspješno ažurirano!');
       } else { throw new Error('Failed to update'); }
-    } catch (err) {
-      console.error(err);
-      alert('Greška prilikom ažuriranja natjecanja');
-    }
+    } catch (err) { alert('Greška prilikom ažuriranja'); }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('hr-HR', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
+  // Helperi
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('hr-HR', { day: 'numeric', month: 'long', year: 'numeric' });
   const getStatusBadge = (status) => {
     const map = { upcoming: { text: 'Nadolazeće', class: 'status-upcoming' }, ongoing: { text: 'U tijeku', class: 'status-ongoing' }, completed: { text: 'Završeno', class: 'status-completed' } };
     return map[status] || { text: status, class: 'status-default' };
   };
-
   const filteredCompetitions = competitions.filter(comp => filter === 'all' ? true : comp.status === filter);
+  
   const stats = {
       total: competitions.length,
       upcoming: competitions.filter(c => c.status === 'upcoming').length,
@@ -244,22 +206,20 @@ function MojaNatjecanja() {
       completed: competitions.filter(c => c.status === 'completed').length,
   };
 
-  // --------------------------------------------------------
-  // RENDERIRANJE (PRIKAZ)
-  // --------------------------------------------------------
 
+  // --- RENDER ---
   if (loading) {
     return (
       <div className="dashboard-container">
         <Link to="/organizator" className="back-link">← Natrag na Dashboard</Link>
         <h1>Moja natjecanja</h1>
-        <div className="loading-spinner">Provjera statusa...</div>
+        <div className="loading-spinner">Osvježavanje podataka...</div>
       </div>
     );
   }
 
-  // 4. STROGA BLOKADA PRIKAZA
-  // Ovdje koristimo funkciju isSubscriptionValid() umjesto samo provjere stringa
+  // BLOKADA PRIKAZA AKO ČLANARINA NIJE VALJANA
+  // Koristimo funkciju isSubscriptionValid()
   if (currentUser && !isSubscriptionValid()) {
     return (
       <div className="dashboard-container">
@@ -286,7 +246,7 @@ function MojaNatjecanja() {
     );
   }
 
-  // 5. GLAVNI PRIKAZ (Samo ako je isSubscriptionValid == true)
+  // GLAVNI PRIKAZ
   return (
     <div className="dashboard-container">
       
@@ -305,10 +265,11 @@ function MojaNatjecanja() {
       </div>
 
       <div className="filters">
-        <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Sva</button>
-        <button className={`filter-btn ${filter === 'upcoming' ? 'active' : ''}`} onClick={() => setFilter('upcoming')}>Nadolazeća</button>
-        <button className={`filter-btn ${filter === 'ongoing' ? 'active' : ''}`} onClick={() => setFilter('ongoing')}>U tijeku</button>
-        <button className={`filter-btn ${filter === 'completed' ? 'active' : ''}`} onClick={() => setFilter('completed')}>Završena</button>
+        {['all', 'upcoming', 'ongoing', 'completed'].map(f => (
+            <button key={f} className={`filter-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
+                {f === 'all' ? 'Sva' : f === 'upcoming' ? 'Nadolazeća' : f === 'ongoing' ? 'U tijeku' : 'Završena'}
+            </button>
+        ))}
       </div>
 
       {filteredCompetitions.length === 0 ? (
@@ -347,7 +308,7 @@ function MojaNatjecanja() {
         </div>
       )}
 
-      {/* MODALI */}
+      {/* MODALI (Edit i Delete) su ostali isti kao u tvom kodu... */}
       {deleteModal.show && (
         <div className="modal-overlay" onClick={() => setDeleteModal({ show: false, id: null, name: '' })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
