@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ExcuseButton from './ExcuseButton';
 import './PublicNavbar.css';
 
 function PublicNavbar() {
@@ -13,7 +14,7 @@ function PublicNavbar() {
         <div className="navbar-links">
           <Link to="/" className="nav-link">Početna</Link>
           <Link to="/natjecanja" className="nav-link">Natjecanja</Link>
-          <Link to="/o-nama" className="nav-link">O nama</Link>
+          <ExcuseButton />
           <Link to="/login" className="nav-link login-link">Prijava</Link>
         </div>
       </div>
