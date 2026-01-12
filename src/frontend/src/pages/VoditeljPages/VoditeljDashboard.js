@@ -150,6 +150,10 @@ function VoditeljDashboard() {
               <span className="info-label">Voditelj:</span>
               <span className="info-value">{currentUser.name} {currentUser.surname}</span>
             </div>
+            <div className="club-info-row">
+              <span className="info-label">Email Voditelja:</span>
+              <span className="info-value">{currentUser.email}</span>
+            </div>
           </div>
         </section>
 
