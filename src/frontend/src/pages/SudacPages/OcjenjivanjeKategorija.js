@@ -22,7 +22,7 @@ function OcjenjivanjeKategorija() {
         setLoading(true);
         const [compRes, perfRes] = await Promise.all([
           axios.get(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`),
-          axios.get(`${process.env.REACT_APP_API_URL}/performances/competition/${competitionId}`)
+          axios.get(`${process.env.REACT_APP_API_URL}/performances?competitionId=${competitionId}`)
         ].map(p => p.catch(e => e)));
 
         if (compRes instanceof Error) {
@@ -42,7 +42,12 @@ function OcjenjivanjeKategorija() {
             setPerformances([]);
           }
         } else {
-          setPerformances(perfRes.data || []);
+          if (Array.isArray(perfRes.data)) {
+            setPerformances(perfRes.data);
+          } else {
+            console.warn('Neočekivan odgovor za nastupe:', perfRes.data);
+            setPerformances([]);
+          }
         }
       } catch (err) {
         console.error('Greška pri učitavanju natjecanja ili nastupa:', err);
