@@ -12,6 +12,7 @@ const SudacRoutes = () => {
   return (
     <div>
       <Routes>
+        <Navbar />
         <Route path="/" element={<SudacDashboard />} />
         <Route path="/moja-natjecanja" element={<SudacFolder />} />
         <Route path="/ocjenjivanje/:competitionId" element={<OcjenjivanjeKategorija />} />
