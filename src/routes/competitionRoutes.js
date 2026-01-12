@@ -317,7 +317,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../backend/middleware/authMiddleware");
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
 
