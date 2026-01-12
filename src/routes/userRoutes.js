@@ -117,7 +117,7 @@ router. put("/:id", async (req, res) => {
 // =======================
 // DELETE USER
 // =======================
-router.delete("/: id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.status(204).send();
@@ -166,19 +166,29 @@ router. post("/secret-login", async (req, res) => {
 // =======================
 // GOOGLE LOGIN
 // =======================
-router. post("/google-login", async (req, res) => {
+// =======================
+// GOOGLE LOGIN
+// =======================
+router.post("/google-login", async (req, res) => {
   try {
     const { credential } = req.body;
+    console.log("🔍 RECEIVED credential:", credential);  // 🔴 DODAJ OVO
+    
     if (!credential)
       return res.status(400).json({ error: "Credential missing" });
 
-    const base64Url = credential.split(". ")[1];
+    const base64Url = credential.split(".")[1];  // ISPRAVKA:  bez razmaka
+    console.log("🔍 base64Url:", base64Url);  // 🔴 DODAJ OVO
+    
     const jsonPayload = Buffer.from(base64Url, "base64").toString("utf8");
-    const payload = JSON. parse(jsonPayload);
+    console.log("🔍 jsonPayload:", jsonPayload);  // 🔴 DODAJ OVO
+    
+    const payload = JSON.parse(jsonPayload);
+    console.log("🔍 payload:", payload);  // 🔴 DODAJ OVO
 
     const user = await User.findOne({ email: payload.email });
+    console.log("🔍 user found:", user);  // 🔴 DODAJ OVO
 
-    // 🔴 AKO USER NE POSTOJI → FRONTEND REDIRECTA NA REGISTRACIJU
     if (!user) {
       return res.status(404).json({ error: "USER_NOT_FOUND" });
     }
@@ -192,9 +202,8 @@ router. post("/google-login", async (req, res) => {
     res.status(200).json({ user, token });
 
   } catch (error) {
-    console.error("Google login error:", error);
-    res.status(500).json({ error: "Google login failed" });
+    console.error("❌ Google login error:", error);  // 🔴 DETALJNIJA GREŠKA
+    res.status(500).json({ error: error.message || "Google login failed" });
   }
 });
-
 module.exports = router;
