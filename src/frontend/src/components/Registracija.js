@@ -85,7 +85,14 @@ function Registracija() {
     e.preventDefault();
     setMessage("");
     setLoading(true);
-
+    if (inviteToken && inviteData) {
+    if (formData.email. toLowerCase() !== inviteData.email.toLowerCase()) {
+      setMessage(`Morate se prijaviti s emailom ${inviteData.email} na koji je poslan poziv. `);
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+  }
     try {
       const response = await fetch(`${API_URL}/users`, {
         method: "POST",

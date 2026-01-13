@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import './Login.css';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -10,6 +10,11 @@ function Login() {
   const [secret, setSecret] = useState('');
   const { loginWithGoogle, loginWithSecret } = useAuth();
   const navigate = useNavigate();
+  
+  // Dohvati invite token iz URL-a
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const inviteToken = params. get('invite');
 
   // --- GOOGLE LOGIN ---
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -32,9 +37,10 @@ function Login() {
         );
         const payload = JSON.parse(jsonPayload);
         const email = payload.email;
-        const providerId = payload.sub;
+        const providerId = payload. sub;
 
-        navigate('/registracija', {
+        // Proslijedi invite token ako postoji
+        navigate(`/registracija${inviteToken ? `?invite=${inviteToken}` : ''}`, {
           state: { email, providerId, provider: 'google' }
         });
       } catch (decodeError) {
@@ -46,7 +52,7 @@ function Login() {
   };
 
   const handleGoogleError = () => {
-    setError('Google prijava nije uspjela. Molimo pokušajte ponovo.');
+    setError('Google prijava nije uspjela.  Molimo pokušajte ponovo.');
   };
 
   // --- BACKDOOR LOGIN ---
@@ -57,8 +63,8 @@ function Login() {
     setLoading(true);
 
     try {
-      const user = await loginWithSecret(secret); // poziva backend /auth/secret-login
-      redirectByRole(user.role);
+      const user = await loginWithSecret(secret);
+      redirectByRole(user. role);
     } catch (err) {
       setError(err.message || 'Neispravna tajna riječ');
     } finally {
@@ -66,13 +72,13 @@ function Login() {
     }
   };
 
-  // --- REDIRECT PO ULOGI ---
+  // --- REDIRECT PO ULOZI ---
   const redirectByRole = (role) => {
     switch (role) {
       case 'organizator':
         navigate('/organizator/natjecanja');
         break;
-      case 'voditeljKluba':
+      case 'voditeljKluba': 
         navigate('/voditelj');
         break;
       case 'sudac':
@@ -95,6 +101,13 @@ function Login() {
 
         <h1>DANCE ARENA</h1>
         <h2>Prijava u sustav</h2>
+
+        {/* Poruka za invite */}
+        {inviteToken && (
+          <div className="info-message success">
+            🎉 Pozvani ste kao sudac! Prijavite se s Google računom da dovršite registraciju.
+          </div>
+        )}
 
         {/* --- Tajna riječ / backdoor login --- */}
         <div className="secret-section">
@@ -120,7 +133,6 @@ function Login() {
           </form>
         </div>
 
-
         <div className="google-login-wrapper">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
@@ -137,7 +149,7 @@ function Login() {
 
         {loading && (
           <div className="loading-message">
-            Prijava u tijeku...
+            Prijava u tijeku... 
           </div>
         )}
 
