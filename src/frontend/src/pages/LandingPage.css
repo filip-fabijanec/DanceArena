@@ -8,31 +8,31 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 100px 20px;
-  text-align: center;
+  text-align:  center;
 }
 
 .hero-content h1 {
   font-size: 48px;
-  margin-bottom: 20px;
+  margin-bottom:  20px;
   font-weight: 700;
 }
 
 .hero-content p {
   font-size: 20px;
-  margin-bottom: 40px;
+  margin-bottom:  40px;
   opacity: 0.9;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 20px;
+  gap:  20px;
   justify-content: center;
 }
 
-.btn {
+. btn {
   padding: 14px 32px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size:  16px;
+  font-weight:  600;
   border-radius: 8px;
   text-decoration: none;
   transition: transform 0.3s, box-shadow 0.3s;
@@ -62,14 +62,45 @@
 
 .section-container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin:  0 auto;
 }
 
 .section-container h2 {
   text-align: center;
   font-size: 36px;
-  margin-bottom: 50px;
+  margin-bottom:  10px;
   color: #333;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 18px;
+  margin-bottom:  50px;
+}
+
+/* Loading */
+.loading-spinner {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner . spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #eee;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation:  spin 0.8s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+. loading-spinner p {
+  color: #666;
 }
 
 /* Natjecanja grid */
@@ -89,63 +120,94 @@
 
 .competition-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.competition-card. finished . card-header {
+  background:  linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
 
 .card-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 20px;
+  padding: 20px 25px;
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: center;
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .status-badge {
-  background-color: rgba(255, 255, 255, 0.3);
-  padding: 4px 12px;
-  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.25);
+  padding: 6px 14px;
+  border-radius:  20px;
   font-size: 12px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+. status-badge.finished {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .card-body {
-  padding: 20px;
+  padding: 25px;
 }
 
-.card-body p {
-  margin: 10px 0;
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: #555;
+  font-size: 15px;
 }
 
-.date, .location {
-  font-weight: 600;
-  color: #333;
+.info-row .icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
 }
 
 .description {
-  margin: 15px 0;
-  line-height: 1.6;
-}
-
-.card-details {
-  margin-top: 15px;
-  padding-top: 15px;
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid #eee;
-  font-weight: 600;
-  color: #667eea;
+  color: #666;
+  line-height: 1.6;
+  font-size: 14px;
 }
 
+/* No competitions */
 .no-competitions {
   text-align: center;
-  color: #999;
+  padding: 60px 20px;
+  background:  white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-competitions . empty-icon {
+  font-size: 60px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.no-competitions p {
+  color: #666;
   font-size: 18px;
-  padding: 40px;
+  margin:  0;
 }
 
 /* O platformi */
@@ -161,12 +223,20 @@
 
 .about-card {
   text-align: center;
-  padding: 30px;
+  padding: 40px 30px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .about-icon {
-  font-size: 60px;
-  margin-bottom: 20px;
+  font-size: 50px;
+  margin-bottom:  20px;
 }
 
 .about-card h3 {
@@ -177,7 +247,7 @@
 
 .about-card p {
   color: #666;
-  line-height: 1.6;
+  line-height:  1.6;
 }
 
 /* Footer */
@@ -197,7 +267,7 @@
   margin-top: 15px;
   display: flex;
   gap: 20px;
-  justify-content: center;
+  justify-content:  center;
 }
 
 .footer-links a {
@@ -208,5 +278,35 @@
 }
 
 .footer-links a:hover {
-  opacity: 1;
+  opacity:  1;
+}
+
+/* Responsive */
+@media (max-width:  768px) {
+  .hero-content h1 {
+    font-size: 32px;
+  }
+
+  .hero-content p {
+    font-size: 16px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .section-container h2 {
+    font-size: 28px;
+  }
+
+  .competitions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
 }

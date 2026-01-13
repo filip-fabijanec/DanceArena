@@ -12,8 +12,8 @@ function LandingPage() {
 
   const fetchPublicCompetitions = async () => {
     try {
-      console.log('Fetching from:', `${process.env.REACT_APP_API_URL}/competitions/upcoming`);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`);
+      console.log('Fetching from:', `${process.env.REACT_APP_API_URL}/competitions/finished`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/competitions/finished`);
 
       const text = await response.text();
       console.log('Response text (first 100 chars):', text.slice(0, 100));
@@ -45,16 +45,12 @@ function LandingPage() {
         <div className="hero-content">
           <h1>Dobrodošli u Dance Arena</h1>
           <p>Platforma za organizaciju i praćenje plesnih natjecanja</p>
-          <div className="hero-buttons">
-            <a href="#competitions" className="btn btn-primary">Pregledaj natjecanja</a>
-            <a href="/login" className="btn btn-secondary">Prijavi se</a>
-          </div>
         </div>
       </section>
 
       <section id="competitions" className="competitions-section">
         <div className="section-container">
-          <h2>Nadolazeća natjecanja</h2>
+          <h2>Održana natjecanja, slobodno pregledajte pobjednike</h2>
           
           {loading ? (
             <p>Učitavanje...</p>
@@ -70,15 +66,12 @@ function LandingPage() {
                     <p className="date">{formatDate(comp.date)}</p>
                     <p className="location">{comp.location}</p>
                     {comp.description && <p className="description">{comp.description}</p>}
-                    <div className="card-details">
-                      <span>Kotizacija: {comp.registrationFee} €</span>
-                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="no-competitions">Trenutno nema nadolazećih natjecanja.</p>
+            <p className="no-competitions">Trenutno nema završenih natjecanja.</p>
           )}
         </div>
       </section>
