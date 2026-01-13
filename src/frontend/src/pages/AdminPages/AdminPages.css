@@ -1,83 +1,120 @@
-/* Admin-specific styles */
+/* --- OPĆENITO --- */
+:root {
+  --primary-color: #3182ce;       /* Moderna plava */
+  --primary-hover: #2c5282;
+  --success-bg: #def7ec;
+  --success-text: #03543f;
+  --warning-bg: #fefcbf;
+  --warning-text: #744210;
+  --danger-bg: #fed7d7;
+  --danger-text: #9b2c2c;
+  --gray-light: #f7fafc;
+  --gray-border: #e2e8f0;
+  --text-dark: #2d3748;
+  --text-muted: #718096;
+}
 
+/* Page Header */
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end; /* Poravnanje s donjim rubom teksta */
   margin-bottom: 30px;
+  border-bottom: 1px solid var(--gray-border);
+  padding-bottom: 20px;
 }
 
 .page-header h1 {
   margin: 0;
+  font-size: 24px;
+  color: var(--text-dark);
+  font-weight: 700;
 }
 
+/* Gumbi - Globalno */
 .btn-primary {
-  display: inline-block;
-  padding: 12px 24px;
-  background-color: #667eea;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
   color: white;
   text-decoration: none;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px; /* Malo zaobljeniji rubovi */
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Filters Section */
+/* --- FILTER SEKCIJA --- */
 .filters-section {
   background: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 25px;
   display: flex;
   gap: 20px;
   align-items: center;
   flex-wrap: wrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-border); /* Umjesto jake sjene, tanki rub */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .filter-group {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column; /* Labela iznad inputa izgleda bolje */
+  gap: 5px;
 }
 
 .filter-group label {
   font-weight: 600;
-  color: #555;
-  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.filter-select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+.filter-select, .filter-input {
+  padding: 10px 12px;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
   font-size: 14px;
-  cursor: pointer;
+  color: var(--text-dark);
+  min-width: 200px;
+  transition: border-color 0.2s;
 }
 
-.filter-select:focus {
+.filter-select:focus, .filter-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
 }
 
 .filter-info {
   margin-left: auto;
-  color: #666;
+  color: var(--text-muted);
   font-size: 14px;
+  background: var(--gray-light);
+  padding: 5px 10px;
+  border-radius: 6px;
 }
 
-/* Users Table */
+/* --- TABLICA (MODERNA) --- */
 .users-table-container {
   background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden; /* Zaobljuje rubove tablice */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--gray-border);
 }
 
 .users-table {
@@ -86,81 +123,69 @@
 }
 
 .users-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #f8fafc; /* Svijetlo siva umjesto gradijenta */
+  border-bottom: 2px solid var(--gray-border);
 }
 
 .users-table th {
-  padding: 15px;
+  padding: 16px;
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .users-table tbody tr {
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s;
+  border-bottom: 1px solid var(--gray-border);
+  transition: background-color 0.2s;
+}
+
+.users-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .users-table tbody tr:hover {
-  background-color: #f9f9f9;
+  background-color: #f7fafc;
 }
 
 .users-table td {
-  padding: 15px;
-  color: #555;
+  padding: 16px;
+  color: var(--text-dark);
   font-size: 14px;
+  vertical-align: middle;
 }
 
-.role-badge {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 15px;
+/* --- BEDŽEVI (STATUSI & ROLE) --- */
+.status-badge, .role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px; /* Pill shape */
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
+  line-height: 1;
 }
 
-.role-organizator {
-  background-color: #e3f2fd;
-  color: #1976d2;
+/* Statusi za članarine (usklađeno s React kodom) */
+.status-completed {
+  background-color: var(--success-bg);
+  color: var(--success-text);
 }
 
-.role-voditeljKluba {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+.status-pending {
+  background-color: var(--danger-bg); /* Crveno za neaktivno/isteklo */
+  color: var(--danger-text);
 }
 
-.role-sudac {
-  background-color: #fff3e0;
-  color: #f57c00;
-}
+/* Role (postojeće) */
+.role-organizator { background-color: #ebf8ff; color: #2b6cb0; }
+.role-voditeljKluba { background-color: #faf5ff; color: #6b46c1; }
+.role-sudac { background-color: #fffaf0; color: #c05621; }
+.role-admin { background-color: #fff5f5; color: #c53030; }
 
-.role-admin {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-.status-badge.approved {
-  background-color: #c8e6c9;
-  color: #2e7d32;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.status-badge.pending {
-  background-color: #fff9c4;
-  color: #f57f17;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
+/* Akcijski gumbi u tablici */
 .table-actions {
   display: flex;
   gap: 8px;
@@ -168,197 +193,154 @@
 
 .btn-table {
   padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: opacity 0.3s;
-}
-
-.btn-table:hover {
-  opacity: 0.8;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .btn-approve {
-  background-color: #4caf50;
-  color: white;
+  background-color: white;
+  border-color: var(--gray-border);
+  color: var(--text-dark);
+}
+.btn-approve:hover {
+  background-color: var(--gray-light);
+  border-color: #cbd5e0;
 }
 
-.btn-unapprove {
-  background-color: #ff9800;
-  color: white;
-}
-
+/* Gumb za brisanje/poništavanje - suptilniji */
 .btn-delete-small {
-  background-color: #f44336;
-  color: white;
-  padding: 6px 10px;
+  background-color: white;
+  border-color: var(--danger-bg);
+  color: #e53e3e;
+}
+.btn-delete-small:hover {
+  background-color: #fff5f5;
 }
 
-/* Modal */
+/* --- MODAL --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px); /* Moderni blur efekt */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  max-width: 500px;
+  padding: 32px;
+  border-radius: 16px;
   width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease-out;
 }
 
 .modal-content h3 {
   margin-top: 0;
-  color: #333;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .large-modal {
-  max-width: 600px;
+  max-width: 650px;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
+/* Forme u modalu */
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #555;
-  font-size: 14px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
 }
 
 .form-group input,
 .form-group select {
+  padding: 12px;
+  border: 1px solid var(--gray-border);
+  border-radius: 8px;
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  box-sizing: border-box;
+  transition: all 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
   outline: none;
-  border-color: #667eea;
-}
-
-.checkbox-label-inline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-}
-
-.checkbox-label-inline input[type="checkbox"] {
-  width: auto;
-  cursor: pointer;
-}
-
-.modal-user-name {
-  text-align: center;
-  font-size: 16px;
-  color: #667eea;
-  margin: 15px 0;
-}
-
-.modal-warning {
-  color: #f44336;
-  font-size: 14px;
-  margin-bottom: 25px;
-  text-align: center;
 }
 
 .modal-actions {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.btn-cancel,
-.btn-confirm-delete {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.3s;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gray-border);
 }
 
 .btn-cancel {
-  background-color: #ddd;
-  color: #333;
+  background-color: white;
+  border: 1px solid var(--gray-border);
+  color: var(--text-dark);
+  padding: 10px 20px;
+  border-radius: 8px;
 }
 
 .btn-cancel:hover {
-  opacity: 0.8;
+  background-color: var(--gray-light);
 }
 
 .btn-confirm-delete {
-  background-color: #f44336;
+  background-color: #e53e3e;
   color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
 }
 
 .btn-confirm-delete:hover {
-  opacity: 0.9;
+  background-color: #c53030;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #999;
+/* Animacije */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsivnost */
 @media (max-width: 768px) {
   .filters-section {
     flex-direction: column;
     align-items: stretch;
   }
-
-  .filter-info {
-    margin-left: 0;
-    text-align: center;
+  
+  .filter-select, .filter-input {
+    width: 100%;
   }
 
   .users-table-container {
     overflow-x: auto;
   }
-
+  
   .users-table {
-    min-width: 800px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 15px;
+    min-width: 800px; /* Osigurava da se tablica ne zgnječi na mobitelu */
   }
 }
