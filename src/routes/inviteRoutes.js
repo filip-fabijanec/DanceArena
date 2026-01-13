@@ -5,7 +5,7 @@ const Invite = require("../models/Invite");
 // =======================
 // VALIDACIJA INVITE TOKENA (za registraciju)
 // =======================
-router.get("/validate/: token", async (req, res) => {
+router.get("/validate/:token", async (req, res) => {
   try {
     const invite = await Invite.findOne({ token: req.params.token });
 

@@ -30,11 +30,12 @@ function ExcuseButton() {
   return (
     <>
       <button 
-        className="excuse-btn nav-link"
+        className="nav-link"  // <-- MAKNUTO "excuse-btn"
         onClick={getExcuse}
         disabled={loading}
+        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
       >
-        {loading ?  '⏳ Tražim izgovor...' : 'Izgovor'}
+        {loading ? '⏳' : 'Izgovor'}
       </button>
 
       {showExcuse && (
@@ -42,7 +43,7 @@ function ExcuseButton() {
           <div className="excuse-content" onClick={(e) => e.stopPropagation()}>
             <span className="excuse-close" onClick={closeExcuse}>&times;</span>
             <div className="excuse-emoji">😅</div>
-            <h2>Moj izgovor: </h2>
+            <h2>Zašto nismo napravili progi prije? </h2>
             <p className="excuse-text">{excuse}</p>
             <button className="excuse-close-btn" onClick={closeExcuse}>
               Zatvori

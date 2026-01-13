@@ -15,13 +15,14 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
           <h2 style="color: #333;">Pozvani ste kao sudac! </h2>
-          <p>Organizator vas je pozvao da sudite na natjecanju:  <strong>${competitionName}</strong></p>
+          <p>Poštovani, ovim putem vas obavještavamo da ste pozvani da sudite na natjecanju:  <strong>${competitionName}</strong></p>
+          <p>Molimo Vas da pritisnite gumb koji se nalazi u ovom mailu te da kreirate vaš račun na <strong>DanceArena</strong> stranici</p>
           <br/>
-          <a href="${inviteLink}" style="background-color:  #4CAF50; color:  white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          <a href="${inviteLink}" style="background-color:  #61dafb; color:  white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             Prihvati poziv i registriraj se
           </a>
           <br/><br/>
-          <p style="font-size: 12px; color: #888;">Ako gumb ne radi, kopirajte link: ${inviteLink}</p>
+          <p style="font-size: 12px; color: #888;">U slučaju da gumb ne radi slobodno kopirajte link: ${inviteLink}</p>
         </div>
       `,
     });
