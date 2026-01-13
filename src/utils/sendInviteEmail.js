@@ -10,7 +10,7 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
 
     await sgMail.send({
       to: to,
-      from: 'dancearenaunderdogs@gmail. com', // tvoj verificirani email
+      from: 'dancearenaunderdogs@gmail.com', // tvoj verificirani email
       subject: `Poziv za suđenje:  ${competitionName}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
