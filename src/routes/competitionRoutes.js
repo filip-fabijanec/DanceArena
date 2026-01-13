@@ -22,16 +22,16 @@ const Performance = require("../models/Performance");
 router.get("/finished", async (req, res) => {
   try {
     const today = new Date();
-    today.setHours(23, 59, 59, 999);
+    today.setHours(0, 0, 0, 0);
 
     const competitions = await Competition.find({
       date: { $lt: today }
     })
       .populate("organizer", "name surname")
-      .sort({ date: -1 }); // Najnovija završena prva
+      .sort({ date: -1 });
 
-    const finishedCompetitions = competitions. filter(comp => {
-      return comp.autoStatus === 'completed';
+    const finishedCompetitions = competitions.filter(comp => {
+      return comp.autoStatus === 'completed';  // <-- COMPLETED, ne finished! 
     });
 
     res.status(200).json(finishedCompetitions);
