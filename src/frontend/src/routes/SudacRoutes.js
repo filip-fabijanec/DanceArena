@@ -11,8 +11,8 @@ import OcjenjivanjeKategorija from '../pages/SudacPages/OcjenjivanjeKategorija';
 const SudacRoutes = () => {
   return (
     <div>
+      <Navbar />
       <Routes>
-        <Navbar />
         <Route path="/" element={<SudacDashboard />} />
         <Route path="/moja-natjecanja" element={<SudacFolder />} />
         <Route path="/ocjenjivanje/:competitionId" element={<OcjenjivanjeKategorija />} />

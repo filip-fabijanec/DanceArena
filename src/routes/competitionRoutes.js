@@ -67,18 +67,23 @@ router.get("/upcoming/after-2-days", async (req, res) => {
 // =======================
 router.get("/judge/:judgeId", async (req, res) => {
   try {
+    const { judgeId } = req.params;
+    
     const competitions = await Competition.find({
-      referees: req.params.judgeId
+      referees: judgeId
     })
       .populate("organizer", "name surname")
       .populate("referees", "name surname")
       .sort({ date: -1 });
 
-    if (!competitions || competitions.length === 0) {
-      return res.status(200).json([]);
-    }
+    // Dodaj automatski status (virtual field) kao polje status
+    const competitionsWithStatus = competitions.map(comp => {
+      const obj = comp.toObject();
+      obj.status = comp.autoStatus;
+      return obj;
+    });
 
-    res.status(200).json(competitions);
+    res.status(200).json(competitionsWithStatus);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
