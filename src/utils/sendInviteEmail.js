@@ -1,6 +1,6 @@
-const { Resend } = require('resend');
+const sgMail = require('@sendgrid/mail');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendInviteEmail = async ({ to, token, competitionName }) => {
   const inviteLink = `https://dancearena.onrender.com/registracija?invite=${token}`;
@@ -8,9 +8,9 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
   try {
     console.log(`⏳ Šaljem email na: ${to}... `);
 
-    const { data, error } = await resend.emails.send({
-      from: 'Dance Arena <onboarding@resend.dev>', // ili tvoja verificirana domena
-      to:  [to],
+    await sgMail.send({
+      to: to,
+      from: 'dancearenaunderdogs@gmail. com', // tvoj verificirani email
       subject: `Poziv za suđenje:  ${competitionName}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
@@ -26,14 +26,12 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
       `,
     });
 
-    if (error) {
-      console.error(`❌ GREŠKA pri slanju na ${to}:`, error);
-      return;
-    }
-
-    console.log(`✅ Email uspješno poslan na: ${to}`, data);
+    console.log(`✅ Email uspješno poslan na: ${to}`);
   } catch (error) {
     console.error(`❌ GREŠKA pri slanju na ${to}:`, error. message);
+    if (error.response) {
+      console.error('❌ SendGrid error body:', error.response.body);
+    }
   }
 };
 
