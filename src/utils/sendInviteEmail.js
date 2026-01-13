@@ -1,35 +1,35 @@
 const sgMail = require('@sendgrid/mail');
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(process. env.SENDGRID_API_KEY);
 
 const sendInviteEmail = async ({ to, token, competitionName }) => {
-  const inviteLink = `https://dancearena.onrender.com/registracija?invite=${token}`;
+  // Link vodi na LOGIN umjesto registracije
+  const inviteLink = `https://dancearena.onrender.com/login?invite=${token}`;
 
   try {
     console.log(`⏳ Šaljem email na: ${to}... `);
 
     await sgMail.send({
       to: to,
-      from: 'dancearenaunderdogs@gmail.com', // tvoj verificirani email
+      from: 'dancearenaunderdogs@gmail.com',
       subject: `Poziv za suđenje:  ${competitionName}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
-          <h2 style="color: #333;">Pozvani ste kao sudac! </h2>
-          <p>Poštovani, ovim putem vas obavještavamo da ste pozvani da sudite na natjecanju:  <strong>${competitionName}</strong></p>
-          <p>Molimo Vas da pritisnite gumb koji se nalazi u ovom mailu te da kreirate vaš račun na <strong>DanceArena</strong> stranici</p>
+          <h2 style="color: #333;">Pozvani ste kao sudac!</h2>
+          <p>Organizator vas je pozvao da sudite na natjecanju:  <strong>${competitionName}</strong></p>
           <br/>
-          <a href="${inviteLink}" style="background-color:  #61dafb; color:  white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          <a href="${inviteLink}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             Prihvati poziv i registriraj se
           </a>
           <br/><br/>
-          <p style="font-size: 12px; color: #888;">U slučaju da gumb ne radi slobodno kopirajte link: ${inviteLink}</p>
+          <p style="font-size: 12px; color: #888;">Ako gumb ne radi, kopirajte link:  ${inviteLink}</p>
         </div>
       `,
     });
 
     console.log(`✅ Email uspješno poslan na: ${to}`);
   } catch (error) {
-    console.error(`❌ GREŠKA pri slanju na ${to}:`, error. message);
+    console.error(`❌ GREŠKA pri slanju na ${to}:`, error.message);
     if (error.response) {
       console.error('❌ SendGrid error body:', error.response.body);
     }
