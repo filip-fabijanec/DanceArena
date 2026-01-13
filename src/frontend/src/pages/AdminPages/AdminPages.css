@@ -1,346 +1,241 @@
-/* --- OPĆENITO --- */
-:root {
-  --primary-color: #3182ce;       /* Moderna plava */
-  --primary-hover: #2c5282;
-  --success-bg: #def7ec;
-  --success-text: #03543f;
-  --warning-bg: #fefcbf;
-  --warning-text: #744210;
-  --danger-bg: #fed7d7;
-  --danger-text: #9b2c2c;
-  --gray-light: #f7fafc;
-  --gray-border: #e2e8f0;
-  --text-dark: #2d3748;
-  --text-muted: #718096;
+/* src/pages/OrgPages/AdminPages.css */
+
+/* --- GLOBALNI RESET I FONTOVI ZA DASHBOARD --- */
+.dashboard-wrapper {
+  background-color: #f8fafc; /* Svijetlo siva pozadina */
+  min-height: 100vh;
+  padding: 40px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1a202c;
 }
 
-/* Page Header */
-.page-header {
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- HEADER SEKCIJA --- */
+.dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end; /* Poravnanje s donjim rubom teksta */
-  margin-bottom: 30px;
-  border-bottom: 1px solid var(--gray-border);
-  padding-bottom: 20px;
+  align-items: flex-end;
+  margin-bottom: 40px;
 }
 
-.page-header h1 {
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.welcome-text {
+  color: #718096;
+  font-size: 16px;
   margin: 0;
-  font-size: 24px;
-  color: var(--text-dark);
-  font-weight: 700;
 }
 
-/* Gumbi - Globalno */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  text-decoration: none;
-  border: none;
-  border-radius: 8px; /* Malo zaobljeniji rubovi */
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
-}
-
-/* --- FILTER SEKCIJA --- */
-.filters-section {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  flex-wrap: wrap;
-  border: 1px solid var(--gray-border); /* Umjesto jake sjene, tanki rub */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column; /* Labela iznad inputa izgleda bolje */
-  gap: 5px;
-}
-
-.filter-group label {
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.filter-select, .filter-input {
-  padding: 10px 12px;
-  border: 1px solid var(--gray-border);
-  border-radius: 6px;
-  font-size: 14px;
-  color: var(--text-dark);
-  min-width: 200px;
-  transition: border-color 0.2s;
-}
-
-.filter-select:focus, .filter-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-}
-
-.filter-info {
-  margin-left: auto;
-  color: var(--text-muted);
-  font-size: 14px;
-  background: var(--gray-light);
-  padding: 5px 10px;
-  border-radius: 6px;
-}
-
-/* --- TABLICA (MODERNA) --- */
-.users-table-container {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden; /* Zaobljuje rubove tablice */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--gray-border);
-}
-
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.users-table thead {
-  background-color: #f8fafc; /* Svijetlo siva umjesto gradijenta */
-  border-bottom: 2px solid var(--gray-border);
-}
-
-.users-table th {
-  padding: 16px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.users-table tbody tr {
-  border-bottom: 1px solid var(--gray-border);
-  transition: background-color 0.2s;
-}
-
-.users-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.users-table tbody tr:hover {
-  background-color: #f7fafc;
-}
-
-.users-table td {
-  padding: 16px;
-  color: var(--text-dark);
-  font-size: 14px;
-  vertical-align: middle;
-}
-
-/* --- BEDŽEVI (STATUSI & ROLE) --- */
-.status-badge, .role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 9999px; /* Pill shape */
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-/* Statusi za članarine (usklađeno s React kodom) */
-.status-completed {
-  background-color: var(--success-bg);
-  color: var(--success-text);
-}
-
-.status-pending {
-  background-color: var(--danger-bg); /* Crveno za neaktivno/isteklo */
-  color: var(--danger-text);
-}
-
-/* Role (postojeće) */
-.role-organizator { background-color: #ebf8ff; color: #2b6cb0; }
-.role-voditeljKluba { background-color: #faf5ff; color: #6b46c1; }
-.role-sudac { background-color: #fffaf0; color: #c05621; }
-.role-admin { background-color: #fff5f5; color: #c53030; }
-
-/* Akcijski gumbi u tablici */
-.table-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-table {
-  padding: 6px 12px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-approve {
+.date-badge {
   background-color: white;
-  border-color: var(--gray-border);
-  color: var(--text-dark);
-}
-.btn-approve:hover {
-  background-color: var(--gray-light);
-  border-color: #cbd5e0;
-}
-
-/* Gumb za brisanje/poništavanje - suptilniji */
-.btn-delete-small {
-  background-color: white;
-  border-color: var(--danger-bg);
-  color: #e53e3e;
-}
-.btn-delete-small:hover {
-  background-color: #fff5f5;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+  text-transform: capitalize;
 }
 
-/* --- MODAL --- */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px); /* Moderni blur efekt */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
+/* --- STATISTIKA (Tri gornje kartice) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
 }
 
-.modal-content {
+.stat-card {
   background: white;
-  padding: 32px;
+  padding: 24px;
   border-radius: 16px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid transparent;
 }
 
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: var(--text-dark);
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Ikone unutar stat kartica */
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+  color: #2d3748;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Specifične boje za kartice */
+/* PLAVA (Korisnici) */
+.stat-card.blue { border-bottom: 4px solid #4299e1; }
+.stat-card.blue .stat-icon {
+  background-color: #ebf8ff;
+  color: #3182ce;
+}
+
+/* NARANČASTA (Čeka odobrenje) */
+.stat-card.orange { border-bottom: 4px solid #ed8936; }
+.stat-card.orange .stat-icon {
+  background-color: #fffaf0;
+  color: #dd6b20;
+}
+
+/* LJUBIČASTA (Natjecanja) */
+.stat-card.purple { border-bottom: 4px solid #9f7aea; }
+.stat-card.purple .stat-icon {
+  background-color: #faf5ff;
+  color: #805ad5;
+}
+
+/* --- BRZI PRISTUP (ACTION CARDS) --- */
+.section-title {
   font-size: 20px;
   font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 24px;
+  padding-left: 10px;
+  border-left: 4px solid #3182ce;
 }
 
-.large-modal {
-  max-width: 650px;
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
 }
 
-/* Forme u modalu */
-.form-group label {
-  color: var(--text-dark);
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select {
-  padding: 12px;
-  border: 1px solid var(--gray-border);
-  border-radius: 8px;
-  width: 100%;
-  transition: all 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-  outline: none;
-}
-
-.modal-actions {
+/* Glavni stil za velike gumbe */
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  text-decoration: none; /* Miče podcrtavanje linka */
+  color: inherit;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid var(--gray-border);
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-cancel {
-  background-color: white;
-  border: 1px solid var(--gray-border);
-  color: var(--text-dark);
-  padding: 10px 20px;
-  border-radius: 8px;
+.action-card:hover {
+  border-color: #bee3f8; /* Ispravljena tipfeler u hex kodu */
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.btn-cancel:hover {
-  background-color: var(--gray-light);
-}
-
-.btn-confirm-delete {
-  background-color: #e53e3e;
+.action-card:hover .btn-action {
+  background-color: #3182ce;
   color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
+  padding-left: 20px; /* Animacija gumba */
 }
 
-.btn-confirm-delete:hover {
-  background-color: #c53030;
+/* Header unutar akcijske kartice (Ikona + Naslov) */
+.action-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* Animacije */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.action-card-header svg {
+  color: #3182ce;
+  width: 24px;
+  height: 24px;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.action-card h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
 }
 
-/* Responsivnost */
+.action-card p {
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  flex-grow: 1;
+}
+
+/* Gumb "Otvori" unutar kartice */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #3182ce;
+  transition: all 0.3s ease;
+  padding: 8px 0;
+  border-radius: 6px;
+}
+
+/* Highlight kartica (Članarine) */
+.action-card.highlight {
+  background: linear-gradient(to bottom right, #ffffff, #f0f9ff);
+  border-color: #bee3f8;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .filters-section {
+  .dashboard-wrapper {
+    padding: 20px;
+  }
+  
+  .dashboard-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 10px;
   }
   
-  .filter-select, .filter-input {
-    width: 100%;
-  }
-
-  .users-table-container {
-    overflow-x: auto;
-  }
-  
-  .users-table {
-    min-width: 800px; /* Osigurava da se tablica ne zgnječi na mobitelu */
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
