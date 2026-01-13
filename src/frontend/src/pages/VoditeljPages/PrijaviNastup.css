@@ -1,64 +1,79 @@
-.subtitle {
-  color: #666;
+/* Container */
+.prijavi-nastup-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* Page Title */
+.page-title {
+  text-align: center;
+  color: #333;
   margin-bottom: 30px;
+  font-size: 28px;
 }
 
 /* Competition Info Banner */
 .competition-info-banner {
   background: white;
-  color: black;
-  padding: 10px;
-  padding-left: 30px;
-  border-radius: 10px;
+  padding: 25px 30px;
+  border-radius:  10px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .competition-info-banner h2 {
-  margin: 0 0 20px 0;
-  font-size: 28px;
+  margin:  0 0 20px 0;
+  font-size: 24px;
+  color: #333;
 }
 
 .info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
 }
 
 .info-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   font-size: 16px;
+  color: #555;
 }
 
-.icon {
-  font-size: 20px;
+.info-item .icon {
+  font-size: 24px;
 }
 
 /* Performance Form */
 .performance-form {
-  max-width: 800px;
   background: white;
   padding: 40px;
-  border-radius: 10px;
+  border-radius:  10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-section {
-  margin-bottom: 40px;
-  padding-bottom: 30px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 35px;
+  padding-bottom: 25px;
+  border-bottom:  1px solid #eee;
 }
 
 .form-section:last-of-type {
   border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .form-section h3 {
   color: #667eea;
-  margin-bottom: 20px;
-  font-size: 20px;
+  margin-bottom:  20px;
+  font-size: 18px;
+  text-align: center;
 }
 
 .form-group {
@@ -82,6 +97,7 @@
   font-size: 16px;
   font-family: inherit;
   box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .form-group input:focus,
@@ -110,28 +126,23 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 25px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-radius:  10px;
+  text-align: center;
 }
 
 .payment-info p {
-  margin: 12px 0;
+  margin: 10px 0;
   line-height: 1.6;
 }
 
 .payment-info strong {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .payment-notice {
-  color: white !important;
-  font-weight: 500;
   font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  opacity: 0.9;
 }
 
 /* Submit Button */
@@ -142,11 +153,11 @@
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 18px;
+  font-size:  18px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  margin-top: 20px;
+  margin-top: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,7 +177,7 @@
   box-shadow: none;
 }
 
-/* Spinner animation */
+/* Spinner */
 .spinner {
   width: 20px;
   height: 20px;
@@ -180,7 +191,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Secure notice */
+/* Secure Notice */
 .secure-notice {
   text-align: center;
   margin-top: 15px;
@@ -192,24 +203,20 @@
   gap: 8px;
 }
 
-.lock-icon {
-  font-size: 16px;
-}
-
 /* Message */
 .message {
-  margin: 20px 0;
-  padding: 15px;
-  border-radius: 8px;
+  padding: 15px 20px;
+  border-radius:  8px;
   text-align: center;
   font-weight: 500;
+  margin-bottom: 25px;
   animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform:  translateY(-10px);
   }
   to {
     opacity: 1;
@@ -229,29 +236,43 @@
   border: 1px solid #f5c6cb;
 }
 
-.error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 15px;
-  border-radius: 5px;
-  margin-top: 20px;
+/* Loading State */
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  background:  white;
+  border-radius:  10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width:  768px) {
+  .prijavi-nastup-page {
+    padding: 20px 15px;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
 
   .info-grid {
-    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .performance-form {
-    padding: 20px;
+    padding: 25px 20px;
   }
 
   .competition-info-banner {
     padding: 20px;
+  }
+
+  .page-title {
+    font-size: 24px;
   }
 }
