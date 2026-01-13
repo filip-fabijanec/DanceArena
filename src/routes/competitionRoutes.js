@@ -30,10 +30,6 @@ router.get("/finished", async (req, res) => {
       .populate("organizer", "name surname")
       .sort({ date: -1 });
 
-    const finishedCompetitions = competitions.filter(comp => {
-      return comp.autoStatus === 'completed';  // <-- COMPLETED, ne finished! 
-    });
-
     res.status(200).json(finishedCompetitions);
   } catch (error) {
     res.status(400).json({ error: error.message });
