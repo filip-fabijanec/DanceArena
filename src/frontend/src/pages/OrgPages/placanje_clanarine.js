@@ -42,13 +42,19 @@ function PlacanjeClanarine() {
       const storedUser = JSON.parse(localStorage.getItem('user'));
       const token = storedUser?.token;
 
-      // Šaljemo zahtjev za plaćanje s DOHVAĆENOM cijenom
+      // Provjera imamo li ID korisnika prije slanja
+      if (!currentUser || !currentUser._id) {
+        throw new Error("Greška: Nije pronađen ID korisnika. Pokušajte se ponovno prijaviti.");
+      }
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/stripe/create-subscription-checkout-session`,
         {
+          userId: currentUser._id, 
+          
           email: currentUser.email,
-          price: membershipPrice, // <--- Šaljemo cijenu iz baze
-          interval: 'year'        // <--- Godišnja pretplata
+          price: membershipPrice, 
+          interval: 'year'        
         },
         {
           headers: {
@@ -63,7 +69,7 @@ function PlacanjeClanarine() {
 
     } catch (err) {
       console.error('Payment error:', err);
-      const errorMsg = err.response?.data?.error || 'Došlo je do greške prilikom povezivanja sa sustavom naplate.';
+      const errorMsg = err.response?.data?.error || err.message || 'Došlo je do greške.';
       setError(errorMsg);
       setProcessingPayment(false);
     }

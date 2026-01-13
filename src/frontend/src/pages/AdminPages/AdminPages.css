@@ -2,47 +2,188 @@
    1. GLAVNI LAYOUT I CONTAINER
    ========================================= */
 .dashboard-container {
-  max-width: 1400px; /* Malo šire da tablica bolje stane */
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 30px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #2d3748;
+  background-color: #f8fafc; /* Lagana siva pozadina za cijeli container */
+  min-height: 100vh;
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   margin-bottom: 20px;
   color: #718096;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   transition: color 0.2s;
 }
-
-.back-link:hover {
-  color: #3182ce;
-}
+.back-link:hover { color: #3182ce; }
 
 /* Header stranice */
-.page-header {
+.page-header, .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.page-header h1 {
+.page-header h1, .dashboard-header h1 {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   color: #1a202c;
   margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.welcome-text {
+  color: #718096;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.date-badge {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
 }
 
 /* =========================================
-   2. FILTER SEKCIJA
+   2. DASHBOARD CARDS (STATISTIKA & IZBORNIK)
+   --- OVO JE NEDOSTAJALO ---
+   ========================================= */
+
+/* Grid za statistiku (3 gornje kartice) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #edf2f7;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.stat-info { display: flex; flex-direction: column; }
+.stat-number { font-size: 32px; font-weight: 800; color: #2d3748; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 14px; color: #718096; font-weight: 500; }
+
+/* Boje kartica */
+.stat-card.blue { border-bottom: 4px solid #4299e1; }
+.stat-card.blue .stat-icon { background: #ebf8ff; color: #3182ce; }
+
+.stat-card.orange { border-bottom: 4px solid #ed8936; }
+.stat-card.orange .stat-icon { background: #fffaf0; color: #dd6b20; }
+
+.stat-card.purple { border-bottom: 4px solid #9f7aea; }
+.stat-card.purple .stat-icon { background: #faf5ff; color: #805ad5; }
+
+/* Grid za brzi pristup (Veliki gumbi) */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  border-left: 4px solid #3182ce;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card:hover {
+  border-color: #bee3f8;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.action-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.action-card-header svg { color: #3182ce; width: 24px; height: 24px; }
+.action-card h3 { margin: 0; font-size: 18px; font-weight: 700; color: #2d3748; }
+
+.action-card p {
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  flex-grow: 1;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #3182ce;
+  padding: 8px 0;
+}
+.action-card:hover .btn-action { text-decoration: underline; }
+
+.action-card.highlight {
+  background: linear-gradient(to bottom right, #ffffff, #f0f9ff);
+  border-color: #bee3f8;
+}
+
+/* =========================================
+   3. FILTER SEKCIJA
    ========================================= */
 .filters-section {
   background-color: white;
@@ -57,22 +198,12 @@
   flex-wrap: wrap;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
+.filter-group { display: flex; flex-direction: column; gap: 6px; }
 .filter-group label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #718096;
-  letter-spacing: 0.05em;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; color: #718096; letter-spacing: 0.05em;
 }
 
-.filter-select, 
-.filter-input {
+.filter-select, .filter-input {
   padding: 8px 12px;
   border: 1px solid #cbd5e0;
   border-radius: 6px;
@@ -81,351 +212,117 @@
   background-color: #fff;
   transition: all 0.2s;
 }
-
-.filter-select:focus, 
-.filter-input:focus {
-  outline: none;
-  border-color: #3182ce;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+.filter-select:focus, .filter-input:focus {
+  outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
 }
 
 .filter-info {
-  margin-left: auto;
-  font-size: 13px;
-  color: #718096;
-  background: #f7fafc;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #edf2f7;
+  margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #edf2f7;
 }
 
 /* =========================================
-   3. TABLICA (POPRAVLJENO)
+   4. TABLICA (USERS TABLE)
    ========================================= */
 .users-table-container {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
-  overflow-x: auto; /* Omogućuje scrollanje lijevo-desno ako ne stane */
+  overflow-x: auto;
 }
 
 .users-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  white-space: nowrap; /* KLJUČNO: Sprječava prelamanje teksta u novi red */
+  white-space: nowrap;
 }
 
-.users-table thead {
-  background-color: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-}
-
+.users-table thead { background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; }
 .users-table th {
-  padding: 12px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #64748b;
-  letter-spacing: 0.05em;
+  padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;
 }
 
-.users-table tbody tr {
-  border-bottom: 1px solid #edf2f7;
-  transition: background-color 0.15s;
-}
+.users-table tbody tr { border-bottom: 1px solid #edf2f7; transition: background-color 0.15s; }
+.users-table tbody tr:hover { background-color: #f7fafc; }
+.users-table td { padding: 12px 16px; font-size: 14px; vertical-align: middle; color: #2d3748; }
 
-.users-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.users-table tbody tr:hover {
-  background-color: #f7fafc;
-}
-
-.users-table td {
-  padding: 12px 16px;
-  font-size: 14px;
-  vertical-align: middle;
-  color: #2d3748;
-}
-
-/* Prazno stanje */
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #718096;
-}
+.empty-state { text-align: center; padding: 40px; color: #718096; }
 
 /* =========================================
-   4. BADGES (Bedževi)
+   5. BADGES & GUMBI
    ========================================= */
 .status-badge, .role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 50px;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  text-transform: capitalize;
+  display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; line-height: 1; text-transform: capitalize;
 }
 
-/* Status Colors */
-.status-completed, .status-active, .approved {
-  background-color: #def7ec;
-  color: #03543f;
-}
+.status-completed, .status-active, .approved { background-color: #def7ec; color: #03543f; }
+.status-pending, .status-inactive, .pending, .status-upcoming { background-color: #fffaf0; color: #9c4221; border: 1px solid #feeebc; }
+.status-ongoing { background-color: #e9d8fd; color: #553c9a; animation: pulse 2s infinite; }
 
-.status-pending, .status-inactive, .pending, .status-upcoming {
-  background-color: #fffaf0;
-  color: #9c4221;
-  border: 1px solid #feeebc;
-}
-
-.status-ongoing {
-  background-color: #e9d8fd;
-  color: #553c9a;
-  animation: pulse 2s infinite;
-}
-
-/* Role Colors */
 .role-admin { background-color: #fed7e2; color: #702459; }
 .role-organizator { background-color: #bee3f8; color: #2c5282; }
 .role-voditeljKluba { background-color: #e9d8fd; color: #553c9a; }
 .role-sudac { background-color: #feebc8; color: #744210; }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-/* =========================================
-   5. AKCIJSKI GUMBI (POPRAVLJENO)
-   ========================================= */
-.table-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: nowrap; /* KLJUČNO: Gumbi moraju ostati u jednom redu */
-}
+/* Table Actions */
+.table-actions { display: flex; gap: 6px; align-items: center; }
 
 .btn-table {
-  padding: 6px 10px; /* Malo manji padding da stanu */
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-  white-space: nowrap;
+  padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; white-space: nowrap;
 }
+.btn-approve { background: white; border-color: #cbd5e0; color: #4a5568; }
+.btn-approve:hover { background: #edf2f7; border-color: #a0aec0; }
 
-/* Sivi/Bijeli gumbi (Uredi, Poništi) */
-.btn-approve {
-  background-color: white;
-  border-color: #cbd5e0;
-  color: #4a5568;
-}
-.btn-approve:hover {
-  background-color: #edf2f7;
-  border-color: #a0aec0;
-  color: #2d3748;
-}
+.btn-unapprove { background: #fffaf0; border-color: #fbd38d; color: #c05621; }
+.btn-delete-small { background: white; border-color: #fc8181; color: #c53030; }
+.btn-delete-small:hover { background: #fff5f5; border-color: #e53e3e; }
 
-/* Narančasti (Poništi odobrenje) */
-.btn-unapprove {
-    background-color: #fffaf0;
-    border-color: #fbd38d;
-    color: #c05621;
-}
-.btn-unapprove:hover {
-    background-color: #feebc8;
-}
-
-/* Crveni (Obriši) */
-.btn-delete-small {
-  background-color: white;
-  border-color: #fc8181;
-  color: #c53030;
-}
-.btn-delete-small:hover {
-  background-color: #fff5f5;
-  border-color: #e53e3e;
-}
-
-/* Zeleni (Odobri) */
-.btn-success {
-    background-color: #48bb78;
-    color: white;
-    border: none;
-}
-.btn-success:hover {
-    background-color: #38a169;
-}
-
-/* Glavni gumb (Plavi) */
 .btn-primary {
-  background-color: #3182ce;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  background-color: #3182ce; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;
 }
-.btn-primary:hover {
-  background-color: #2b6cb0;
-}
+.btn-primary:hover { background-color: #2b6cb0; }
 
 /* =========================================
    6. MODALI
    ========================================= */
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out;
 }
-
 .modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 90vh;
-  overflow-y: auto;
+  background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto;
 }
+.modal-content.large-modal { max-width: 650px; }
+.modal-content h3 { margin-top: 0; font-size: 20px; color: #2d3748; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 15px; }
 
-.modal-content.large-modal {
-  max-width: 650px;
-}
-
-.modal-content h3 {
-  margin-top: 0;
-  font-size: 20px;
-  color: #2d3748;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #edf2f7;
-  padding-bottom: 15px;
-}
-
-/* Forme unutar modala */
 .form-group { margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #4a5568; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; box-sizing: border-box;
+}
+.form-group input:focus { border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); outline: none; }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
+.checkbox-label-inline { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; user-select: none; }
+.checkbox-label-inline input { width: 16px; height: 16px; }
 
-.form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #4a5568;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
-  box-sizing: border-box; 
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #3182ce;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-  outline: none;
-}
-
-.checkbox-label-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    font-size: 14px;
-    user-select: none;
-}
-.checkbox-label-inline input {
-    width: 16px;
-    height: 16px;
-}
-
-/* Modal Actions */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #edf2f7;
-}
-
-.btn-cancel {
-  background: white;
-  border: 1px solid #cbd5e0;
-  padding: 10px 20px;
-  border-radius: 8px;
-  color: #4a5568;
-  font-weight: 600;
-  cursor: pointer;
-}
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #edf2f7; }
+.btn-cancel { background: white; border: 1px solid #cbd5e0; padding: 10px 20px; border-radius: 8px; color: #4a5568; font-weight: 600; cursor: pointer; }
 .btn-cancel:hover { background: #f7fafc; }
-
-.btn-confirm-delete {
-  background: #e53e3e;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
+.btn-confirm-delete { background: #e53e3e; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .btn-confirm-delete:hover { background: #c53030; }
 
-.modal-user-name {
-    background: #f7fafc;
-    padding: 12px;
-    border-radius: 8px;
-    margin: 15px 0;
-    text-align: center;
-    border: 1px dashed #cbd5e0;
-    font-weight: 500;
-}
+.modal-user-name { background: #f7fafc; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; border: 1px dashed #cbd5e0; font-weight: 500; }
+.modal-warning { color: #e53e3e; font-size: 13px; text-align: center; margin-top: 10px; }
 
-.modal-warning {
-    color: #e53e3e;
-    font-size: 13px;
-    text-align: center;
-    margin-top: 10px;
-}
-
-/* Animations */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* Responsive */
 @media (max-width: 768px) {
   .filters-section { flex-direction: column; align-items: stretch; }
   .filter-select, .filter-input { width: 100%; }
   .form-row { grid-template-columns: 1fr; }
+  .stats-grid, .actions-grid { grid-template-columns: 1fr; }
 }
