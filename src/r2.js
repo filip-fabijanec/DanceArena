@@ -27,7 +27,7 @@ async function uploadFile(fileBuffer, originalName) {
     })
   );
 
-  return `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${fileName}`;
+  return `${process.env.R2_PUBLIC_URL}/${fileName}`;
 }
 
 module.exports = { uploadFile };
