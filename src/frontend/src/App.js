@@ -2,6 +2,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
+import CompetitionResults from './pages/CompetitionResults';
 import Login from './components/Login';
 import Registracija from './components/Registracija';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           {/* Javne rute */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/competition/:id/results" element={<CompetitionResults />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registracija" element={<Registracija />} />
 

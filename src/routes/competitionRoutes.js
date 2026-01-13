@@ -129,6 +129,82 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/:id/results", async (req, res) => {
+  try {
+    const compId = req.params.id;
+    const competition = await Competition.findById(compId);
+    if (!competition) {
+      return res.status(404).json({ error: "Competition not found" });
+    }
+
+    // Aggregate performances for this competition and sum all scores per performance
+    const performances = await Performance.aggregate([
+      { $match: { competitionId: competition._id, approved: true } },
+      { $lookup: {
+          from: 'scores',
+          let: { perfId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$performanceId', '$$perfId'] } } },
+            { $group: { _id: null, totalScore: { $sum: '$score' }, judgesCount: { $sum: 1 } } }
+          ],
+          as: 'scores'
+        }
+      },
+      { $addFields: {
+          totalScore: { $ifNull: [ { $arrayElemAt: ['$scores.totalScore', 0] }, 0 ] },
+          judgesCount: { $ifNull: [ { $arrayElemAt: ['$scores.judgesCount', 0] }, 0 ] }
+        }
+      },
+      { $lookup: { from: 'users', localField: 'clubId', foreignField: '_id', as: 'club' } },
+      { $unwind: { path: '$club', preserveNullAndEmptyArrays: true } },
+      { $project: { choreographyName:1, ageCategory:1, groupSize:1, totalScore:1, judgesCount:1, clubName:'$club.clubName', _id: 1 } }
+    ]);
+
+    // Group by age category then by groupSize (order sizes by numeric part when possible)
+    const grouped = {};
+    performances.forEach(p => {
+      const age = p.ageCategory || 'Nepoznata kategorija';
+      if (!grouped[age]) grouped[age] = {};
+      const sizeLabel = p.groupSize || 'Nepoznata veličina';
+      const num = (() => {
+        const m = (sizeLabel || '').match(/\d+/);
+        return m ? parseInt(m[0], 10) : 999;
+      })();
+      if (!grouped[age][sizeLabel]) grouped[age][sizeLabel] = { sizeOrder: num, items: [] };
+      grouped[age][sizeLabel].items.push(p);
+    });
+
+    const ageKeys = Object.keys(grouped).sort((a,b) => {
+      const na = Number(a), nb = Number(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+
+    const result = ageKeys.map(age => {
+      const sizes = Object.keys(grouped[age]).map(sizeLabel => {
+        const bucket = grouped[age][sizeLabel];
+        bucket.items.sort((a,b) => b.totalScore - a.totalScore);
+        const items = bucket.items.map((it, idx) => ({
+          rank: idx + 1,
+          performanceId: it._id,
+          choreographyName: it.choreographyName,
+          clubName: it.clubName,
+          groupSize: it.groupSize,
+          totalScore: it.totalScore,
+          judgesCount: it.judgesCount
+        }));
+        return { sizeLabel, sizeOrder: bucket.sizeOrder, items };
+      }).sort((a,b) => a.sizeOrder - b.sizeOrder);
+
+      return { ageCategory: age, sizes };
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =======================
 // GET /competitions (sa query params)
 // =======================

@@ -72,8 +72,121 @@
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* reduced gap to tighten vertical spacing */
 }
+
+/* separation for size groups */
+.size-block {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid rgba(15,15,20,0.03);
+}
+
+.size-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.size-badge {
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(99,102,241,0.08);
+  color: #1f2937;
+  display: inline-block;
+}
+
+.age-block {
+  margin-bottom: 28px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff, #fbfdff);
+  border: 1px solid rgba(15,15,20,0.04);
+}
+
+.age-header { display:flex; align-items:center; gap:12px; }
+.age-title { margin: 0; font-size: 1.05rem; font-weight: 800; }
+
+/* medal badge */
+.medal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px; /* slightly smaller */
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 800;
+  margin-right: 8px; /* reduced spacing */
+  background: #fff;
+  border: 1px solid rgba(15,15,20,0.03);
+}
+.medal-badge.rank-1 { color: #b7791f; background: linear-gradient(180deg,#fff7ed,#fffaf0); }
+.medal-badge.rank-2 { color: #475569; background: linear-gradient(180deg,#f8fafc,#f1f5f9); }
+.medal-badge.rank-3 { color: #6b7280; background: linear-gradient(180deg,#fafafa,#f8fafc); }
+
+.info-badge {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.04);
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.points-badge {
+  background: #eef2ff;
+  color: #2d6cdf;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  min-width: 72px;
+  text-align: center;
+}
+
+.group-item {
+  background: white;
+  padding: 10px 12px; /* tighter padding */
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px; /* reduced gap */
+  transition: transform .12s ease, box-shadow .12s ease;
+  border: 1px solid rgba(15,15,20,0.04);
+}
+
+.group-top { display:flex; align-items:center; gap:8px; }
+.group-left { flex: 1; min-width: 0; }
+.group-right { display:flex; align-items:center; justify-content:flex-end; min-width: 90px; }
+
+/* stronger back button */
+.back-button {
+  display:inline-block;
+  background:#fff;
+  color:#2d6cdf;
+  padding:8px 12px;
+  border-radius:6px;
+  border:1px solid rgba(45,108,223,0.12);
+  box-shadow: 0 2px 8px rgba(45,108,223,0.03);
+  text-decoration:none;
+  font-weight:700;
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .group-item { flex-direction: column; align-items: flex-start; }
+  .group-right { width:100%; display:flex; justify-content: flex-end; margin-top:8px; }
+  .medal-badge { min-width: 36px; height: 36px; }
+  .points-badge { min-width: 60px; }
+}
+
+/* results title */
+.results-title { margin-top: 6px; margin-bottom: 18px; font-size: 1.4rem; }
 
 /* group item card look */
 .group-item {

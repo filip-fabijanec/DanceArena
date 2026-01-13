@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PublicNavbar from '../components/PublicNavbar';
 import './LandingPage.css';
+import { Link } from 'react-router-dom';
 import { ReactComponent as Logo } from './dancearena.svg';
 import { ReactComponent as Cloud } from './cloud.svg';
 
@@ -49,14 +50,16 @@ function LandingPage() {
   };
 
   const Event = ({ c }) => (
-    <div className="event-panel">
-      <div className="event-content">
-        <span className="event-date">{formatDate(c.date)}</span>
-        <h3>{c.name}</h3>
-        <span className="event-location">{c.location}</span>
-        {c.description && <p>{c.description}</p>}
+    <Link to={`/competition/${c._id}/results`} className="event-panel-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <div className="event-panel" role="button">
+        <div className="event-content">
+          <span className="event-date">{formatDate(c.date)}</span>
+          <h3>{c.name}</h3>
+          <span className="event-location">{c.location}</span>
+          {c.description && <p>{c.description}</p>}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 
   const Section = ({ title, data, refEl }) => (
