@@ -30,7 +30,7 @@ router.get("/finished", async (req, res) => {
       .populate("organizer", "name surname")
       .sort({ date: -1 });
 
-    res.status(200).json(finishedCompetitions);
+    res.status(200).json(competitions);  // <-- FIX: bilo je finishedCompetitions
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
