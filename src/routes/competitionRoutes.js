@@ -15,6 +15,27 @@ const authMiddleware = require("../backend/middleware/authMiddleware");
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
 
+
+// =======================
+// GET /competitions/finished (završena natjecanja)
+// =======================
+router.get("/finished", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const competitions = await Competition.find({
+      date: { $lt: today }
+    })
+      .populate("organizer", "name surname")
+      .sort({ date: -1 });
+
+    res.status(200).json(competitions);  // <-- FIX: bilo je finishedCompetitions
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =======================
 // GET /competitions/upcoming
 // =======================

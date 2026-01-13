@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios'; 
 import './placanje_clanarine.css';
 
 function PlacanjeClanarine() {
@@ -7,8 +8,30 @@ function PlacanjeClanarine() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [error, setError] = useState('');
 
-  // Fiksna cijena članarine
-  const SUBSCRIPTION_PRICE = 20; 
+  // STATE za dinamičku cijenu (po defaultu 0 ili null dok se ne učita)
+  const [membershipPrice, setMembershipPrice] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 1. DOHVAĆANJE CIJENE IZ BAZE (tvoj settingsRoutes.js)
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        // Pretpostavljam da je tvoja ruta montirana na /api/settings
+        // Provjeri u server.js (npr. app.use('/api/settings', settingsRoutes))
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/settings`);
+        
+        // Postavljamo cijenu koju je vratio backend
+        setMembershipPrice(response.data.membershipPrice);
+      } catch (err) {
+        console.error("Greška pri dohvatu postavki:", err);
+        setError("Ne mogu dohvatiti cijenu članarine.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const handleSubscriptionPayment = async (e) => {
     e.preventDefault();
@@ -16,51 +39,58 @@ function PlacanjeClanarine() {
     setProcessingPayment(true);
 
     try {
-      // 1. Pozivamo backend da kreira Stripe Checkout Session za pretplatu
-      // Napomena: Moraš imati rutu na backendu koja ovo obrađuje (slično kao za nastup)
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/stripe/create-subscription-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const token = storedUser?.token;
+
+      // Šaljemo zahtjev za plaćanje s DOHVAĆENOM cijenom
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/stripe/create-subscription-checkout-session`,
+        {
+          email: currentUser.email,
+          price: membershipPrice, // <--- Šaljemo cijenu iz baze
+          interval: 'year'        // <--- Godišnja pretplata
         },
-        body: JSON.stringify({
-          userId: currentUser._id,
-          email: currentUser.email, // Stripeu treba email za račun
-          price: SUBSCRIPTION_PRICE
-        }),
-      });
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Greška prilikom kreiranja plaćanja');
-      }
-
-      const { url } = await response.json();
-
-      // 2. Preusmjeravanje na Stripe
+      const { url } = response.data;
       window.location.href = url;
 
     } catch (err) {
       console.error('Payment error:', err);
-      setError('Došlo je do greške prilikom povezivanja sa sustavom naplate. Pokušajte ponovno.');
+      const errorMsg = err.response?.data?.error || 'Došlo je do greške prilikom povezivanja sa sustavom naplate.';
+      setError(errorMsg);
       setProcessingPayment(false);
     }
   };
 
   const handleLogout = () => {
-    // Obriši podatke i vrati na login
     localStorage.removeItem('user');
     window.location.href = '/login';
   };
+
+  // Dok se učitava cijena, prikaži loading
+  if (loading) {
+    return (
+      <div className="subscription-lock-container">
+        <div className="subscription-card" style={{ textAlign: 'center' }}>
+           <span className="spinner" style={{display: 'inline-block'}}></span>
+           <p>Učitavanje cijene...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="subscription-lock-container">
       <div className="subscription-card">
         
-        {/* Header ikona */}
-        <div className="icon-wrapper">
-          🔒
-        </div>
+        <div className="icon-wrapper">🔒</div>
 
         <h1>Pristup Ograničen</h1>
         <p className="user-greeting">
@@ -68,34 +98,32 @@ function PlacanjeClanarine() {
         </p>
         
         <p className="description">
-            Vaša organizatorska licenca nije aktivna. <br/>
-            Kako biste mogli kreirati natjecanja i upravljati prijavama, potrebno je aktivirati mjesečnu članarinu.
+            Vaša organizatorska licenca nije aktivna.<br/>
+            Kako biste mogli kreirati natjecanja, potrebno je aktivirati godišnju članarinu.
         </p>
 
-        {/* Info o cijeni */}
+        {/* DINAMIČKI PRIKAZ CIJENE */}
         <div className="price-display">
             <span className="currency">€</span>
-            <span className="amount">{SUBSCRIPTION_PRICE}</span>
-            <span className="period">/ mjesečno</span>
+            <span className="amount">{membershipPrice}</span>
+            <span className="period">/ godišnje</span>
         </div>
 
-        {/* Error poruka */}
         {error && <div className="error-message">{error}</div>}
 
-        {/* Gumb za plaćanje (Stil iz tvog primjera) */}
         <button 
             onClick={handleSubscriptionPayment} 
             className="stripe-pay-button" 
-            disabled={processingPayment}
+            disabled={processingPayment || !membershipPrice}
         >
             {processingPayment ? (
               <>
                 <span className="spinner"></span>
-                Preusmjeravanje na Stripe...
+                Preusmjeravanje...
               </>
             ) : (
               <>
-                💳 Aktiviraj članarinu
+                💳 Aktiviraj članarinu ({membershipPrice}€)
               </>
             )}
         </button>
@@ -107,7 +135,6 @@ function PlacanjeClanarine() {
 
         <div className="divider"></div>
 
-        {/* Gumb za odjavu */}
         <button onClick={handleLogout} className="logout-link">
             Odustani i odjavi se
         </button>

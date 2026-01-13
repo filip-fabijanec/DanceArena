@@ -171,7 +171,11 @@ function OcjenjivanjeKategorija() {
                       return (
                         <div key={perf._id} className="group-item" style={{ marginBottom: 12 }}>
                           <div className="group-left">
-                            <div className="group-name">{perf.choreographyName || 'Bez naziva'}</div>
+                            <div className="group-name">
+                              {perf.choreographyName || 'Bez naziva'}
+                              {(perf.clubId?.clubName || perf.clubName) ? ` (${perf.clubId?.clubName || perf.clubName})` : ''}
+                            </div>                            
+                            
                             <div className="group-meta">Veličina: {perf.groupSize || '-'}{perf.participants ? ` • Sudionici: ${perf.participants.length}` : ''}</div>
 
                             <div className="score-form" style={{ marginTop: 8 }}>

@@ -32,25 +32,31 @@ router.get("/", async (req, res) => {
 
 // POST - Kreiraj novu prijavu
 router.post("/", async (req, res) => {
-  
   try {
+    console.log('📝 [PERFORMANCE] Kreiram novu prijavu:', req.body);
+
     const competition = await Competition.findById(req.body.competitionId);
 
     if (!competition) {
+      console.log('❌ [PERFORMANCE] Natjecanje ne postoji:', req.body.competitionId);
       return res.status(404).json({ error: "Natjecanje ne postoji" });
     }
 
     if (competition.isLocked) {
+      console.log('🔒 [PERFORMANCE] Natjecanje je zaključano');
       return res.status(403).json({
         error: "Natjecanje je zaključano – prijave nisu moguće"
       });
     }
 
     const newPerformance = new Performance(req.body);
+    console.log('💾 [PERFORMANCE] Spremam performance...');
     await newPerformance.save({
       runValidators: true,
       validateBeforeSave: true,
     });
+
+    console.log('✅ [PERFORMANCE] Performance spremljen:', newPerformance._id);
     
     // ← DODAJ POPULATE prije slanja odgovora
     await newPerformance.populate("clubId", "name surname clubName clubLocation");
@@ -58,6 +64,7 @@ router.post("/", async (req, res) => {
     
     res.status(201).json(newPerformance);
   } catch (error) {
+    console.error('❌ [PERFORMANCE ERROR]:', error.message);
     res.status(400).json({ error: error.message });
   }
 });
@@ -128,8 +135,10 @@ router.get("/competition/:competitionId", async (req, res) => {
 
     // Dohvati sve nastupe za zadani competitionId
     const performances = await Performance.find({ competitionId })
+
       .populate("clubId", "name surname") // Opcionalno: podaci o klubu
       .populate("competitionId", "name date location isLocked"); // Opcionalno: podaci o natjecanju
+    
 
     if (!performances || performances.length === 0) {
       return res.status(404).json({ message: "Nema nastupa za ovo natjecanje." });
