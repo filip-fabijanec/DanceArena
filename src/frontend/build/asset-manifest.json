@@ -1,32 +1,17 @@
 {
   "files": {
-<<<<<<< Updated upstream
-    "main.css": "/static/css/main.974e3dd7.css",
-    "main.js": "/static/js/main.98413f29.js",
-=======
-    "main.css": "/static/css/main.084179be.css",
-    "main.js": "/static/js/main.84dcb39c.js",
->>>>>>> Stashed changes
+    "main.css": "/static/css/main.3480a069.css",
+    "main.js": "/static/js/main.9e26bd02.js",
     "static/js/453.d7446e4a.chunk.js": "/static/js/453.d7446e4a.chunk.js",
-    "static/media/dancearena.svg": "/static/media/dancearena.c79e39e519caa9c19eabb9aaa944e574.svg",
-    "static/media/cloud.svg": "/static/media/cloud.9fc755a7d5d465228642b20aa57f3ca3.svg",
+    "static/media/dancearena.svg": "/static/media/dancearena.4eca59575fdd666feae129417f0e0718.svg",
+    "static/media/cloud.svg": "/static/media/cloud.3cbad7795525c32b836ecbc23b2ea002.svg",
     "index.html": "/index.html",
-<<<<<<< Updated upstream
-    "main.974e3dd7.css.map": "/static/css/main.974e3dd7.css.map",
-    "main.98413f29.js.map": "/static/js/main.98413f29.js.map",
+    "main.3480a069.css.map": "/static/css/main.3480a069.css.map",
+    "main.9e26bd02.js.map": "/static/js/main.9e26bd02.js.map",
     "453.d7446e4a.chunk.js.map": "/static/js/453.d7446e4a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.974e3dd7.css",
-    "static/js/main.98413f29.js"
-=======
-    "main.084179be.css.map": "/static/css/main.084179be.css.map",
-    "main.84dcb39c.js.map": "/static/js/main.84dcb39c.js.map",
-    "453.d7446e4a.chunk.js.map": "/static/js/453.d7446e4a.chunk.js.map"
-  },
-  "entrypoints": [
-    "static/css/main.084179be.css",
-    "static/js/main.84dcb39c.js"
->>>>>>> Stashed changes
+    "static/css/main.3480a069.css",
+    "static/js/main.9e26bd02.js"
   ]
 }
