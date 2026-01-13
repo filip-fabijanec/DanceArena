@@ -31,7 +31,7 @@ router.get("/finished", async (req, res) => {
       .sort({ date: -1 }); // Najnovija završena prva
 
     const finishedCompetitions = competitions. filter(comp => {
-      return comp.autoStatus === 'finished';
+      return comp.autoStatus === 'completed';
     });
 
     res.status(200).json(finishedCompetitions);
