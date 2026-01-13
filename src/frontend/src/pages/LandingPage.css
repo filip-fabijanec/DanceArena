@@ -1,6 +1,6 @@
 /* BASE */
 .landing-page {
-  background: #acb8e6;
+  background: #9ec1f5;
   color: #222;
   min-height: 100vh;
 }
@@ -27,13 +27,6 @@
 .events-section {
   padding: 60px 40px;
 }
-
-.events-section h2 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #333;
-}
-
 /* WRAPPER */
 .events-wrapper {
   display: flex;
@@ -117,14 +110,31 @@
   line-height: 1.5;
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  .hero-section h1 {
-    font-size: 40px;
-  }
+.hero-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2px;
+}
 
-  .event-panel {
-    min-width: 220px;
-    height: 260px;
+.logo-svg {
+  height: 400px;       /* prilagodi po želji */
+  width: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .logo-svg {
+    height: 128px;
   }
+}
+
+.events-section h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  display: inline-block;
+  padding: 12px 30px;
+  background: #ffffff;           /* oblak je bijel */
+  color: #222;
+  border-radius: 50px 50px 50px 50px / 35px; /* ovalno, fluffy */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);   /* mekana sjena */
 }

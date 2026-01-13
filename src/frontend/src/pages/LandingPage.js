@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PublicNavbar from '../components/PublicNavbar';
 import './LandingPage.css';
+import { ReactComponent as Logo } from './dancearena.svg';
+import { ReactComponent as Cloud } from './cloud.svg';
 
 function LandingPage() {
   const [finished, setFinished] = useState([]);
@@ -21,10 +23,15 @@ function LandingPage() {
         fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`)
       ]);
 
-      setFinished(await f.json());
-      setUpcoming(await u.json());
+      const finishedData = await f.json();
+      const upcomingData = await u.json();
+
+      setFinished(Array.isArray(finishedData) ? finishedData : []);
+      setUpcoming(Array.isArray(upcomingData) ? upcomingData : []);
     } catch (e) {
       console.error(e);
+      setFinished([]);
+      setUpcoming([]);
     } finally {
       setLoading(false);
     }
@@ -54,20 +61,20 @@ function LandingPage() {
 
   const Section = ({ title, data, refEl }) => (
     <section className="events-section">
-      <h2>{title}</h2>
+        <h2>{title}</h2>
 
       {loading ? (
         <p>Učitavanje...</p>
-      ) : (
+      ) : data.length > 0 ? (
         <div className="events-wrapper">
-          <button onClick={() => scroll(refEl, -1)}>←</button>
+          <button className="scroll-btn" onClick={() => scroll(refEl, -1)}>←</button>
           <div className="events-strip" ref={refEl}>
-            {data.map(c => (
-              <Event key={c._id} c={c} />
-            ))}
+            {data.map(c => <Event key={c._id} c={c} />)}
           </div>
-          <button onClick={() => scroll(refEl, 1)}>→</button>
+          <button className="scroll-btn" onClick={() => scroll(refEl, 1)}>→</button>
         </div>
+      ) : (
+        <p className="no-events">Trenutno nema događaja.</p>
       )}
     </section>
   );
@@ -77,12 +84,14 @@ function LandingPage() {
       <PublicNavbar />
 
       <section className="hero-section">
-        <h1>Dance Arena</h1>
-        <p>Mjesto gdje natjecanja postaju događaji</p>
+        <div className="hero-logo">
+          <Logo className="logo-svg" />
+        </div>
+        <p className="hero-subtitle">Mjesto gdje natjecanja postaju događaji</p>
       </section>
 
-      <Section title="Nadolazeći eventi" data={upcoming} refEl={upcomingRef} />
-      <Section title="Prošli eventi" data={finished} refEl={finishedRef} />
+      <Section title="UPCOMING" data={upcoming} refEl={upcomingRef} />
+      <Section title="FINISHED" data={finished} refEl={finishedRef} />
     </div>
   );
 }
