@@ -5,8 +5,10 @@ import Navbar from '../../components/Navbar';
 import '../Dashboard.css';
 import './VoditeljPages.css';
 
+
 function VoditeljDashboard() {
-  const { currentUser } = useAuth();
+  const { currentUser, token } = useAuth();
+
   const [competitions, setCompetitions] = useState([]);
   const [myPerformances, setMyPerformances] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,7 @@ function VoditeljDashboard() {
       }
 
       // Dohvati moje prijave
-      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances? clubId=${currentUser._id}`);
+      const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances?clubId=${currentUser._id}`);
       if (perfResponse. ok) {
         const perfData = await perfResponse.json();
         setMyPerformances(perfData);
@@ -81,7 +83,9 @@ function VoditeljDashboard() {
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
         {
-          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -291,7 +295,7 @@ function VoditeljDashboard() {
                       <span className="detail-label">Plaćeno:</span>
                       <span className="detail-value">{perf.paid ? 'Da' : 'Ne'}</span>
                     </div>
-                    {perf.competitionId?.isLocked && (
+                    {perf.competitionId?.isLocked && perf.approved && (
                       <button
                         onClick={() => downloadPdf(perf.competitionId._id)}
                         className="btn-secondary"

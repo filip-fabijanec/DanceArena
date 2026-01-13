@@ -336,7 +336,7 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
     const user = req.user;
 
     // ❌ ADMIN NEMA PRAVO
-    if (user.role === "administrator") {
+    if (user.role === "admin") {
       return res.status(403).json({ error: "Administrator nema pristup PDF-u" });
     }
 
@@ -350,13 +350,17 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
         ref => ref.toString() === user._id.toString()
       );
 
-    // ✅ VODITELJ S PRIJAVOM
-    const hasPerformance =
-      user.role === "voditelj" &&
-      await Performance.exists({
+    let hasPerformance = false;
+
+    if (user.role === "voditeljKluba") {
+      const perf = await Performance.findOne({
         competitionId: competition._id,
-        clubId: user._id
+        clubId: user._id,
+        approved: true
       });
+
+      hasPerformance = !!perf;
+    }
 
     if (!isOrganizer && !isReferee && !hasPerformance) {
       return res.status(403).json({ error: "Nemaš pravo na PDF" });

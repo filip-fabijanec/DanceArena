@@ -129,7 +129,7 @@ router.get("/competition/:competitionId", async (req, res) => {
     // Dohvati sve nastupe za zadani competitionId
     const performances = await Performance.find({ competitionId })
       .populate("clubId", "name surname") // Opcionalno: podaci o klubu
-      .populate("competitionId", "name date location"); // Opcionalno: podaci o natjecanju
+      .populate("competitionId", "name date location isLocked"); // Opcionalno: podaci o natjecanju
 
     if (!performances || performances.length === 0) {
       return res.status(404).json({ message: "Nema nastupa za ovo natjecanje." });

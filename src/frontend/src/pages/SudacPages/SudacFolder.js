@@ -12,6 +12,40 @@ function SudacFolder() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const token = localStorage.getItem("token");
+
+  const downloadPdf = async (competitionId) => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        alert("Greška: " + text);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "startna_lista.pdf";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Greška pri preuzimanju PDF-a");
+    }
+  };
+
+
   useEffect(() => {
     if (!judgeId) {
       setLoading(false);
@@ -86,6 +120,15 @@ function SudacFolder() {
                     Ocijeni nastupe
                   </button>
                 )}
+                {comp.isLocked && (
+                  <button
+                    className="card-button btn-secondary"
+                    onClick={() => downloadPdf(comp._id)}
+                  >
+                    📄 Preuzmi startnu listu (PDF)
+                  </button>
+                )}
+
               </div>
             ))}
           </div>

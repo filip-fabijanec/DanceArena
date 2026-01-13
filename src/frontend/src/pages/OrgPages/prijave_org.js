@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import '../Dashboard.css';
 import './prijave_org.css';
+import { useAuth } from "../../context/AuthContext";
+import { downloadCompetitionPdf } from "../../utils/downloadPdf";
+
 
 function UpravljanjePrijavama() {
+  const token = localStorage.getItem("token");
+
   const [searchParams] = useSearchParams();
   const competitionId = searchParams.get('competitionId');
 
@@ -188,14 +193,15 @@ function UpravljanjePrijavama() {
       )}
 
       {competition?.isLocked && (
-        <a
-          href={`${process.env.REACT_APP_API_URL}/performances/export-pdf/${competitionId}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           className="btn-export"
+          onClick={() =>
+            downloadCompetitionPdf(competitionId, token)
+              .catch(err => alert(err.message))
+          }
         >
           Preuzmi startnu listu (PDF)
-        </a>
+        </button>
       )}
 
 
