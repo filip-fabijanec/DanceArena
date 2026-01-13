@@ -25,6 +25,7 @@ app.use('/api/stripe', require('./routes/stripeRoutes'));
 app.use('/api/invites', require('./routes/inviteRoutes'));
 app.use('/api/upload-song', require('./routes/uploadSongRoutes'));
 app.use('/api/clanarine', require('./routes/clanarineRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
 
 
 

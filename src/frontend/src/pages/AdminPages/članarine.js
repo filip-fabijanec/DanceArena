@@ -4,18 +4,24 @@ import '../Dashboard.css';
 import './AdminPages.css';
 
 function Članarine() {
+  // --- STATE ZA KORISNIKE ---
   const [clanarine, setClanarine] = useState([]);
   const [filteredClanarine, setFilteredClanarine] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Filter state
+  // --- STATE ZA CIJENU (NOVO) ---
+  const [priceSettings, setPriceSettings] = useState({ membershipPrice: 0, currency: 'EUR' });
+  const [showPriceModal, setShowPriceModal] = useState(false);
+  const [newPrice, setNewPrice] = useState('');
+
+  // --- FILTER STATE ---
   const [filter, setFilter] = useState({ status: 'all', search: '' });
 
-  // Modals state
+  // --- MODALS STATE ---
   const [showEditModal, setShowEditModal] = useState({ show: false, user: null });
   const [showDeleteModal, setShowDeleteModal] = useState({ show: false, user: null });
 
-  // Edit form state
+  // --- EDIT FORM STATE ---
   const [editForm, setEditForm] = useState({
     subscriptionStatus: 'inactive',
     subscriptionExpiry: ''
@@ -24,6 +30,7 @@ function Članarine() {
   // 1. Fetch data on mount
   useEffect(() => {
     fetchClanarine();
+    fetchPrice(); // <--- DOHVATI CIJENU PRI UČITAVANJU
   }, []);
 
   // 2. Apply filters whenever data or filter state changes
@@ -31,38 +38,85 @@ function Članarine() {
     applyFilters();
   }, [clanarine, filter]);
 
-  // U tvojoj React komponenti (Članarine.js)
+  // --- API POZIVI ---
 
-const fetchClanarine = async () => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem('token');
-    
-    // Poziva tvoju novu rutu
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+  const fetchClanarine = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Osiguravamo da je data niz, čak i ako backend vrati nešto čudno
+        setClanarine(Array.isArray(data) ? data : []);
+      } else {
+        console.error("Greška, status:", response.status);
       }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      setClanarine(data); 
-
-    } else {
-      console.error("Greška, status:", response.status);
+    } catch (error) {
+      console.error("Greška pri dohvatu članarina:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Greška pri dohvatu članarina:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+  // NOVO: Dohvat cijene
+  const fetchPrice = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        // Pazi da ruta odgovara onoj u backendu (vjerojatno /settings ili /api/settings)
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/settings`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setPriceSettings(data);
+            setNewPrice(data.membershipPrice); // Postavi početnu vrijednost za input
+        }
+    } catch (err) { 
+        console.error("Greška pri dohvatu cijene:", err); 
+    }
+  };
+
+  // NOVO: Ažuriranje cijene
+  const handleUpdatePrice = async (e) => {
+    e.preventDefault();
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/settings`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ membershipPrice: newPrice })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            setPriceSettings(data);
+            setShowPriceModal(false);
+            alert("Nova cijena uspješno postavljena!");
+        } else {
+            alert("Greška pri spremanju cijene.");
+        }
+    } catch (err) { 
+        console.error(err);
+        alert("Greška servera.");
+    }
+  };
+
+  // --- FILTRIRANJE ---
 
   const applyFilters = () => {
-    // Ako clanarine nisu niz, postavi prazan niz da aplikacija ne 'pukne'
     let filtered = Array.isArray(clanarine) ? [...clanarine] : [];
 
     // Filter po statusu
@@ -83,12 +137,11 @@ const fetchClanarine = async () => {
     setFilteredClanarine(filtered);
   };
 
-  // --- HANDLERS ZA MODALE ---
+  // --- HANDLERS ZA KORISNIKE ---
 
   const handleEditClick = (user) => {
     setShowEditModal({ show: true, user });
     
-    // Formatiranje datuma za HTML input (YYYY-MM-DD)
     let formattedDate = '';
     if (user.subscriptionExpiry) {
         formattedDate = new Date(user.subscriptionExpiry).toISOString().split('T')[0];
@@ -115,12 +168,9 @@ const fetchClanarine = async () => {
 
       if (response.ok) {
         const updatedUser = await response.json();
-        
-        // Ažuriraj state
         setClanarine(clanarine.map(c => 
           c._id === showEditModal.user._id ? updatedUser : c
         ));
-        
         setShowEditModal({ show: false, user: null });
         alert('Status pretplate ažuriran!');
       } else {
@@ -132,7 +182,6 @@ const fetchClanarine = async () => {
     }
   };
 
-  // Ovo zapravo poništava pretplatu, ne briše usera
   const handleDeleteClanarina = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -144,7 +193,6 @@ const fetchClanarine = async () => {
       });
 
       if (response.ok) {
-        // Ovdje ne mičemo usera iz liste, nego mu samo resetiramo status lokalno
         setClanarine(clanarine.map(c => {
             if (c._id === showDeleteModal.user._id) {
                 return { ...c, subscriptionStatus: 'inactive', subscriptionExpiry: null };
@@ -179,7 +227,20 @@ const fetchClanarine = async () => {
       <Link to="/admin" className="back-link">← Natrag na Dashboard</Link>
       
       <div className="page-header">
-        <h1>Upravljanje pretplatama (Organizatori)</h1>
+        <div>
+            <h1>Upravljanje članarinama</h1>
+            <p style={{color: '#666', marginTop: '5px'}}>Pregled pretplata organizatora</p>
+        </div>
+        
+        {/* NOVO: Gumb za promjenu cijene */}
+        <button 
+            className="btn-primary" 
+            onClick={() => setShowPriceModal(true)}
+            style={{ display: 'flex', gap: '10px', alignItems: 'center', height: 'fit-content' }}
+        >
+            <span>Cijena: <strong>{priceSettings.membershipPrice} {priceSettings.currency}</strong></span>
+            <span style={{background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px'}}>Uredi</span>
+        </button>
       </div>
 
       {/* FILTERI */}
@@ -270,7 +331,9 @@ const fetchClanarine = async () => {
         )}
       </div>
 
-      {/* EDIT MODAL */}
+      {/* --- MODALI --- */}
+
+      {/* 1. EDIT MODAL (KORISNIK) */}
       {showEditModal.show && (
         <div className="modal-overlay" onClick={() => setShowEditModal({ show: false, user: null })}>
           <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
@@ -284,7 +347,6 @@ const fetchClanarine = async () => {
                 <select
                     value={editForm.subscriptionStatus}
                     onChange={(e) => setEditForm({ ...editForm, subscriptionStatus: e.target.value })}
-                    style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
                 >
                     <option value="active">Active (Plaćeno)</option>
                     <option value="inactive">Inactive (Nije plaćeno)</option>
@@ -298,7 +360,9 @@ const fetchClanarine = async () => {
                   value={editForm.subscriptionExpiry}
                   onChange={(e) => setEditForm({ ...editForm, subscriptionExpiry: e.target.value })}
                 />
-                <small>Ako je status "active", ovdje postavi do kada vrijedi.</small>
+                <small style={{display:'block', marginTop:'5px', color:'#666'}}>
+                    Ako je status "active", ovdje postavi do kada vrijedi.
+                </small>
               </div>
 
               <div className="modal-actions">
@@ -318,7 +382,7 @@ const fetchClanarine = async () => {
         </div>
       )}
 
-      {/* DELETE MODAL (Zapravo Cancel Modal) */}
+      {/* 2. DELETE MODAL (KORISNIK) */}
       {showDeleteModal.show && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal({ show: false, user: null })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -343,6 +407,34 @@ const fetchClanarine = async () => {
           </div>
         </div>
       )}
+
+      {/* 3. PRICE MODAL (NOVO - CIJENA) */}
+      {showPriceModal && (
+        <div className="modal-overlay" onClick={() => setShowPriceModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>Postavi cijenu članarine</h3>
+            <p>Ova cijena će biti prikazana svim organizatorima pri plaćanju.</p>
+            
+            <form onSubmit={handleUpdatePrice}>
+                <div className="form-group">
+                    <label>Cijena (EUR)</label>
+                    <input 
+                        type="number" 
+                        value={newPrice} 
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        min="0"
+                        step="0.01"
+                    />
+                </div>
+                <div className="modal-actions">
+                    <button type="button" className="btn-cancel" onClick={() => setShowPriceModal(false)}>Odustani</button>
+                    <button type="submit" className="btn-primary">Spremi cijenu</button>
+                </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios'; // <--- 1. PROMJENA: Importiramo direktno 'axios'
 import './placanje_clanarine.css';
 
 function PlacanjeClanarine() {
@@ -7,7 +8,6 @@ function PlacanjeClanarine() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [error, setError] = useState('');
 
-  // Fiksna cijena članarine
   const SUBSCRIPTION_PRICE = 20; 
 
   const handleSubscriptionPayment = async (e) => {
@@ -16,39 +16,42 @@ function PlacanjeClanarine() {
     setProcessingPayment(true);
 
     try {
-      // 1. Pozivamo backend da kreira Stripe Checkout Session za pretplatu
-      // Napomena: Moraš imati rutu na backendu koja ovo obrađuje (slično kao za nastup)
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/stripe/create-subscription-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Dohvaćamo token direktno iz localStorage-a (jer nemamo api helper)
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const token = storedUser?.token;
+
+      // 2. PROMJENA: Koristimo puni URL i ručno šaljemo header
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/stripe/create-subscription-checkout-session`,
+        {
           userId: currentUser._id,
-          email: currentUser.email, // Stripeu treba email za račun
+          email: currentUser.email,
           price: SUBSCRIPTION_PRICE
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // <--- OVO JE BITNO da backend zna tko plaća
+          }
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Greška prilikom kreiranja plaćanja');
-      }
+      // Kod axiosa podaci su u .data
+      const { url } = response.data;
 
-      const { url } = await response.json();
-
-      // 2. Preusmjeravanje na Stripe
+      // Preusmjeravanje
       window.location.href = url;
 
     } catch (err) {
       console.error('Payment error:', err);
-      setError('Došlo je do greške prilikom povezivanja sa sustavom naplate. Pokušajte ponovno.');
+      // Axios greške su malo drugačije strukturirane
+      const errorMsg = err.response?.data?.error || 'Došlo je do greške prilikom povezivanja sa sustavom naplate.';
+      setError(errorMsg);
       setProcessingPayment(false);
     }
   };
 
   const handleLogout = () => {
-    // Obriši podatke i vrati na login
     localStorage.removeItem('user');
     window.location.href = '/login';
   };
@@ -57,7 +60,6 @@ function PlacanjeClanarine() {
     <div className="subscription-lock-container">
       <div className="subscription-card">
         
-        {/* Header ikona */}
         <div className="icon-wrapper">
           🔒
         </div>
@@ -72,17 +74,14 @@ function PlacanjeClanarine() {
             Kako biste mogli kreirati natjecanja i upravljati prijavama, potrebno je aktivirati mjesečnu članarinu.
         </p>
 
-        {/* Info o cijeni */}
         <div className="price-display">
             <span className="currency">€</span>
             <span className="amount">{SUBSCRIPTION_PRICE}</span>
             <span className="period">/ mjesečno</span>
         </div>
 
-        {/* Error poruka */}
         {error && <div className="error-message">{error}</div>}
 
-        {/* Gumb za plaćanje (Stil iz tvog primjera) */}
         <button 
             onClick={handleSubscriptionPayment} 
             className="stripe-pay-button" 
@@ -107,7 +106,6 @@ function PlacanjeClanarine() {
 
         <div className="divider"></div>
 
-        {/* Gumb za odjavu */}
         <button onClick={handleLogout} className="logout-link">
             Odustani i odjavi se
         </button>
