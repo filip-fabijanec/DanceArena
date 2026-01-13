@@ -25,7 +25,7 @@ function PrijaviNastup() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location. search);
 
     if (params.get('payment_success') === 'true') {
       setMessage('✅ Plaćanje uspješno! Nastup je registriran.');
@@ -37,7 +37,7 @@ function PrijaviNastup() {
     if (params.get('payment_cancelled') === 'true') {
       setMessage('❌ Plaćanje je otkazano. Pokušajte ponovno.');
       setMessageType('error');
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, window.location. pathname);
       setTimeout(() => setMessage(''), 5000);
     }
 
@@ -63,7 +63,7 @@ function PrijaviNastup() {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ... formData, [e.target. name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -97,7 +97,7 @@ function PrijaviNastup() {
           body: JSON.stringify({
             competitionId,
             clubId: currentUser._id,
-            choreographyName: formData.choreographyName,
+            choreographyName:  formData.choreographyName,
             ageCategory: formData.ageCategory,
             danceStyle: formData.danceStyle,
             groupSize: formData.groupSize,
@@ -110,7 +110,7 @@ function PrijaviNastup() {
 
       if (!perfRes.ok) throw new Error('Greška pri kreiranju nastupa');
 
-      const performance = await perfRes.json();
+      const performance = await perfRes. json();
 
       // 3️⃣ Stripe checkout
       const stripeRes = await fetch(
@@ -121,7 +121,7 @@ function PrijaviNastup() {
           body: JSON.stringify({
             competitionId,
             userId: currentUser._id,
-            performanceId: performance._id,
+            performanceId:  performance._id,
           }),
         }
       );
@@ -139,117 +139,167 @@ function PrijaviNastup() {
   };
 
   if (loading) {
-    return <div className="prijavi-nastup-container">Učitavanje...</div>;
+    return <div className="performance-form" style={{ textAlign: 'center', padding: '40px' }}>Učitavanje...</div>;
   }
 
   if (!competition) {
-    return <div className="prijavi-nastup-container">Natjecanje nije pronađeno</div>;
+    return <div className="performance-form" style={{ textAlign: 'center', padding: '40px' }}>Natjecanje nije pronađeno</div>;
   }
 
   return (
-    <div className="prijavi-nastup-container">
-      <h1>Prijavi nastup – {competition.name}</h1>
-
-      {message && <div className={`message-banner ${messageType}`}>{message}</div>}
-
-      <form onSubmit={handleSubmit} className="prijava-form">
-        <div className="form-group">
-          <label>Naziv koreografije *</label>
-          <input
-            name="choreographyName"
-            value={formData.choreographyName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Dobna kategorija *</label>
-            <select
-              name="ageCategory"
-              value={formData.ageCategory}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Odaberi</option>
-              {competition.ageCategories?.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+    <div>
+      {/* Competition Info Banner */}
+      <div className="competition-info-banner">
+        <h2>{competition.name}</h2>
+        <div className="info-grid">
+          <div className="info-item">
+            <span className="icon">📅</span>
+            <span>{new Date(competition.date).toLocaleDateString('hr-HR')}</span>
           </div>
-
-          <div className="form-group">
-            <label>Plesni stil *</label>
-            <select
-              name="danceStyle"
-              value={formData.danceStyle}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Odaberi</option>
-              {competition.danceStyles?.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+          <div className="info-item">
+            <span className="icon">📍</span>
+            <span>{competition.location}</span>
+          </div>
+          <div className="info-item">
+            <span className="icon">💰</span>
+            <span>Kotizacija: {competition.registrationFee} €</span>
           </div>
         </div>
+      </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Veličina grupe *</label>
-            <select
-              name="groupSize"
-              value={formData.groupSize}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Odaberi</option>
-              {competition.groupSizes?.map((g) => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </select>
-          </div>
+      {message && <div className={`message ${messageType}`}>{message}</div>}
 
+      <form onSubmit={handleSubmit} className="performance-form">
+        <div className="form-section">
+          <h3>Podaci o nastupu</h3>
+          
           <div className="form-group">
-            <label>Koreograf</label>
+            <label>Naziv koreografije *</label>
             <input
-              name="choreographer"
-              value={formData.choreographer}
+              name="choreographyName"
+              value={formData.choreographyName}
               onChange={handleChange}
+              placeholder="Unesite naziv koreografije"
+              required
             />
           </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Dobna kategorija *</label>
+              <select
+                name="ageCategory"
+                value={formData. ageCategory}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Odaberi</option>
+                {competition.ageCategories?. map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Plesni stil *</label>
+              <select
+                name="danceStyle"
+                value={formData.danceStyle}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Odaberi</option>
+                {competition.danceStyles?. map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Veličina grupe *</label>
+              <select
+                name="groupSize"
+                value={formData.groupSize}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Odaberi</option>
+                {competition.groupSizes?.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Koreograf</label>
+              <input
+                name="choreographer"
+                value={formData. choreographer}
+                onChange={handleChange}
+                placeholder="Ime koreografa (opcionalno)"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Trajanje (sekunde) *</label>
-          <input
-            type="number"
-            name="performanceDuration"
-            min="1"
-            value={formData.performanceDuration}
-            onChange={handleChange}
-            required
-          />
+        <div className="form-section">
+          <h3>Glazba i trajanje</h3>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label>Trajanje (sekunde) *</label>
+              <input
+                type="number"
+                name="performanceDuration"
+                min="1"
+                value={formData.performanceDuration}
+                onChange={handleChange}
+                placeholder="npr. 180"
+                required
+              />
+              <span className="form-hint">Unesite trajanje u sekundama (npr. 180 = 3 minute)</span>
+            </div>
+
+            <div className="form-group">
+              <label>Glazba (MP3) *</label>
+              <input
+                type="file"
+                accept="audio/mpeg"
+                onChange={(e) =>
+                  setFormData({ ...formData, musicFile: e.target.files[0] })
+                }
+                required
+              />
+              <span className="form-hint">Maksimalna veličina: 10MB</span>
+            </div>
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Glazba (MP3) *</label>
-          <input
-            type="file"
-            accept="audio/mpeg"
-            onChange={(e) =>
-              setFormData({ ...formData, musicFile: e.target.files[0] })
-            }
-            required
-          />
+        <div className="form-section">
+          <h3>Plaćanje</h3>
+          <div className="payment-info">
+            <p>💳 Kotizacija za nastup: <strong>{competition.registrationFee} €</strong></p>
+            <p className="payment-notice">⚡ Nakon prijave bit ćete preusmjereni na sigurno plaćanje putem Stripe-a</p>
+          </div>
         </div>
 
-        <p><strong>Kotizacija:</strong> {competition.registrationFee} €</p>
-
-        <button disabled={submitting}>
-          {submitting ? 'Obrađujem...' : 'Prijavi nastup i plati'}
+        <button type="submit" className="submit-button" disabled={submitting}>
+          {submitting ?  (
+            <>
+              <span className="spinner"></span>
+              Obrađujem...
+            </>
+          ) : (
+            '💳 Prijavi nastup i plati'
+          )}
         </button>
+
+        <p className="secure-notice">
+          <span className="lock-icon">🔒</span>
+          Sigurno plaćanje putem Stripe-a
+        </p>
       </form>
     </div>
   );
