@@ -31,41 +31,46 @@ function Članarine() {
     applyFilters();
   }, [clanarine, filter]);
 
-  const fetchClanarine = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // OVO JE KLJUČNO
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setClanarine(data);
-      } else {
-        console.error("Greška, status:", response.status);
+  // U tvojoj React komponenti (Članarine.js)
+
+const fetchClanarine = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    
+    // Poziva tvoju novu rutu
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/clanarine`, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
       }
-    } catch (error) {
-      console.error("Greška pri dohvatu članarina:", error);
-    } finally {
-      setLoading(false);
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      setClanarine(data); 
+
+    } else {
+      console.error("Greška, status:", response.status);
     }
-  };
+  } catch (error) {
+    console.error("Greška pri dohvatu članarina:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const applyFilters = () => {
-    let filtered = [...clanarine];
+    // Ako clanarine nisu niz, postavi prazan niz da aplikacija ne 'pukne'
+    let filtered = Array.isArray(clanarine) ? [...clanarine] : [];
 
     // Filter po statusu
     if (filter.status !== 'all') {
       filtered = filtered.filter(u => u.subscriptionStatus === filter.status);
     }
 
-    // Filter po imenu ili prezimenu (search)
+    // Filter po imenu, prezimenu ili emailu
     if (filter.search) {
       const term = filter.search.toLowerCase();
       filtered = filtered.filter(u => 
