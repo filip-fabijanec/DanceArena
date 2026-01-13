@@ -23,6 +23,8 @@ app.use('/api/scores', require('./routes/scoreRoutes'));
 app.use('/api/performances', require('./routes/performanceRoutes'));
 app.use('/api/stripe', require('./routes/stripeRoutes'));
 app.use('/api/invites', require('./routes/inviteRoutes'));
+app.use('/api/upload-song', require('./routes/uploadSongRoutes'));
+
 
 
 

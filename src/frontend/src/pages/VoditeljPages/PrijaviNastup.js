@@ -16,7 +16,7 @@ function PrijaviNastup() {
     groupSize: '',
     choreographer: '',
     performanceDuration: '',
-    musicFilePath: '',
+    musicFile: null,
   });
 
   const [message, setMessage] = useState('');
@@ -25,16 +25,17 @@ function PrijaviNastup() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Provjeri payment success/cancelled
     const params = new URLSearchParams(window.location.search);
+
     if (params.get('payment_success') === 'true') {
       setMessage('✅ Plaćanje uspješno! Nastup je registriran.');
       setMessageType('success');
-      window.history.replaceState({}, document.title, window.location. pathname);
+      window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => navigate('/voditelj/'), 3000);
     }
+
     if (params.get('payment_cancelled') === 'true') {
-      setMessage('❌ Plaćanje je otkazano.  Pokušajte ponovno.');
+      setMessage('❌ Plaćanje je otkazano. Pokušajte ponovno.');
       setMessageType('error');
       window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => setMessage(''), 5000);
@@ -46,16 +47,15 @@ function PrijaviNastup() {
   const fetchCompetition = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/competitions/${competitionId}`);
-      if (res.ok) {
-        setCompetition(await res.json());
-      } else {
-        setMessage('Greška pri učitavanju natjecanja');
-        setMessageType('error');
-      }
-    } catch (error) {
-      console.error('Error fetching competition:', error);
-      setMessage('Greška pri povezivanju');
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}`
+      );
+
+      if (!res.ok) throw new Error();
+
+      setCompetition(await res.json());
+    } catch {
+      setMessage('Greška pri učitavanju natjecanja');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -72,79 +72,90 @@ function PrijaviNastup() {
     setMessage('');
 
     try {
-      // 1. Prvo kreiraj Performance
-      const perfRes = await fetch(`${process.env.REACT_APP_API_URL}/performances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          competitionId,
-          clubId: currentUser._id,
-          ... formData,
-          performanceDuration: parseInt(formData.performanceDuration),
-        }),
-      });
+      // 1️⃣ Upload MP3 na Cloudflare R2
+      const uploadData = new FormData();
+      uploadData.append('song', formData.musicFile);
 
-      if (! perfRes.ok) throw new Error('Greška pri kreiranju performanse');
+      const uploadRes = await fetch(
+        `${process.env.REACT_APP_API_URL}/upload-song`,
+        {
+          method: 'POST',
+          body: uploadData,
+        }
+      );
+
+      if (!uploadRes.ok) throw new Error('Upload glazbe nije uspio');
+
+      const { url: musicFilePath } = await uploadRes.json();
+
+      // 2️⃣ Kreiraj performance
+      const perfRes = await fetch(
+        `${process.env.REACT_APP_API_URL}/performances`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            competitionId,
+            clubId: currentUser._id,
+            choreographyName: formData.choreographyName,
+            ageCategory: formData.ageCategory,
+            danceStyle: formData.danceStyle,
+            groupSize: formData.groupSize,
+            choreographer: formData.choreographer,
+            performanceDuration: parseInt(formData.performanceDuration),
+            musicFilePath,
+          }),
+        }
+      );
+
+      if (!perfRes.ok) throw new Error('Greška pri kreiranju nastupa');
 
       const performance = await perfRes.json();
 
-      // 2. Kreiraj Stripe session za plaćanje
-      const stripeRes = await fetch(`${process.env.REACT_APP_API_URL}/stripe/checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          competitionId,
-          userId: currentUser._id,
-          performanceId: performance._id,
-        }),
-      });
+      // 3️⃣ Stripe checkout
+      const stripeRes = await fetch(
+        `${process.env.REACT_APP_API_URL}/stripe/checkout`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            competitionId,
+            userId: currentUser._id,
+            performanceId: performance._id,
+          }),
+        }
+      );
 
       if (!stripeRes.ok) throw new Error('Greška pri kreiranju plaćanja');
 
-      const { url } = await stripeRes. json();
-
-      // 3. Preusmjeri na Stripe
+      const { url } = await stripeRes.json();
       window.location.href = url;
-    } catch (error) {
-      console.error('Error:', error);
-      setMessage(error.message || 'Greška pri procesiranju');
+    } catch (err) {
+      console.error(err);
+      setMessage(err.message || 'Greška pri prijavi');
       setMessageType('error');
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="prijavi-nastup-container">
-        <p>Učitavanje... </p>
-      </div>
-    );
+    return <div className="prijavi-nastup-container">Učitavanje...</div>;
   }
 
   if (!competition) {
-    return (
-      <div className="prijavi-nastup-container">
-        <p>Natjecanje nije pronađeno</p>
-      </div>
-    );
+    return <div className="prijavi-nastup-container">Natjecanje nije pronađeno</div>;
   }
 
   return (
     <div className="prijavi-nastup-container">
-      <h1>Prijavi nastup - {competition.name}</h1>
+      <h1>Prijavi nastup – {competition.name}</h1>
 
-      {message && (
-        <div className={`message-banner ${messageType}`}>
-          {message}
-        </div>
-      )}
+      {message && <div className={`message-banner ${messageType}`}>{message}</div>}
 
       <form onSubmit={handleSubmit} className="prijava-form">
         <div className="form-group">
-          <label htmlFor="choreographyName">Naziv koreografije *</label>
+          <label>Naziv koreografije *</label>
           <input
-            type="text"
-            id="choreographyName"
             name="choreographyName"
             value={formData.choreographyName}
             onChange={handleChange}
@@ -154,33 +165,31 @@ function PrijaviNastup() {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="ageCategory">Dobna kategorija *</label>
+            <label>Dobna kategorija *</label>
             <select
-              id="ageCategory"
               name="ageCategory"
-              value={formData. ageCategory}
+              value={formData.ageCategory}
               onChange={handleChange}
               required
             >
-              <option value="">Odaberi kategoriju</option>
-              {competition. ageCategories && competition.ageCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+              <option value="">Odaberi</option>
+              {competition.ageCategories?.map((c) => (
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="danceStyle">Plesni stil *</label>
+            <label>Plesni stil *</label>
             <select
-              id="danceStyle"
               name="danceStyle"
-              value={formData. danceStyle}
+              value={formData.danceStyle}
               onChange={handleChange}
               required
             >
-              <option value="">Odaberi stil</option>
-              {competition. danceStyles && competition.danceStyles.map(style => (
-                <option key={style} value={style}>{style}</option>
+              <option value="">Odaberi</option>
+              {competition.danceStyles?.map((s) => (
+                <option key={s} value={s}>{s}</option>
               ))}
             </select>
           </div>
@@ -188,26 +197,23 @@ function PrijaviNastup() {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="groupSize">Veličina grupe *</label>
+            <label>Veličina grupe *</label>
             <select
-              id="groupSize"
               name="groupSize"
               value={formData.groupSize}
               onChange={handleChange}
               required
             >
-              <option value="">Odaberi veličinu</option>
-              {competition.groupSizes && competition.groupSizes.map(size => (
-                <option key={size} value={size}>{size}</option>
+              <option value="">Odaberi</option>
+              {competition.groupSizes?.map((g) => (
+                <option key={g} value={g}>{g}</option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="choreographer">Koreograf</label>
+            <label>Koreograf</label>
             <input
-              type="text"
-              id="choreographer"
               name="choreographer"
               value={formData.choreographer}
               onChange={handleChange}
@@ -216,36 +222,32 @@ function PrijaviNastup() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="performanceDuration">Trajanje (sekunde) *</label>
+          <label>Trajanje (sekunde) *</label>
           <input
             type="number"
-            id="performanceDuration"
             name="performanceDuration"
+            min="1"
             value={formData.performanceDuration}
             onChange={handleChange}
-            min="1"
             required
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="musicFilePath">Glazba (URL ili putanja) *</label>
+          <label>Glazba (MP3) *</label>
           <input
-            type="text"
-            id="musicFilePath"
-            name="musicFilePath"
-            value={formData.musicFilePath}
-            onChange={handleChange}
-            placeholder="https://..."
+            type="file"
+            accept="audio/mpeg"
+            onChange={(e) =>
+              setFormData({ ...formData, musicFile: e.target.files[0] })
+            }
             required
           />
         </div>
 
-        <div className="form-info">
-          <p><strong>Kotizacija:</strong> {competition.registrationFee} €</p>
-        </div>
+        <p><strong>Kotizacija:</strong> {competition.registrationFee} €</p>
 
-        <button type="submit" className="btn-submit" disabled={submitting}>
+        <button disabled={submitting}>
           {submitting ? 'Obrađujem...' : 'Prijavi nastup i plati'}
         </button>
       </form>
