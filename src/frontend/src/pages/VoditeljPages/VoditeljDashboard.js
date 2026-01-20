@@ -74,47 +74,57 @@ function VoditeljDashboard() {
   };
 
   const downloadPdf = async (competitionId) => {
-    if (!token) {
-      alert("Token nije dostupan. Molimo prijavite se ponovno.");
+  // 🔍 DODAJ OVO ZA DEBUG
+  console.log("=== PDF DOWNLOAD DEBUG ===");
+  console.log("Token iz context:", token);
+  console.log("Token iz localStorage:", localStorage.getItem('token'));
+  console.log("CurrentUser:", currentUser);
+  console.log("==========================");
+
+  if (!token) {
+    alert("Token nije dostupan. Molimo prijavite se ponovno.");
+    return;
+  }
+
+  try {
+    setDownloadingPdf(competitionId);
+    
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("PDF response status:", res.status); // Debug
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("PDF error response:", text); // Debug
+      alert("Greška pri preuzimanju PDF-a: " + text);
       return;
     }
 
-    try {
-      setDownloadingPdf(competitionId);
-      
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
 
-      if (!res.ok) {
-        const text = await res.text();
-        alert("Greška pri preuzimanju PDF-a: " + text);
-        return;
-      }
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "startna_lista.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "startna_lista.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("Greška pri preuzimanju PDF-a");
-    } finally {
-      setDownloadingPdf(null);
-    }
-  };
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("PDF download error:", err);
+    alert("Greška pri preuzimanju PDF-a: " + err.message);
+  } finally {
+    setDownloadingPdf(null);
+  }
+};
 
   if (loading) {
     return (

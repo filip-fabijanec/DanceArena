@@ -1,23 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 1. KREIRANJE KONTEKSTA
 const AuthContext = createContext();
 
-// 2. EXPORT HOOKA
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-// 3. PROVIDER
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null); // ← DODANO
   const [loading, setLoading] = useState(true);
 
   // --- KLJUČNA FUNKCIJA: OSVJEŽI KORISNIKA S BACKENDA ---
   const refreshUser = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return null;
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return null;
 
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/users/me`, 
@@ -25,12 +23,18 @@ export const AuthProvider = ({ children }) => {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${storedToken}`
           },
         }
       );
 
-      if (!response.ok) throw new Error("Failed to fetch user");
+      if (!response.ok) {
+        // Ako je token nevažeći, očisti sve
+        if (response.status === 401) {
+          logout();
+        }
+        throw new Error("Failed to fetch user");
+      }
 
       const updatedUser = await response.json();
       
@@ -51,12 +55,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       const savedUser = localStorage.getItem("currentUser");
-      const token = localStorage.getItem("token");
+      const storedToken = localStorage.getItem("token");
 
-      if (savedUser && token) {
-        // Prvo postavi ono što imamo u memoriji da bude brzo
+      if (savedUser && storedToken) {
+        setToken(storedToken); // ← DODANO
         setCurrentUser(JSON.parse(savedUser)); 
-        // Zatim u pozadini provjeri je li se nešto promijenilo (npr. plaćanje)
         await refreshUser(); 
       }
       
@@ -80,7 +83,10 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
+      
+      setToken(data.token); // ← DODANO
       setCurrentUser(data.user);
+      
       return data.user;
     } catch (error) {
       console.error("Google login error:", error);
@@ -100,7 +106,10 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
+      
+      setToken(data.token); // ← DODANO
       setCurrentUser(data.user);
+      
       return data.user;
     } catch (error) {
       console.error("Secret login error:", error);
@@ -110,13 +119,22 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setCurrentUser(null);
+    setToken(null); // ← DODANO
     localStorage.removeItem("currentUser");
     localStorage.removeItem("token");
-    window.location.href = '/login'; // Opcionalno: preusmjeri na login
+    window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, loginWithGoogle, loginWithSecret, logout, loading, refreshUser }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      token, // ← DODANO u value
+      loginWithGoogle, 
+      loginWithSecret, 
+      logout, 
+      loading, 
+      refreshUser 
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );
