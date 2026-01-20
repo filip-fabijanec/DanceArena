@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
+const path = require("path");
+
 
 // Modeli
 const Competition = require("../models/Competition");
@@ -168,6 +170,12 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
 
     // Generiraj PDF
     const doc = new PDFDocument({ margin: 40 });
+
+    const fontPath = path.join(__dirname, "src/fonts/DejaVuSans.ttf");
+
+    doc.registerFont("DejaVu", fontPath);
+    doc.font("DejaVu");
+
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
