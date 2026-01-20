@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './PrijaviNastup.css';
 
@@ -155,6 +155,9 @@ function PrijaviNastup() {
 
   return (
     <div className="prijavi-nastup-page">
+      <Link to="/voditelj" className="back-link">
+        ← Natrag na dashboard
+      </Link>
       <h1 className="page-title">Prijava nastupa</h1>
 
       {/* Competition Info */}

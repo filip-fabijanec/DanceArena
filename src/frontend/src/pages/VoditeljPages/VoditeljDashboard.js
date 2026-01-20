@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/Navbar';
@@ -14,6 +14,11 @@ function VoditeljDashboard() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [downloadingPdf, setDownloadingPdf] = useState(null);
+
+  // filter + sort
+  const [perfFilter, setPerfFilter] = useState('all'); // all | pending | approved
+  const [perfSort, setPerfSort] = useState('dateAsc'); // dateAsc | dateDesc
+  const [perfAnimateIn, setPerfAnimateIn] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -31,12 +36,14 @@ function VoditeljDashboard() {
     }
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+      setPerfAnimateIn(false);
+
       const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming/after-2-days`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
@@ -50,11 +57,11 @@ function VoditeljDashboard() {
       } else if (perfResponse.status === 404) {
         setMyPerformances([]);
       }
-
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+      requestAnimationFrame(() => setPerfAnimateIn(true));
     }
   };
 
@@ -74,57 +81,78 @@ function VoditeljDashboard() {
   };
 
   const downloadPdf = async (competitionId) => {
-  // 🔍 DODAJ OVO ZA DEBUG
-  console.log("=== PDF DOWNLOAD DEBUG ===");
-  console.log("Token iz context:", token);
-  console.log("Token iz localStorage:", localStorage.getItem('token'));
-  console.log("CurrentUser:", currentUser);
-  console.log("==========================");
+    console.log("=== PDF DOWNLOAD DEBUG ===");
+    console.log("Token iz context:", token);
+    console.log("Token iz localStorage:", localStorage.getItem('token'));
+    console.log("CurrentUser:", currentUser);
+    console.log("==========================");
 
-  if (!token) {
-    alert("Token nije dostupan. Molimo prijavite se ponovno.");
-    return;
-  }
-
-  try {
-    setDownloadingPdf(competitionId);
-    
-    const res = await fetch(
-      `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    console.log("PDF response status:", res.status); // Debug
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("PDF error response:", text); // Debug
-      alert("Greška pri preuzimanju PDF-a: " + text);
+    if (!token) {
+      alert("Token nije dostupan. Molimo prijavite se ponovno.");
       return;
     }
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
+    try {
+      setDownloadingPdf(competitionId);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "startna_lista.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error("PDF download error:", err);
-    alert("Greška pri preuzimanju PDF-a: " + err.message);
-  } finally {
-    setDownloadingPdf(null);
-  }
-};
+      console.log("PDF response status:", res.status);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("PDF error response:", text);
+        alert("Greška pri preuzimanju PDF-a: " + text);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "startna_lista.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF download error:", err);
+      alert("Greška pri preuzimanju PDF-a: " + err.message);
+    } finally {
+      setDownloadingPdf(null);
+    }
+  };
+
+  const visiblePerformances = useMemo(() => {
+    const filtered = myPerformances.filter((p) => {
+      if (perfFilter === 'pending') return !p.approved;
+      if (perfFilter === 'approved') return !!p.approved;
+      return true;
+    });
+
+    const getCompetitionDateMs = (p) => {
+      const d = p?.competitionId?.date;
+      if (!d) return Number.POSITIVE_INFINITY;
+      return new Date(d).getTime();
+    };
+
+    filtered.sort((a, b) => {
+      const da = getCompetitionDateMs(a);
+      const db = getCompetitionDateMs(b);
+      return perfSort === 'dateAsc' ? da - db : db - da;
+    });
+
+    return filtered;
+  }, [myPerformances, perfFilter, perfSort]);
 
   if (loading) {
     return (
@@ -175,7 +203,7 @@ function VoditeljDashboard() {
 
         <section className="dashboard-section">
           <h2>Nadolazeća natjecanja</h2>
-          
+
           {competitions.length === 0 ? (
             <div className="empty-state">
               <p>Trenutno nema nadolazećih natjecanja.</p>
@@ -200,7 +228,7 @@ function VoditeljDashboard() {
                       <span className="icon">💰</span>
                       <span>Kotizacija: {comp.registrationFee} €</span>
                     </div>
-                    
+
                     {comp.description && (
                       <p className="competition-description">{comp.description}</p>
                     )}
@@ -221,8 +249,8 @@ function VoditeljDashboard() {
                     </div>
 
                     {!comp.isLocked ? (
-                      <Link 
-                        to={`/voditelj/prijavi-nastup/${comp._id}`} 
+                      <Link
+                        to={`/voditelj/prijavi-nastup/${comp._id}`}
                         className="btn-primary full-width"
                       >
                         Prijavi nastup
@@ -242,74 +270,104 @@ function VoditeljDashboard() {
 
         <section className="dashboard-section">
           <h2>Moje prijave</h2>
-          
+
           {myPerformances.length === 0 ? (
             <div className="empty-state">
               <p>Nemate prijavljenih nastupa.</p>
               <p style={{ fontSize: '14px', color: '#999' }}>
-                Prijavite se na natjecanje iznad! 
+                Prijavite se na natjecanje iznad!
               </p>
             </div>
           ) : (
-            <div className="performances-list">
-              {myPerformances.map((perf) => (
-                <div key={perf._id} className="performance-card">
-                  <div className="performance-header">
-                    <div>
-                      <h3>{perf.choreographyName}</h3>
-                      <p className="competition-name">
-                        Natjecanje: {perf.competitionId?.name || 'N/A'}
-                      </p>
-                    </div>
-                    <span className={`status-badge ${perf.approved ? 'approved' : 'pending'}`}>
-                      {perf.approved ? '✓ Prihvaćeno' : '⏳ Na čekanju'}
-                    </span>
-                  </div>
+            <>
+              <div className="performance-toolbar">
+                <div className="filter-chips">
+                  <button
+                    type="button"
+                    className={`chip ${perfFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setPerfFilter('all')}
+                  >
+                    Sve
+                  </button>
+                  <button
+                    type="button"
+                    className={`chip ${perfFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setPerfFilter('pending')}
+                  >
+                    Na čekanju
+                  </button>
+                  <button
+                    type="button"
+                    className={`chip ${perfFilter === 'approved' ? 'active' : ''}`}
+                    onClick={() => setPerfFilter('approved')}
+                  >
+                    Prihvaćeno
+                  </button>
+                </div>
 
-                  <div className="performance-details">
-                    <div className="detail-row">
-                      <span className="detail-label">Datum natjecanja:</span>
-                      <span className="detail-value">
-                        {perf.competitionId?.date ? formatDate(perf.competitionId.date) : 'N/A'}
+                <label className="sort-select">
+                  Sortiraj:
+                  <select value={perfSort} onChange={(e) => setPerfSort(e.target.value)}>
+                    <option value="dateAsc">Datum natjecanja (najbliže prvo)</option>
+                    <option value="dateDesc">Datum natjecanja (najdalje prvo)</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="performances-list">
+                {visiblePerformances.map((perf, idx) => (
+                  <div
+                    key={perf._id}
+                    className={`performance-card ${perf.approved ? 'approved' : ''} ${perfAnimateIn ? 'enter' : ''}`}
+                    style={{ '--i': idx }}
+                  >
+                    <div className="performance-header">
+                      <div>
+                        <h3>{perf.choreographyName}</h3>
+                        <p className="competition-name">
+                          Natjecanje: {perf.competitionId?.name || 'N/A'}
+                        </p>
+                      </div>
+                      <span className={`status-badge ${perf.approved ? 'approved' : 'pending'}`}>
+                        {perf.approved ? '✓ Prihvaćeno' : '⏳ Na čekanju'}
                       </span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Lokacija:</span>
-                      <span className="detail-value">
-                        {perf.competitionId?.location || 'N/A'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Kategorija:</span>
-                      <span className="detail-value">
-                        {perf.ageCategory} / {perf.danceStyle} / {perf.groupSize}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Koreograf:</span>
-                      <span className="detail-value">{perf.choreographer || 'N/A'}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Trajanje:</span>
-                      <span className="detail-value">{formatDuration(perf.performanceDuration)}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Glazba:</span>
-                      <span className="detail-value">
-                        <a href={perf.musicFilePath} target="_blank" rel="noopener noreferrer">
-                          {perf.musicFilePath}
-                        </a>
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Plaćeno:</span>
-                      <span className="detail-value">
-                        {perf.paid ? (
-                          <span style={{ color: '#2e7d32', fontWeight: '600' }}>✓ Da</span>
-                        ) : (
-                          <span style={{ color: '#d32f2f', fontWeight: '600' }}>✗ Ne</span>
-                        )}
-                      </span>
+
+                    <div className="performance-details">
+                      <div className="detail-row">
+                        <span className="detail-label">Datum natjecanja:</span>
+                        <span className="detail-value">
+                          {perf.competitionId?.date ? formatDate(perf.competitionId.date) : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Lokacija:</span>
+                        <span className="detail-value">
+                          {perf.competitionId?.location || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Kategorija:</span>
+                        <span className="detail-value">
+                          {perf.ageCategory} / {perf.danceStyle} / {perf.groupSize}
+                        </span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Koreograf:</span>
+                        <span className="detail-value">{perf.choreographer || 'N/A'}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Trajanje:</span>
+                        <span className="detail-value">{formatDuration(perf.performanceDuration)}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Glazba:</span>
+                        <span className="detail-value">
+                          <a href={perf.musicFilePath} target="_blank" rel="noopener noreferrer">
+                            {perf.musicFilePath}
+                          </a>
+                        </span>
+                      </div>
                     </div>
 
                     {perf.competitionId?.isLocked && perf.approved && (
@@ -325,14 +383,14 @@ function VoditeljDashboard() {
                           </>
                         ) : (
                           <>
-                            <svg 
-                              width="20" 
-                              height="20" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              stroke="currentColor" 
-                              strokeWidth="2" 
-                              strokeLinecap="round" 
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
                               strokeLinejoin="round"
                             >
                               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -346,9 +404,9 @@ function VoditeljDashboard() {
                     )}
 
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </div>
