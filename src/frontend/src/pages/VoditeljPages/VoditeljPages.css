@@ -1,29 +1,89 @@
-/* Dashboard Section */
+/* ================================
+   Voditelj Dashboard – clean UI
+   (NE MIJENJA JS: radi s .btn-primary i .btn-disabled)
+================================== */
+
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  --primary: #667eea;
+  --primary2: #764ba2;
+
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+
+  --danger: #dc2626;
+  --danger-bg: #fee2e2;
+
+  --shadow-sm: 0 2px 10px rgba(16, 24, 40, 0.08);
+  --shadow-md: 0 14px 30px rgba(16, 24, 40, 0.12);
+
+  --radius: 14px;
+}
+
+/* ========== SECTION ========== */
 .dashboard-section {
-  margin-bottom: 50px;
+  margin-bottom: 44px;
 }
 
 .dashboard-section h2 {
-  color: #333;
-  margin-bottom: 25px;
-  font-size: 28px;
-  border-bottom: 3px solid #667eea;
-  padding-bottom: 10px;
+  color: var(--text);
+  margin: 0 0 18px 0;
+  font-size: 24px;
+  letter-spacing: 0.2px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  border: 0;
+  padding-bottom: 0;
+}
+
+.dashboard-section h2::before {
+  content: "";
+  width: 10px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
+}
+
+.dashboard-section h2::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(102, 126, 234, 0.35),
+    rgba(118, 75, 162, 0.15),
+    rgba(229, 231, 235, 0)
+  );
 }
 
 /* ========== MOJ KLUB ========== */
 .club-info-card {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--card);
+  padding: 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .club-info-row {
   display: flex;
   justify-content: space-between;
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
+  align-items: baseline;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .club-info-row:last-child {
@@ -31,64 +91,94 @@
 }
 
 .info-label {
-  font-weight: 600;
-  color: #555;
+  font-weight: 800;
+  color: #374151;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .info-value {
-  color: #333;
-  font-size: 16px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 650;
 }
 
+/* edit button */
 .btn-edit-club {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #667eea;
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 10px 18px rgba(102, 126, 234, 0.22);
+}
+
+.btn-edit-club:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(102, 126, 234, 0.3);
 }
 
 .btn-edit-club:disabled {
-  background-color: #ccc;
+  background: #d1d5db;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ========== NATJECANJA ========== */
 .competitions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 18px;
 }
 
 .competition-card {
-  background: white;
-  border-radius: 10px;
+  background: var(--card);
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .competition-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
   color: white;
-  padding: 20px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::after {
+  content: "";
+  position: absolute;
+  inset: -70px -70px auto auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  transform: rotate(15deg);
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
+  letter-spacing: 0.2px;
 }
 
 .card-body {
-  padding: 20px;
+  padding: 16px 18px 18px 18px;
 }
 
 .info-item {
@@ -96,34 +186,46 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
-  color: #555;
+  color: #4b5563;
+  font-size: 14px;
 }
 
+/* icon pill */
 .icon {
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(102, 126, 234, 0.12);
+  color: #3949ab;
+  font-size: 16px;
 }
 
 .competition-description {
-  margin: 15px 0;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
+  margin: 12px 0;
+  padding: 12px;
+  background: #fbfbfd;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .categories-summary {
-  margin: 15px 0;
-  padding: 15px;
-  background-color: #f0f4ff;
-  border-radius: 5px;
-  font-size: 14px;
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.16);
+  border-radius: 12px;
+  font-size: 13px;
 }
 
 .category-item {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
@@ -132,89 +234,199 @@
 }
 
 .category-item strong {
-  color: #667eea;
+  color: #3b5bdb;
 }
 
 .category-item span {
-  color: #555;
+  color: #374151;
+  font-weight: 650;
 }
 
+/* keep your helper */
 .full-width {
   width: 100%;
   display: block;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 14px;
+}
+
+/* Make Link look like button + remove underline */
+a.btn-primary.full-width {
+  text-decoration: none;
+}
+
+/* "Prijavi nastup" */
+.btn-primary.full-width {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  box-shadow: 0 10px 18px rgba(102, 126, 234, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-primary.full-width:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 26px rgba(102, 126, 234, 0.34);
+}
+
+.btn-primary.full-width:active {
+  transform: translateY(0);
+}
+
+/* "Prijave su zaključane" – neka izgleda namjerno (ne sivo disabled) */
+.btn-disabled.full-width {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+
+  /* locked/info styling */
+  color: #6b4e00;
+  background: linear-gradient(135deg, #fff7d6 0%, #ffe8a3 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.12);
+
+  cursor: not-allowed;
+
+  /* IMPORTANT: override disabled fade */
+  opacity: 1;
+}
+
+.btn-disabled.full-width:disabled {
+  opacity: 1; /* keeps it clean */
+}
+
+/* Optional: make lock icon look better without changing markup */
+.btn-disabled.full-width::before {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.18);
+}
+
+/* ===== Fix: CTA buttons too wide inside competition cards ===== */
+.competition-card .card-body .full-width.btn-primary,
+.competition-card .card-body .full-width.btn-disabled {
+  width: auto;            /* override full-width */
+  display: inline-flex;   /* keep button layout */
+  margin-left: auto;
+  margin-right: auto;     /* center */
+  min-width: 220px;       /* nice CTA size */
+  max-width: 260px;       /* prevent too wide */
+}
+
+/* optional: on very small screens keep it full width */
+@media (max-width: 420px) {
+  .competition-card .card-body .full-width.btn-primary,
+  .competition-card .card-body .full-width.btn-disabled {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* ========== MOJE PRIJAVE ========== */
 .performances-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .performance-card {
-  background: white;
-  border-radius: 10px;
-  padding: 25px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .performance-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .performance-header {
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #eee;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .performance-header h3 {
-  margin: 0 0 5px 0;
-  color: #667eea;
-  font-size: 22px;
+  margin: 0 0 6px 0;
+  color: #2b3a67;
+  font-size: 18px;
 }
 
 .competition-name {
   margin: 0;
-  color: #666;
-  font-size: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .status-badge {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .status-badge.pending {
-  background-color: #fff9c4;
-  color: #f57f17;
+  background-color: var(--warning-bg);
+  color: #92400e;
+  border-color: rgba(146, 64, 14, 0.18);
 }
 
 .status-badge.approved {
-  background-color: #c8e6c9;
-  color: #2e7d32;
+  background-color: var(--success-bg);
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.18);
 }
 
 .performance-details {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .detail-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  align-items: baseline;
   padding: 10px 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .detail-row:last-child {
@@ -222,21 +434,24 @@
 }
 
 .detail-label {
-  font-weight: 600;
-  color: #555;
-  flex: 0 0 180px;
+  font-weight: 800;
+  color: #374151;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .detail-value {
-  color: #333;
-  flex: 1;
+  color: var(--text);
+  font-weight: 650;
   text-align: right;
 }
 
 .detail-value a {
-  color: #667eea;
+  color: #3b5bdb;
   text-decoration: none;
   word-break: break-all;
+  font-weight: 750;
 }
 
 .detail-value a:hover {
@@ -245,27 +460,28 @@
 
 /* ========== DOWNLOAD PDF BUTTON ========== */
 .btn-download-pdf {
-  margin-top: 20px;
+  margin-top: 14px;
   width: 100%;
-  padding: 14px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 900;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 10px 18px rgba(102, 126, 234, 0.25);
 }
 
 .btn-download-pdf:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(102, 126, 234, 0.32);
 }
 
 .btn-download-pdf:active:not(:disabled) {
@@ -273,76 +489,73 @@
 }
 
 .btn-download-pdf:disabled {
-  opacity: 0.7;
+  opacity: 0.75;
   cursor: not-allowed;
-}
-
-.btn-download-pdf svg {
-  transition: transform 0.3s ease;
-}
-
-.btn-download-pdf:hover:not(:disabled) svg {
-  transform: translateY(2px);
+  box-shadow: none;
 }
 
 /* Spinner animation */
 .spinner {
   width: 18px;
   height: 18px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.35);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ========== EMPTY STATE ========== */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 46px 18px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .empty-state p {
-  color: #999;
-  font-size: 18px;
-  margin: 10px 0;
+  color: #9ca3af;
+  font-size: 15px;
+  margin: 10px 0 0 0;
 }
 
 /* ========== MESSAGE BANNER ========== */
 .message-banner {
-  padding: 16px 20px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 10px;
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.25s ease-out;
+  border: 1px solid transparent;
 }
 
 .message-banner.success {
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
+  background-color: var(--success-bg);
+  border-color: rgba(22, 101, 52, 0.18);
+  color: #166534;
 }
 
 .message-banner.error {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background-color: var(--danger-bg);
+  border-color: rgba(153, 27, 27, 0.18);
+  color: #991b1b;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -358,26 +571,21 @@
 
   .performance-header {
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
   }
 
   .detail-row {
-    flex-direction: column;
-    gap: 5px;
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
-  .detail-label,
   .detail-value {
     text-align: left;
   }
 
   .club-info-row {
     flex-direction: column;
-    gap: 5px;
-  }
-
-  .btn-download-pdf {
-    padding: 12px 20px;
-    font-size: 14px;
+    align-items: flex-start;
+    gap: 6px;
   }
 }

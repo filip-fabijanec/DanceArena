@@ -1,341 +1,484 @@
-/* Competition Info Banner */
+/* ====== Base / layout helpers ====== */
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  --primary: #667eea;
+  --primary2: #764ba2;
+
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+
+  --shadow-sm: 0 2px 10px rgba(16, 24, 40, 0.08);
+  --shadow-md: 0 10px 25px rgba(16, 24, 40, 0.12);
+  --radius: 12px;
+}
+
+/* Ako ti dashboard-container već ima background, slobodno obriši ovo */
+.dashboard-container {
+  color: var(--text);
+}
+
+/* ====== Competition Info Banner ====== */
 .competition-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
   color: white;
-  padding: 30px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  border-radius: var(--radius);
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.competition-info::after {
+  content: "";
+  position: absolute;
+  inset: -60px -60px auto auto;
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  transform: rotate(15deg);
 }
 
 .competition-info h1 {
-  margin: 0 0 20px 0;
-  font-size: 28px;
+  margin: 0 0 14px 0;
+  font-size: 26px;
+  line-height: 1.15;
   color: white;
+  letter-spacing: 0.2px;
 }
 
 .info-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  font-size: 16px;
+  gap: 10px 14px;
+  font-size: 14px;
+  opacity: 0.95;
 }
 
 .info-details span {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
 }
 
-/* Performances List */
+/* ====== Top actions (Lock / Export) ====== */
+.btn-lock,
+.btn-export {
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  margin: 0 0 18px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* "Zaključi prijave" – istaknut, ali warning vibe */
+.btn-lock {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #111827;
+  box-shadow: 0 10px 18px rgba(245, 158, 11, 0.25);
+}
+
+.btn-lock:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 26px rgba(245, 158, 11, 0.32);
+}
+
+.btn-lock:active {
+  transform: translateY(0px);
+}
+
+/* PDF export – primary */
+.btn-export {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+  color: white;
+  box-shadow: 0 10px 18px rgba(102, 126, 234, 0.25);
+}
+
+.btn-export:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 14px 26px rgba(102, 126, 234, 0.32);
+}
+
+.btn-export:active {
+  transform: translateY(0px);
+}
+
+/* ====== Performances List ====== */
 .performances-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .performance-card {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.3s;
-  border-left: 5px solid #ff9800;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--warning);
 }
 
 .performance-card.approved {
-  border-left-color: #4caf50;
+  border-left-color: var(--success);
 }
 
 .performance-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .performance-header {
-  background-color: #f9f9f9;
-  padding: 20px;
+  background: linear-gradient(180deg, #fafafa 0%, #f7f7f7 100%);
+  padding: 18px 18px 14px 18px;
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  border-bottom: 2px solid #eee;
+  align-items: flex-start;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
 .performance-header h3 {
-  margin: 0 0 5px 0;
-  color: #667eea;
-  font-size: 22px;
+  margin: 0 0 6px 0;
+  color: #2b3a67;
+  font-size: 18px;
+  line-height: 1.2;
 }
 
 .club-name {
   margin: 0;
-  color: #666;
-  font-size: 14px;
+  color: var(--muted);
+  font-size: 13px;
   font-weight: 600;
 }
 
 .status-badge {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .status-badge.pending {
-  background-color: #fff9c4;
-  color: #f57f17;
+  background-color: var(--warning-bg);
+  color: #92400e;
+  border-color: rgba(146, 64, 14, 0.18);
 }
 
 .status-badge.approved {
-  background-color: #c8e6c9;
-  color: #2e7d32;
+  background-color: var(--success-bg);
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.18);
 }
 
-/* Performance Body */
+/* ====== Performance Body ====== */
 .performance-body {
-  padding: 20px;
+  padding: 16px 18px 18px 18px;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .info-item {
+  background: #fbfbfd;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .info-item .label {
-  font-weight: 600;
-  color: #555;
-  font-size: 13px;
+  font-weight: 800;
+  color: #6b7280;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
 }
 
 .info-item .value {
-  color: #333;
-  font-size: 15px;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .music-info {
-  padding: 15px;
-  background-color: #f0f4ff;
-  border-radius: 5px;
+  padding: 12px;
+  background: #f3f6ff;
+  border: 1px solid rgba(102, 126, 234, 0.18);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .music-info .label {
-  font-weight: 600;
-  color: #555;
-  font-size: 13px;
+  font-weight: 800;
+  color: #4b5563;
+  font-size: 12px;
 }
 
 .music-link {
-  color: #667eea;
+  color: #3b5bdb;
   text-decoration: none;
   word-break: break-all;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .music-link:hover {
   text-decoration: underline;
 }
 
-/* Performance Actions */
+/* ====== Actions ====== */
 .performance-actions {
-  padding: 15px 20px;
-  background-color: #f9f9f9;
-  border-top: 1px solid #eee;
+  padding: 14px 18px;
+  background: #fafafa;
+  border-top: 1px solid var(--border);
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-approve,
+.btn-delete {
+  flex: 1;
+  min-width: 140px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .btn-approve {
-  flex: 1;
-  padding: 12px 20px;
-  background-color: #4caf50;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.18);
 }
 
 .btn-approve:hover {
-  background-color: #45a049;
   transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(34, 197, 94, 0.24);
 }
 
 .btn-delete {
-  flex: 1;
-  padding: 12px 20px;
-  background-color: #f44336;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2px;
+  box-shadow: 0 10px 18px rgba(239, 68, 68, 0.18);
 }
 
 .btn-delete:hover {
-  background-color: #da190b;
   transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(239, 68, 68, 0.24);
 }
 
 .approved-message {
-  color: #4caf50;
-  font-weight: 600;
-  font-size: 14px;
+  color: #166534;
+  background: var(--success-bg);
+  border: 1px solid rgba(22, 101, 52, 0.18);
+  font-weight: 800;
+  font-size: 13px;
   text-align: center;
   width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
 }
 
-/* Modal */
+/* Payment warning */
+.payment-warning {
+  color: #7c2d12;
+  font-weight: 800;
+  font-size: 13px;
+  background: #ffedd5;
+  border: 1px solid rgba(124, 45, 18, 0.18);
+  padding: 8px 10px;
+  border-radius: 999px;
+}
+
+/* ====== Modal ====== */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgba(17, 24, 39, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 18px;
 }
 
 .modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 22px;
+  border-radius: 14px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  color: #333;
+  margin: 0 0 10px 0;
+  color: #111827;
 }
 
 .modal-performance-name {
-  font-weight: bold;
-  color: #667eea;
-  font-size: 18px;
-  margin: 15px 0;
+  font-weight: 900;
+  color: #4338ca;
+  font-size: 16px;
+  margin: 12px 0;
 }
 
 .modal-warning {
-  color: #f44336;
-  font-size: 14px;
-  margin-bottom: 25px;
+  color: #b91c1c;
+  font-size: 13px;
+  margin-bottom: 18px;
+  background: var(--danger-bg);
+  border: 1px solid rgba(185, 28, 28, 0.18);
+  padding: 10px 12px;
+  border-radius: 10px;
 }
 
 .modal-actions {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .btn-cancel,
 .btn-confirm-delete {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-weight: 600;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 900;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-cancel {
-  background-color: #ddd;
-  color: #333;
+  background-color: #e5e7eb;
+  color: #111827;
 }
 
 .btn-cancel:hover {
-  opacity: 0.8;
+  transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 
 .btn-confirm-delete {
-  background-color: #f44336;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
+  box-shadow: 0 10px 18px rgba(239, 68, 68, 0.18);
 }
 
 .btn-confirm-delete:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(239, 68, 68, 0.24);
 }
 
-/* Empty State */
+/* ====== Empty & Error ====== */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 52px 18px;
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
 }
 
 .empty-state h3 {
-  color: #333;
-  margin-bottom: 15px;
+  color: #111827;
+  margin-bottom: 10px;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--muted);
 }
 
-/* Error Message */
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 15px;
-  border-radius: 5px;
-  margin-top: 20px;
+  background-color: #fff1f2;
+  color: #9f1239;
+  border: 1px solid rgba(159, 18, 57, 0.18);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-top: 18px;
 }
 
-/* Responsive */
+/* ====== Responsive ====== */
 @media (max-width: 768px) {
+  .competition-info {
+    padding: 18px;
+  }
+
   .info-details {
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .info-details span {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .performance-header {
     flex-direction: column;
-    gap: 15px;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
+    align-items: flex-start;
   }
 
   .performance-actions {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .btn-approve,
   .btn-delete {
     width: 100%;
   }
-}
 
-.payment-warning {
-  color: #c0392b;
-  font-weight: 600;
-  font-size: 0.9rem;
-  background: #fdecea;
-  padding: 6px 10px;
-  border-radius: 6px;
-  margin-right: 10px;
+  .btn-lock,
+  .btn-export {
+    width: 100%;
+    justify-content: center;
+  }
 }
