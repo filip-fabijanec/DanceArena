@@ -297,9 +297,9 @@ function MojaNatjecanja() {
                   <div className="info-row"><span>Lokacija: {competition.location}</span></div>
                   <div className="info-row"><span>Kotizacija: {competition.registrationFee} €</span></div>
                 </div>
-                <div className="card-actions">
-                  <Link to={`/organizator/prijave?competitionId=${competition._id}`} className="btn-action btn-view">Prijave</Link>
-                  <button onClick={() => setDeleteModal({ show: true, id: competition._id, name: competition.name })} className="btn-action btn-delete">Obriši</button>
+                <div className="card-actions-org">
+                  <Link to={`/organizator/prijave?competitionId=${competition._id}`} className="btn-action-org btn-view">Prijave</Link>
+                  <button onClick={() => setDeleteModal({ show: true, id: competition._id, name: competition.name })} className="btn-action-org btn-delete">Obriši</button>
                 </div>
               </div>
             );
