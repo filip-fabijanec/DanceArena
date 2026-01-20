@@ -168,7 +168,7 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
       .populate("clubId", "clubName")
       .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
 
-    // Generiraj PDF
+     // Generiraj PDF
     const doc = new PDFDocument({ margin: 40 });
 
     const fontPath = path.join(__dirname, "src/fonts/DejaVuSans.ttf");
