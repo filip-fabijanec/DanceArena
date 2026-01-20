@@ -299,7 +299,6 @@ function MojaNatjecanja() {
                 </div>
                 <div className="card-actions">
                   <Link to={`/organizator/prijave?competitionId=${competition._id}`} className="btn-action btn-view">Prijave</Link>
-                  <Link to={`/organizator/suci?competitionId=${competition._id}`} className="btn-action btn-referees">Suci</Link>
                   <button onClick={() => setDeleteModal({ show: true, id: competition._id, name: competition.name })} className="btn-action btn-delete">Obriši</button>
                 </div>
               </div>
