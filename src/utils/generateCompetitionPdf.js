@@ -8,10 +8,10 @@ module.exports = async function generatePdfForCompetition(competition, res) {
   })
     .populate("clubId", "clubName")
     .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
-  
-    const doc = new PDFDocument({ margin: 40 });
-  
-    res.setHeader("Content-Type", "application/pdf");
+
+  const doc = new PDFDocument({ margin: 40 });
+
+  res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
     `attachment; filename="startna_lista_${competition._id}.pdf"`
@@ -26,9 +26,7 @@ module.exports = async function generatePdfForCompetition(competition, res) {
   doc.moveDown();
 
   performances.forEach((p, i) => {
-    doc.text(
-      `${i + 1}. ${p.choreographyName} – ${p.clubId?.clubName || "N/A"}`
-    );
+    doc.text(`${i + 1}. ${p.choreographyName} – ${p.clubId?.clubName || "N/A"}`);
   });
 
   doc.end();

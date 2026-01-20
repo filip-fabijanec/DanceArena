@@ -1,24 +1,22 @@
+// competitionRoutes.js
 const express = require("express");
 const router = express.Router();
-
 const crypto = require("crypto");
-const path = require("path");
-const fs = require("fs");
 
 // Modeli
 const Competition = require("../models/Competition");
 const User = require("../models/User");
 const Invite = require("../models/Invite");
+
+// Utility za slanje maila
+const sendInviteEmail = require("../utils/sendInviteEmail");
+
+const authMiddleware = require("../backend/middleware/authMiddleware");
+const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
 
-// Utility
-const sendInviteEmail = require("../utils/sendInviteEmail");
-const authMiddleware = require("../backend/middleware/authMiddleware");
-
-const PDFDocument = require("pdfkit");
-
 // =======================
-// GET /competitions/finished
+// GET /competitions/finished (završena natjecanja)
 // =======================
 router.get("/finished", async (req, res) => {
   try {
@@ -26,7 +24,7 @@ router.get("/finished", async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     const competitions = await Competition.find({
-      date: { $lt: today },
+      date: { $lt: today }
     })
       .populate("organizer", "name surname")
       .sort({ date: -1 });
@@ -46,15 +44,14 @@ router.get("/upcoming", async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     const competitions = await Competition.find({
-      date: { $gte: today },
+      date: { $gte: today }
     })
       .populate("organizer", "name surname")
       .sort({ date: 1 });
 
-    const upcomingCompetitions = competitions.filter(
-      (comp) =>
-        comp.autoStatus === "upcoming" || comp.autoStatus === "ongoing"
-    );
+    const upcomingCompetitions = competitions.filter(comp => {
+      return comp.autoStatus === "upcoming" || comp.autoStatus === "ongoing";
+    });
 
     res.status(200).json(upcomingCompetitions);
   } catch (error) {
@@ -72,14 +69,12 @@ router.get("/upcoming/after-2-days", async (req, res) => {
     dateFrom.setDate(dateFrom.getDate() + 2);
 
     const competitions = await Competition.find({
-      date: { $gt: dateFrom },
+      date: { $gt: dateFrom }
     })
       .populate("organizer", "name surname")
       .sort({ date: 1 });
 
-    const filtered = competitions.filter(
-      (comp) => comp.autoStatus === "upcoming"
-    );
+    const filtered = competitions.filter(comp => comp.autoStatus === "upcoming");
 
     res.status(200).json(filtered);
   } catch (error) {
@@ -95,13 +90,13 @@ router.get("/judge/:judgeId", async (req, res) => {
     const { judgeId } = req.params;
 
     const competitions = await Competition.find({
-      referees: judgeId,
+      referees: judgeId
     })
       .populate("organizer", "name surname")
       .populate("referees", "name surname")
       .sort({ date: -1 });
 
-    const competitionsWithStatus = competitions.map((comp) => {
+    const competitionsWithStatus = competitions.map(comp => {
       const obj = comp.toObject();
       obj.status = comp.autoStatus;
       return obj;
@@ -114,64 +109,65 @@ router.get("/judge/:judgeId", async (req, res) => {
 });
 
 // =======================
-// PDF mora biti prije /:id
+// 🔥 KRITIČNO: PDF ROUTE MORA BITI PRIJE /:id ROUTE-A! 🔥
 // =======================
 router.get("/:id/pdf", authMiddleware, async (req, res) => {
   try {
+    console.log("📄 PDF zahtjev - User ID:", req.user._id);
+    console.log("📄 PDF zahtjev - User Role:", req.user.role);
+    console.log("📄 Competition ID:", req.params.id);
+
     const competition = await Competition.findById(req.params.id);
+
     if (!competition) {
       return res.status(404).json({ error: "Natjecanje nije pronađeno" });
     }
 
     if (!competition.isLocked) {
-      return res
-        .status(403)
-        .json({ error: "Natjecanje nije zaključano" });
+      return res.status(403).json({ error: "Natjecanje nije zaključano" });
     }
 
     const user = req.user;
 
+    // ❌ ADMIN NEMA PRAVO
     if (user.role === "admin") {
-      return res
-        .status(403)
-        .json({ error: "Administrator nema pristup PDF-u" });
+      return res.status(403).json({ error: "Administrator nema pristup PDF-u" });
     }
 
-    const isOrganizer =
-      competition.organizer.toString() === user._id.toString();
+    // ✅ ORGANIZATOR
+    const isOrganizer = competition.organizer.toString() === user._id.toString();
 
+    // ✅ SUDAC
     const isReferee = competition.referees.some(
-      (ref) => ref.toString() === user._id.toString()
+      ref => ref.toString() === user._id.toString()
     );
 
+    // ✅ VODITELJ KLUBA koji ima nastup
     let hasPerformance = false;
     if (user.role === "voditeljKluba") {
       const perf = await Performance.findOne({
         competitionId: competition._id,
         clubId: user._id,
-        approved: true,
+        approved: true
       });
       hasPerformance = !!perf;
     }
 
+    console.log("🔐 Auth Check:", { isOrganizer, isReferee, hasPerformance });
+
     if (!isOrganizer && !isReferee && !hasPerformance) {
-      return res
-        .status(403)
-        .json({ error: "Nemate pravo pristupa PDF-u" });
+      return res.status(403).json({ error: "Nemate pravo pristupa PDF-u" });
     }
 
+    // Dohvati nastupe
     const performances = await Performance.find({
       competitionId: competition._id,
-      approved: true,
+      approved: true
     })
       .populate("clubId", "clubName")
       .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
 
-    const fontPath = path.join(
-      __dirname,
-      "../backend/fonts/DejaVuSans.ttf"
-    );
-
+    // Generiraj PDF
     const doc = new PDFDocument({ margin: 40 });
 
     res.setHeader("Content-Type", "application/pdf");
@@ -182,15 +178,17 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
 
     doc.pipe(res);
 
-    doc.registerFont("dejavu", fontPath);
-    doc.font("dejavu");
+    doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
+    doc.moveDown();
 
+    doc.fontSize(12).text(`Natjecanje: ${competition.name}`);
     doc.text(`Datum: ${competition.date.toLocaleDateString("hr-HR")}`);
     doc.text(`Lokacija: ${competition.location}`);
     doc.moveDown(2);
 
+    // Grupiraj po kategorijama
     const grouped = {};
-    performances.forEach((p) => {
+    performances.forEach(p => {
       const key = `${p.ageCategory} | ${p.danceStyle} | ${p.groupSize}`;
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(p);
@@ -203,11 +201,10 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
       grouped[category].forEach((p, i) => {
         const mins = Math.floor(p.performanceDuration / 60);
         const secs = p.performanceDuration % 60;
-
         doc.fontSize(11).text(
-          `${i + 1}. ${p.choreographyName} – ${
-            p.clubId.clubName
-          } (${mins}:${secs.toString().padStart(2, "0")})`
+          `${i + 1}. ${p.choreographyName} – ${p.clubId.clubName} (${mins}:${secs
+            .toString()
+            .padStart(2, "0")})`
         );
       });
 
@@ -216,35 +213,107 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
 
     doc.end();
   } catch (err) {
-    console.error("PDF Error:", err);
+    console.error("❌ PDF Error:", err);
     res.status(500).json({ error: "Greška pri generiranju PDF-a" });
   }
 });
 
 // =======================
 // GET /competitions/:id/results
+// MORA biti prije generičkog /:id!
 // =======================
 router.get("/:id/results", async (req, res) => {
   try {
     const compId = req.params.id;
     const competition = await Competition.findById(compId);
-
     if (!competition) {
       return res.status(404).json({ error: "Competition not found" });
     }
 
     const performances = await Performance.aggregate([
       { $match: { competitionId: competition._id, approved: true } },
+      {
+        $lookup: {
+          from: "scores",
+          let: { perfId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$performanceId", "$$perfId"] } } },
+            { $group: { _id: null, totalScore: { $sum: "$score" }, judgesCount: { $sum: 1 } } }
+          ],
+          as: "scores"
+        }
+      },
+      {
+        $addFields: {
+          totalScore: { $ifNull: [{ $arrayElemAt: ["$scores.totalScore", 0] }, 0] },
+          judgesCount: { $ifNull: [{ $arrayElemAt: ["$scores.judgesCount", 0] }, 0] }
+        }
+      },
+      { $lookup: { from: "users", localField: "clubId", foreignField: "_id", as: "club" } },
+      { $unwind: { path: "$club", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          choreographyName: 1,
+          ageCategory: 1,
+          groupSize: 1,
+          totalScore: 1,
+          judgesCount: 1,
+          clubName: "$club.clubName",
+          _id: 1
+        }
+      }
     ]);
 
-    res.status(200).json(performances);
+    const grouped = {};
+    performances.forEach(p => {
+      const age = p.ageCategory || "Nepoznata kategorija";
+      if (!grouped[age]) grouped[age] = {};
+      const sizeLabel = p.groupSize || "Nepoznata veličina";
+      const num = (() => {
+        const m = (sizeLabel || "").match(/\d+/);
+        return m ? parseInt(m[0], 10) : 999;
+      })();
+      if (!grouped[age][sizeLabel]) grouped[age][sizeLabel] = { sizeOrder: num, items: [] };
+      grouped[age][sizeLabel].items.push(p);
+    });
+
+    const ageKeys = Object.keys(grouped).sort((a, b) => {
+      const na = Number(a),
+        nb = Number(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+
+    const result = ageKeys.map(age => {
+      const sizes = Object.keys(grouped[age])
+        .map(sizeLabel => {
+          const bucket = grouped[age][sizeLabel];
+          bucket.items.sort((a, b) => b.totalScore - a.totalScore);
+          const items = bucket.items.map((it, idx) => ({
+            rank: idx + 1,
+            performanceId: it._id,
+            choreographyName: it.choreographyName,
+            clubName: it.clubName,
+            groupSize: it.groupSize,
+            totalScore: it.totalScore,
+            judgesCount: it.judgesCount
+          }));
+          return { sizeLabel, sizeOrder: bucket.sizeOrder, items };
+        })
+        .sort((a, b) => a.sizeOrder - b.sizeOrder);
+
+      return { ageCategory: age, sizes };
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
 // =======================
-// GET /competitions/:id
+// GET /competitions/:id (pojedinačno natjecanje)
+// ⚠️ MORA biti POSLJEDNJI GET route sa :id parametrom!
 // =======================
 router.get("/:id", async (req, res) => {
   try {
@@ -263,20 +332,22 @@ router.get("/:id", async (req, res) => {
 });
 
 // =======================
-// GET /competitions
+// GET /competitions (sa query params)
 // =======================
 router.get("/", async (req, res) => {
   try {
-    const query = req.query.organizerId
-      ? { organizer: req.query.organizerId }
-      : {};
+    const query = req.query.organizerId ? { organizer: req.query.organizerId } : {};
 
     const competitions = await Competition.find(query)
       .populate("organizer", "name surname")
       .populate("referees", "name surname")
       .sort({ date: -1 });
 
-    const competitionsWithStatus = competitions.map((comp) => {
+    if (!competitions || competitions.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const competitionsWithStatus = competitions.map(comp => {
       const obj = comp.toObject();
       obj.status = comp.autoStatus;
       return obj;
@@ -289,7 +360,7 @@ router.get("/", async (req, res) => {
 });
 
 // =======================
-// POST /competitions
+// POST /competitions (KREIRANJE)
 // =======================
 router.post("/", async (req, res) => {
   try {
@@ -297,40 +368,119 @@ router.post("/", async (req, res) => {
       name,
       date,
       location,
+      description,
+      ageCategories,
+      danceStyles,
+      groupSizes,
+      registrationFee,
       organizer,
       referees,
-      invitedRefereeEmails,
+      invitedRefereeEmails
     } = req.body;
 
     if (!name || !date || !location || !organizer) {
       return res.status(400).json({ error: "Nedostaju obavezna polja" });
     }
 
+    const user = await User.findById(organizer);
+    if (!user) {
+      return res.status(404).json({ error: "Korisnik nije pronađen." });
+    }
+
+    if (user.role !== "organizator") {
+      return res.status(403).json({ error: "Samo organizatori mogu kreirati natjecanja." });
+    }
+
+    const isSubscriptionActive = user.subscriptionStatus === "active";
+    const isDateValid = user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date();
+
+    if (!isSubscriptionActive || !isDateValid) {
+      return res.status(403).json({
+        error:
+          "Vaša članarina je istekla. Molimo platite članarinu kako biste kreirali novo natjecanje."
+      });
+    }
+
     const competition = new Competition({
       name,
       date,
       location,
+      description,
+      ageCategories,
+      danceStyles,
+      groupSizes,
+      registrationFee,
       organizer,
-      referees: referees || [],
+      referees: referees || []
     });
 
     await competition.save();
+
+    if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
+      for (const rawEmail of invitedRefereeEmails) {
+        const email = rawEmail.toLowerCase().trim();
+        if (!email) continue;
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser && existingUser.role === "sudac") {
+          if (!competition.referees.includes(existingUser._id)) {
+            competition.referees.push(existingUser._id);
+          }
+          continue;
+        }
+
+        const existingInvite = await Invite.findOne({
+          email,
+          competition: competition._id,
+          status: "pending"
+        });
+
+        if (existingInvite) continue;
+
+        const token = crypto.randomBytes(32).toString("hex");
+
+        const invite = new Invite({
+          email,
+          role: "sudac",
+          competition: competition._id,
+          invitedBy: organizer,
+          token,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        });
+
+        await invite.save();
+
+        try {
+          await sendInviteEmail({
+            to: email,
+            token,
+            competitionName: name
+          });
+        } catch (emailError) {
+          console.error(`Greška pri slanju emaila za ${email}:`, emailError);
+        }
+      }
+
+      await competition.save();
+    }
+
     res.status(201).json(competition);
   } catch (error) {
+    console.error("Create competition error:", error);
     res.status(400).json({ error: error.message });
   }
 });
 
 // =======================
-// PUT /competitions/:id
+// PUT /competitions/:id (ažuriraj natjecanje)
 // =======================
 router.put("/:id", async (req, res) => {
   try {
-    const updatedCompetition = await Competition.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const updatedCompetition = await Competition.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
 
     if (!updatedCompetition) {
       return res.status(404).json({ error: "Competition not found" });
@@ -343,7 +493,32 @@ router.put("/:id", async (req, res) => {
 });
 
 // =======================
-// DELETE /competitions/:id
+// PUT /competitions/:id/lock
+// =======================
+router.put("/:id/lock", async (req, res) => {
+  try {
+    const competition = await Competition.findById(req.params.id);
+
+    if (!competition) {
+      return res.status(404).json({ error: "Competition not found" });
+    }
+
+    if (competition.isLocked) {
+      return res.status(400).json({ error: "Prijave su već zaključane" });
+    }
+
+    competition.isLocked = true;
+    await competition.save();
+
+    res.status(200).json(competition);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Greška pri zaključavanju" });
+  }
+});
+
+// =======================
+// DELETE /competitions/:id (obriši natjecanje)
 // =======================
 router.delete("/:id", async (req, res) => {
   try {
