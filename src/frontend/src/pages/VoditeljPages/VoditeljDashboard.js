@@ -5,7 +5,6 @@ import Navbar from '../../components/Navbar';
 import '../Dashboard.css';
 import './VoditeljPages.css';
 
-
 function VoditeljDashboard() {
   const { currentUser, token } = useAuth();
 
@@ -14,22 +13,20 @@ function VoditeljDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
+  const [downloadingPdf, setDownloadingPdf] = useState(null);
 
   useEffect(() => {
-    // Provjeri payment success
-    const params = new URLSearchParams(window. location.search);
+    const params = new URLSearchParams(window.location.search);
     if (params.get('payment_success') === 'true') {
       setMessage('✅ Plaćanje uspješno! Vaš nastup je registriran.');
       setMessageType('success');
-      // Očisti URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      // Ukloni poruku nakon 5 sekundi
       setTimeout(() => setMessage(''), 5000);
     }
     if (params.get('payment_cancelled') === 'true') {
       setMessage('❌ Plaćanje je otkazano. Pokušajte ponovno.');
       setMessageType('error');
-      window.history.replaceState({}, document.title, window.location. pathname);
+      window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => setMessage(''), 5000);
     }
 
@@ -40,16 +37,14 @@ function VoditeljDashboard() {
     try {
       setLoading(true);
       
-      // Dohvati nadolazeća natjecanja
       const compResponse = await fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming/after-2-days`);
       if (compResponse.ok) {
         const compData = await compResponse.json();
         setCompetitions(compData);
       }
 
-      // Dohvati moje prijave
       const perfResponse = await fetch(`${process.env.REACT_APP_API_URL}/performances?clubId=${currentUser._id}`);
-      if (perfResponse. ok) {
+      if (perfResponse.ok) {
         const perfData = await perfResponse.json();
         setMyPerformances(perfData);
       } else if (perfResponse.status === 404) {
@@ -79,7 +74,14 @@ function VoditeljDashboard() {
   };
 
   const downloadPdf = async (competitionId) => {
+    if (!token) {
+      alert("Token nije dostupan. Molimo prijavite se ponovno.");
+      return;
+    }
+
     try {
+      setDownloadingPdf(competitionId);
+      
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/competitions/${competitionId}/pdf`,
         {
@@ -89,14 +91,14 @@ function VoditeljDashboard() {
         }
       );
 
-      if (! res.ok) {
+      if (!res.ok) {
         const text = await res.text();
         alert("Greška pri preuzimanju PDF-a: " + text);
         return;
       }
 
       const blob = await res.blob();
-      const url = window. URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
@@ -109,6 +111,8 @@ function VoditeljDashboard() {
     } catch (err) {
       console.error(err);
       alert("Greška pri preuzimanju PDF-a");
+    } finally {
+      setDownloadingPdf(null);
     }
   };
 
@@ -129,16 +133,14 @@ function VoditeljDashboard() {
       <Navbar />
       <div className="dashboard-container">
         <h1>Voditelj Kluba Dashboard</h1>
-        <p className="welcome-text">Dobrodošli!  Upravljajte prijavama i pratite natjecanja.</p>
+        <p className="welcome-text">Dobrodošli! Upravljajte prijavama i pratite natjecanja.</p>
 
-        {/* ========== PORUKA ZA PLAĆANJE ========== */}
         {message && (
           <div className={`message-banner ${messageType}`}>
             {message}
           </div>
         )}
 
-        {/* ========== SEKCIJA 1: MOJ KLUB ========== */}
         <section className="dashboard-section">
           <h2>Moj Klub</h2>
           <div className="club-info-card">
@@ -161,7 +163,6 @@ function VoditeljDashboard() {
           </div>
         </section>
 
-        {/* ========== SEKCIJA 2: NADOLAZEĆA NATJECANJA ========== */}
         <section className="dashboard-section">
           <h2>Nadolazeća natjecanja</h2>
           
@@ -178,15 +179,15 @@ function VoditeljDashboard() {
                   </div>
                   <div className="card-body">
                     <div className="info-item">
-                      <span className="icon"></span>
-                      <span>Datum:  {formatDate(comp.date)}</span>
+                      <span className="icon">📅</span>
+                      <span>Datum: {formatDate(comp.date)}</span>
                     </div>
                     <div className="info-item">
-                      <span className="icon"></span>
+                      <span className="icon">📍</span>
                       <span>Lokacija: {comp.location}</span>
                     </div>
                     <div className="info-item">
-                      <span className="icon"></span>
+                      <span className="icon">💰</span>
                       <span>Kotizacija: {comp.registrationFee} €</span>
                     </div>
                     
@@ -197,7 +198,7 @@ function VoditeljDashboard() {
                     <div className="categories-summary">
                       <div className="category-item">
                         <strong>Dobne kategorije:</strong>
-                        <span>{comp.ageCategories. length} dostupnih</span>
+                        <span>{comp.ageCategories.length} dostupnih</span>
                       </div>
                       <div className="category-item">
                         <strong>Stilovi:</strong>
@@ -209,7 +210,7 @@ function VoditeljDashboard() {
                       </div>
                     </div>
 
-                    {! comp.isLocked ?  (
+                    {!comp.isLocked ? (
                       <Link 
                         to={`/voditelj/prijavi-nastup/${comp._id}`} 
                         className="btn-primary full-width"
@@ -218,7 +219,7 @@ function VoditeljDashboard() {
                       </Link>
                     ) : (
                       <button className="btn-disabled full-width" disabled>
-                        Prijave su zaključane
+                        🔒 Prijave su zaključane
                       </button>
                     )}
 
@@ -229,7 +230,6 @@ function VoditeljDashboard() {
           )}
         </section>
 
-        {/* ========== SEKCIJA 3: MOJE PRIJAVE ========== */}
         <section className="dashboard-section">
           <h2>Moje prijave</h2>
           
@@ -242,7 +242,7 @@ function VoditeljDashboard() {
             </div>
           ) : (
             <div className="performances-list">
-              {myPerformances. map((perf) => (
+              {myPerformances.map((perf) => (
                 <div key={perf._id} className="performance-card">
                   <div className="performance-header">
                     <div>
@@ -251,8 +251,8 @@ function VoditeljDashboard() {
                         Natjecanje: {perf.competitionId?.name || 'N/A'}
                       </p>
                     </div>
-                    <span className={`status-badge ${perf.approved ? 'approved' :  'pending'}`}>
-                      {perf.approved ? 'Prihvaćeno' : 'Na čekanju'}
+                    <span className={`status-badge ${perf.approved ? 'approved' : 'pending'}`}>
+                      {perf.approved ? '✓ Prihvaćeno' : '⏳ Na čekanju'}
                     </span>
                   </div>
 
@@ -272,7 +272,7 @@ function VoditeljDashboard() {
                     <div className="detail-row">
                       <span className="detail-label">Kategorija:</span>
                       <span className="detail-value">
-                        {perf. ageCategory} / {perf.danceStyle} / {perf.groupSize}
+                        {perf.ageCategory} / {perf.danceStyle} / {perf.groupSize}
                       </span>
                     </div>
                     <div className="detail-row">
@@ -293,14 +293,45 @@ function VoditeljDashboard() {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Plaćeno:</span>
-                      <span className="detail-value">{perf.paid ? 'Da' : 'Ne'}</span>
+                      <span className="detail-value">
+                        {perf.paid ? (
+                          <span style={{ color: '#2e7d32', fontWeight: '600' }}>✓ Da</span>
+                        ) : (
+                          <span style={{ color: '#d32f2f', fontWeight: '600' }}>✗ Ne</span>
+                        )}
+                      </span>
                     </div>
+
                     {perf.competitionId?.isLocked && perf.approved && (
                       <button
                         onClick={() => downloadPdf(perf.competitionId._id)}
-                        className="btn-secondary"
+                        disabled={downloadingPdf === perf.competitionId._id}
+                        className="btn-download-pdf"
                       >
-                        Preuzmi startnu listu (PDF)
+                        {downloadingPdf === perf.competitionId._id ? (
+                          <>
+                            <span className="spinner"></span>
+                            <span>Preuzimanje...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg 
+                              width="20" 
+                              height="20" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Preuzmi startnu listu (PDF)</span>
+                          </>
+                        )}
                       </button>
                     )}
 
