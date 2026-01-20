@@ -4,6 +4,7 @@ import './LandingPage.css';
 import { Link } from 'react-router-dom';
 import { ReactComponent as Logo } from './dancearena.svg';
 import { ReactComponent as Cloud } from './cloud.svg';
+import heroBanner from './hero-banner.jpg'; // <-- stavi sliku u isti folder (src/pages)
 
 function LandingPage() {
   const [finished, setFinished] = useState([]);
@@ -50,8 +51,12 @@ function LandingPage() {
   };
 
   const Event = ({ c }) => (
-    <Link to={`/competition/${c._id}/results`} className="event-panel-link" style={{ textDecoration: 'none', color: 'inherit' }}>
-        <div className="event-panel" role="button">
+    <Link
+      to={`/competition/${c._id}/results`}
+      className="event-panel-link"
+      style={{ textDecoration: 'none', color: 'inherit' }}
+    >
+      <div className="event-panel" role="button">
         <div className="event-content">
           <span className="event-date">{formatDate(c.date)}</span>
           <h3>{c.name}</h3>
@@ -64,7 +69,7 @@ function LandingPage() {
 
   const Section = ({ title, data, refEl }) => (
     <section className="events-section">
-        <h2>{title}</h2>
+      <h2>{title}</h2>
 
       {loading ? (
         <p>Učitavanje...</p>
@@ -86,15 +91,29 @@ function LandingPage() {
     <div className="landing-page">
       <PublicNavbar />
 
-      <section className="hero-section">
+      <section
+        className="hero-section"
+        style={{
+          backgroundImage: `url(${heroBanner})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className="hero-logo">
           <Logo className="logo-svg" />
         </div>
-        <p className="hero-subtitle">Mjesto gdje natjecanja postaju događaji</p>
       </section>
 
       <Section title="UPCOMING" data={upcoming} refEl={upcomingRef} />
       <Section title="FINISHED" data={finished} refEl={finishedRef} />
+
+      <footer className="landing-footer">
+        <div className="landing-footer-inner">
+          <p>Hvala na pažnji.</p>
+          <p className="footer-sub">© Underdogs 2026</p>
+        </div>
+      </footer>
     </div>
   );
 }

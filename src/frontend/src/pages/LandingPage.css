@@ -1,32 +1,71 @@
 /* BASE */
 .landing-page {
-  background: #9ec1f5;
+  background: linear-gradient(#9ec1f5, #9ec1f5, #9ec1f5, #3b4d6b);
   color: #222;
   min-height: 100vh;
 }
 
 /* HERO */
 .hero-section {
-  padding: 100px 40px 70px;
+  position: relative;
+  padding: 100px 40px 200px;
   text-align: center;
+  overflow: hidden;
+
+  /* banner feel */
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
 }
 
-.hero-section h1 {
-  font-size: 56px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  color: #222;
+/* overlay above the image (image is set inline in JS via style=backgroundImage) */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(158, 193, 245, 0.55) 0%,
+    rgba(158, 193, 245, 0.25) 45%,
+    rgba(158, 193, 245, 0.78) 100%
+  );
+  z-index: 1;
 }
 
-.hero-section p {
-  font-size: 32px;
-  color: #555;
+/* optional subtle shine */
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: -80px -80px auto auto;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  transform: rotate(15deg);
+  z-index: 1;
+}
+
+/* Keep logo above overlay */
+.hero-logo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -100px;
+}
+
+.logo-svg {
+  height: 400px;
+  width: auto;
+  max-width: 100%;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.22));
 }
 
 /* EVENTS SECTION */
 .events-section {
   padding: 60px 40px;
 }
+
 /* WRAPPER */
 .events-wrapper {
   display: flex;
@@ -71,16 +110,14 @@
   height: 300px;
   background: white;
   border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
-  cursor: pointer;
-
 }
 
 .event-panel:hover {
   transform: translateY(-6px);
-  box-shadow: 0 18px 40px rgba(108,99,255,0.2);
+  box-shadow: 0 18px 40px rgba(108, 99, 255, 0.2);
 }
 
 /* CONTENT */
@@ -112,31 +149,88 @@
   line-height: 1.5;
 }
 
-.hero-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2px;
-}
-
-.logo-svg {
-  height: 400px;       /* prilagodi po želji */
-  width: auto;
-  max-width: 100%;
-}
-
-@media (max-width: 768px) {
-  .logo-svg {
-    height: 128px;
-  }
-}
-
+/* Cloud header title */
 .events-section h2 {
   font-size: 28px;
   margin-bottom: 20px;
   display: inline-block;
   padding: 12px 30px;
-  background: #ffffff;           /* oblak je bijel */
+  background: #ffffff; /* oblak je bijel */
   color: #222;
-  border-radius: 50px 50px 50px 50px / 35px; /* ovalno, fluffy */
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);   /* mekana sjena */
+  border-radius: 50px 50px 50px 50px / 35px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Footer (full width, "real" footer) ===== */
+.landing-footer {
+  margin-top: 40px;
+  width: 100%;
+  box-sizing: border-box; /* ✅ FIX: padding se uračuna u širinu */
+  padding: 24px 16px;
+  text-align: center;
+
+  background: rgba(17, 24, 39, 0.55);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.landing-footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.landing-footer p {
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 650;
+}
+
+.footer-sub {
+  opacity: 0.9;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* "github" link that looks like text, not a button */
+.footer-link {
+  color: #ffffff;
+  text-decoration-thickness: 2px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.footer-link:hover {
+  opacity: 0.9;
+}
+
+.footer-link:active {
+  transform: translateY(1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 70px 16px 55px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+  }
+
+  .hero-logo {
+    margin-bottom: -60px;
+  }
+
+  .logo-svg {
+    height: 128px;
+  }
+
+  .events-section {
+    padding: 44px 16px;
+  }
 }
