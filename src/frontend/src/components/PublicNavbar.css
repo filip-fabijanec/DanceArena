@@ -16,14 +16,32 @@
   align-items: center;
 }
 
+/* ✅ logo row (icon + text) */
 .navbar-logo {
   text-decoration: none;
   color: white;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .navbar-logo h2 {
   margin: 0;
   font-size: 24px;
+  letter-spacing: 0.2px;
+}
+
+/* ✅ underdogs mark in navbar */
+.navbar-underdogs-logo {
+  height: 36px;
+  width: auto;
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.18));
+}
+
+.navbar-underdogs-logo path {
+  fill: rgba(255, 255, 255, 0.92);
 }
 
 .navbar-links {

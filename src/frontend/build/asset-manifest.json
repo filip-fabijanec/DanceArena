@@ -1,18 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.0e0d9f0c.css",
-    "main.js": "/static/js/main.6522f209.js",
+    "main.css": "/static/css/main.b58d7018.css",
+    "main.js": "/static/js/main.71759741.js",
     "static/js/453.d7446e4a.chunk.js": "/static/js/453.d7446e4a.chunk.js",
     "static/media/hero-banner.jpg": "/static/media/hero-banner.4b6785cbff37c08da483.jpg",
+    "static/media/underdogs.svg": "/static/media/underdogs.3899fbd446d8995c8aba6b5d67e1f1af.svg",
     "static/media/dancearena.svg": "/static/media/dancearena.c79e39e519caa9c19eabb9aaa944e574.svg",
     "static/media/cloud.svg": "/static/media/cloud.9fc755a7d5d465228642b20aa57f3ca3.svg",
     "index.html": "/index.html",
-    "main.0e0d9f0c.css.map": "/static/css/main.0e0d9f0c.css.map",
-    "main.6522f209.js.map": "/static/js/main.6522f209.js.map",
+    "main.b58d7018.css.map": "/static/css/main.b58d7018.css.map",
+    "main.71759741.js.map": "/static/js/main.71759741.js.map",
     "453.d7446e4a.chunk.js.map": "/static/js/453.d7446e4a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.0e0d9f0c.css",
-    "static/js/main.6522f209.js"
+    "static/css/main.b58d7018.css",
+    "static/js/main.71759741.js"
   ]
 }

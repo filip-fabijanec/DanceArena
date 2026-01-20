@@ -4,6 +4,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import './Login.css';
 import { GoogleLogin } from '@react-oauth/google';
 import heroBanner from './hero-banner.jpg';
+import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
 
 function Login() {
   const [error, setError] = useState('');
@@ -132,30 +133,32 @@ function Login() {
       />
 
       <div className="login-layout">
-        {/* testimonials more to the left */}
         <div className="login-side-content" aria-label="Testimonials">
-            <div className="review-row">
-              <div className="review-dots" aria-label="Odaberi testimonial">
-                {reviews.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`review-dot-btn ${i === activeReview ? 'active' : ''}`}
-                    onClick={() => handleSelectReview(i)}
-                    aria-label={`Prikaži testimonial ${i + 1}`}
-                    aria-current={i === activeReview ? 'true' : 'false'}
-                  >
-                    <span className="review-dot" />
-                  </button>
-                ))}
-              </div>
-
-              <div className="review-card fade-in" key={fadeTick}>
-                <p className="review-quote">“{r.quote}”</p>
-                <p className="review-author">— {r.author}</p>
-              </div>
+          <div className="review-row">
+            <div className="review-dots" aria-label="Odaberi testimonial">
+              {reviews.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`review-dot-btn ${i === activeReview ? 'active' : ''}`}
+                  onClick={() => handleSelectReview(i)}
+                  aria-label={`Prikaži testimonial ${i + 1}`}
+                  aria-current={i === activeReview ? 'true' : 'false'}
+                >
+                  <span className="review-dot" />
+                </button>
+              ))}
             </div>
+
+            <div className="review-card fade-in" key={fadeTick}>
+              <p className="review-quote">“{r.quote}”</p>
+              <p className="review-author">— {r.author}</p>
+            </div>
+          </div>
         </div>
+
+        {/* ✅ Underdogs watermark behind the login box */}
+        <UnderdogsLogo className="login-underdogs-bg" aria-hidden="true" />
 
         <div className="login-box">
           <Link to="/" className="back-to-home">

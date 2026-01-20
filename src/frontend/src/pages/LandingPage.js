@@ -4,7 +4,8 @@ import './LandingPage.css';
 import { Link } from 'react-router-dom';
 import { ReactComponent as Logo } from './dancearena.svg';
 import { ReactComponent as Cloud } from './cloud.svg';
-import heroBanner from './hero-banner.jpg'; // <-- stavi sliku u isti folder (src/pages)
+import heroBanner from './hero-banner.jpg';
+import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
 
 function LandingPage() {
   const [finished, setFinished] = useState([]);
@@ -77,7 +78,7 @@ function LandingPage() {
         <div className="events-wrapper">
           <button className="scroll-btn" onClick={() => scroll(refEl, -1)}>←</button>
           <div className="events-strip" ref={refEl}>
-            {data.map(c => <Event key={c._id} c={c} />)}
+            {data.map((c) => <Event key={c._id} c={c} />)}
           </div>
           <button className="scroll-btn" onClick={() => scroll(refEl, 1)}>→</button>
         </div>
@@ -110,6 +111,9 @@ function LandingPage() {
 
       <footer className="landing-footer">
         <div className="landing-footer-inner">
+          {/* ✅ Underdogs logo in footer */}
+          <UnderdogsLogo className="footer-logo" aria-hidden="true" />
+
           <p>Hvala na pažnji.</p>
           <p className="footer-sub">© Underdogs 2026</p>
         </div>

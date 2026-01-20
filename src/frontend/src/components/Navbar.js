@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
+import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
 
 function Navbar() {
   const { currentUser, logout } = useAuth();
@@ -26,9 +27,11 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
+          {/* ✅ Underdogs icon before "DANCE ARENA" */}
+          <UnderdogsLogo className="navbar-underdogs-logo" aria-hidden="true" />
           <h2>DANCE ARENA</h2>
         </div>
-        
+
         <div className="navbar-user">
           <div className="user-info">
             <span className="user-name">
