@@ -105,17 +105,18 @@ function SudacFolder() {
                 <p>📅 Datum: {new Date(comp.date).toLocaleDateString('hr-HR')}</p>
                 <p>📍 Lokacija: {comp.location}</p>
                 {comp.status === 'completed' ? (
-                  <button className="card-button btn-danger" disabled>
+                  <button className="card-button btn-danger"  style={{marginBottom : 10}} disabled>
                     Natjecanje završeno
                   </button>
                 ) : comp.status === 'upcoming' ? (
-                  <button className="card-button btn-danger" disabled>
+                  <button className="card-button btn-danger"  style={{marginBottom : 10}} disabled>
                     Nadolazeće
                   </button>
                 ) : (
                   <button
                     onClick={() => navigate(`/sudac/ocjenjivanje/${comp._id}`)}
-                    className="card-button btn-success"
+                    className="card-button btn-success" 
+                    style={{marginBottom : 10}} 
                   >
                     Ocijeni nastupe
                   </button>
