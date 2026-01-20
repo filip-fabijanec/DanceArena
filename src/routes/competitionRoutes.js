@@ -10,11 +10,9 @@ const Invite = require("../models/Invite");
 // Utility za slanje maila
 const sendInviteEmail = require("../utils/sendInviteEmail");
 
-
 const authMiddleware = require("../backend/middleware/authMiddleware");
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
-
 
 // =======================
 // GET /competitions/finished (završena natjecanja)
@@ -30,7 +28,7 @@ router.get("/finished", async (req, res) => {
       .populate("organizer", "name surname")
       .sort({ date: -1 });
 
-    res.status(200).json(competitions);  // <-- FIX: bilo je finishedCompetitions
+    res.status(200).json(competitions);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -97,7 +95,6 @@ router.get("/judge/:judgeId", async (req, res) => {
       .populate("referees", "name surname")
       .sort({ date: -1 });
 
-    // Dodaj automatski status (virtual field) kao polje status
     const competitionsWithStatus = competitions.map(comp => {
       const obj = comp.toObject();
       obj.status = comp.autoStatus;
@@ -111,24 +108,119 @@ router.get("/judge/:judgeId", async (req, res) => {
 });
 
 // =======================
-// GET /competitions/:id (pojedinačno natjecanje)
+// 🔥 KRITIČNO: PDF ROUTE MORA BITI PRIJE /:id ROUTE-A! 🔥
 // =======================
-router.get("/:id", async (req, res) => {
+router.get("/:id/pdf", authMiddleware, async (req, res) => {
   try {
-    const competition = await Competition.findById(req.params.id)
-      .populate("organizer", "name surname email")
-      .populate("referees", "name surname email");
+    console.log("📄 PDF zahtjev - User ID:", req.user._id);
+    console.log("📄 PDF zahtjev - User Role:", req.user.role);
+    console.log("📄 Competition ID:", req.params.id);
 
+    const competition = await Competition.findById(req.params.id);
+    
     if (!competition) {
-      return res.status(404).json({ error: "Competition not found" });
+      return res.status(404).json({ error: "Natjecanje nije pronađeno" });
     }
 
-    res.status(200).json(competition);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    if (!competition.isLocked) {
+      return res.status(403).json({ error: "Natjecanje nije zaključano" });
+    }
+
+    const user = req.user;
+
+    // ❌ ADMIN NEMA PRAVO
+    if (user.role === "admin") {
+      return res.status(403).json({ error: "Administrator nema pristup PDF-u" });
+    }
+
+    // ✅ ORGANIZATOR
+    const isOrganizer = competition.organizer.toString() === user._id.toString();
+
+    // ✅ SUDAC
+    const isReferee = competition.referees.some(
+      ref => ref.toString() === user._id.toString()
+    );
+
+    // ✅ VODITELJ KLUBA koji ima nastup
+    let hasPerformance = false;
+    if (user.role === "voditeljKluba") {
+      const perf = await Performance.findOne({
+        competitionId: competition._id,
+        clubId: user._id,
+        approved: true
+      });
+      hasPerformance = !!perf;
+    }
+
+    console.log("🔐 Auth Check:", { isOrganizer, isReferee, hasPerformance });
+
+    if (!isOrganizer && !isReferee && !hasPerformance) {
+      return res.status(403).json({ error: "Nemate pravo pristupa PDF-u" });
+    }
+
+    // Dohvati nastupe
+    const performances = await Performance.find({
+      competitionId: competition._id,
+      approved: true
+    })
+      .populate("clubId", "clubName")
+      .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
+
+    // Generiraj PDF
+    const doc = new PDFDocument({ margin: 40 });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="startna_lista_${competition._id}.pdf"`
+    );
+
+    doc.pipe(res);
+
+    doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Natjecanje: ${competition.name}`);
+    doc.text(`Datum: ${competition.date.toLocaleDateString("hr-HR")}`);
+    doc.text(`Lokacija: ${competition.location}`);
+    doc.moveDown(2);
+
+    // Grupiraj po kategorijama
+    const grouped = {};
+    performances.forEach(p => {
+      const key = `${p.ageCategory} | ${p.danceStyle} | ${p.groupSize}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(p);
+    });
+
+    for (const category in grouped) {
+      doc.fontSize(14).text(category, { underline: true });
+      doc.moveDown(0.5);
+
+      grouped[category].forEach((p, i) => {
+        const mins = Math.floor(p.performanceDuration / 60);
+        const secs = p.performanceDuration % 60;
+        doc.fontSize(11).text(
+          `${i + 1}. ${p.choreographyName} – ${p.clubId.clubName} (${mins}:${secs
+            .toString()
+            .padStart(2, "0")})`
+        );
+      });
+
+      doc.moveDown(1.5);
+    }
+
+    doc.end();
+  } catch (err) {
+    console.error("❌ PDF Error:", err);
+    res.status(500).json({ error: "Greška pri generiranju PDF-a" });
   }
 });
 
+// =======================
+// GET /competitions/:id/results
+// MORA biti prije generičkog /:id!
+// =======================
 router.get("/:id/results", async (req, res) => {
   try {
     const compId = req.params.id;
@@ -137,7 +229,6 @@ router.get("/:id/results", async (req, res) => {
       return res.status(404).json({ error: "Competition not found" });
     }
 
-    // Aggregate performances for this competition and sum all scores per performance
     const performances = await Performance.aggregate([
       { $match: { competitionId: competition._id, approved: true } },
       { $lookup: {
@@ -160,7 +251,6 @@ router.get("/:id/results", async (req, res) => {
       { $project: { choreographyName:1, ageCategory:1, groupSize:1, totalScore:1, judgesCount:1, clubName:'$club.clubName', _id: 1 } }
     ]);
 
-    // Group by age category then by groupSize (order sizes by numeric part when possible)
     const grouped = {};
     performances.forEach(p => {
       const age = p.ageCategory || 'Nepoznata kategorija';
@@ -200,6 +290,26 @@ router.get("/:id/results", async (req, res) => {
     });
 
     res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// =======================
+// GET /competitions/:id (pojedinačno natjecanje)
+// ⚠️ MORA biti POSLJEDNJI GET route sa :id parametrom!
+// =======================
+router.get("/:id", async (req, res) => {
+  try {
+    const competition = await Competition.findById(req.params.id)
+      .populate("organizer", "name surname email")
+      .populate("referees", "name surname email");
+
+    if (!competition) {
+      return res.status(404).json({ error: "Competition not found" });
+    }
+
+    res.status(200).json(competition);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -254,23 +364,19 @@ router.post("/", async (req, res) => {
       invitedRefereeEmails,
     } = req.body;
 
-    // Osnovna validacija
     if (!name || !date || !location || !organizer) {
       return res.status(400).json({ error: "Nedostaju obavezna polja" });
     }
 
-    // 1. Dohvati korisnika iz baze
     const user = await User.findById(organizer);
     if (!user) {
       return res.status(404).json({ error: "Korisnik nije pronađen." });
     }
 
-    // 2. PROVJERA: Je li korisnik uopće organizator?
     if (user.role !== 'organizator') {
       return res.status(403).json({ error: "Samo organizatori mogu kreirati natjecanja." });
     }
 
-    // 3. PROVJERA PLAĆANJA
     const isSubscriptionActive = user.subscriptionStatus === 'active';
     const isDateValid = user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date();
 
@@ -280,7 +386,6 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // 4. Kreiraj natjecanje
     const competition = new Competition({
       name,
       date,
@@ -296,16 +401,11 @@ router.post("/", async (req, res) => {
 
     await competition.save();
 
-    // =======================
-    // INVITE REFEREE EMAILS
-    // =======================
     if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
-      
       for (const rawEmail of invitedRefereeEmails) {
         const email = rawEmail.toLowerCase().trim();
         if (!email) continue;
 
-        // A) Ako user već postoji kao sudac -> samo ga dodaj u natjecanje
         const existingUser = await User.findOne({ email });
 
         if (existingUser && existingUser.role === "sudac") {
@@ -315,18 +415,14 @@ router.post("/", async (req, res) => {
           continue; 
         }
 
-        // B) Ako user ne postoji ili nije sudac -> šaljemo INVITE
-        
-        // Provjeri postoji li već aktivni invite
         const existingInvite = await Invite.findOne({
           email,
           competition: competition._id,
           status: "pending",
         });
 
-        if (existingInvite) continue; // Već je pozvan
+        if (existingInvite) continue;
 
-        // Kreiraj token (32 bajta hex)
         const token = crypto.randomBytes(32).toString("hex");
 
         const invite = new Invite({
@@ -335,25 +431,22 @@ router.post("/", async (req, res) => {
           competition: competition._id,
           invitedBy: organizer,
           token,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dana
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
 
         await invite.save();
 
-        // Pošalji mail
         try {
           await sendInviteEmail({
             to: email,
-            token, // Ovo šaljemo u e-mailu kao ?invite=token
+            token,
             competitionName: name,
           });
         } catch (emailError) {
           console.error(`Greška pri slanju emaila za ${email}:`, emailError);
-          // Ne prekidamo petlju, samo logiramo grešku
         }
       }
 
-      // Spremi promjene na natjecanju (ako smo dodali postojeće suce)
       await competition.save();
     }
 
@@ -420,103 +513,6 @@ router.delete("/:id", async (req, res) => {
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: error.message });
-  }
-});
-
-router.get("/:id/pdf", authMiddleware, async (req, res) => {
-  try {
-    const competition = await Competition.findById(req.params.id);
-    if (!competition || !competition.isLocked) {
-      return res.status(403).json({ error: "Natjecanje nije zaključano" });
-    }
-
-    const user = req.user;
-
-    // ❌ ADMIN NEMA PRAVO
-    if (user.role === "admin") {
-      return res.status(403).json({ error: "Administrator nema pristup PDF-u" });
-    }
-
-    // ✅ ORGANIZATOR
-    const isOrganizer =
-      competition.organizer.toString() === user._id.toString();
-
-    // ✅ SUDAC
-    const isReferee =
-      competition.referees.some(
-        ref => ref.toString() === user._id.toString()
-      );
-
-    let hasPerformance = false;
-
-    if (user.role === "voditeljKluba") {
-      const perf = await Performance.findOne({
-        competitionId: competition._id,
-        clubId: user._id,
-        approved: true
-      });
-
-      hasPerformance = !!perf;
-    }
-
-    if (!isOrganizer && !isReferee && !hasPerformance) {
-      return res.status(403).json({ error: "Nemaš pravo na PDF" });
-    }
-
-    const performances = await Performance.find({
-      competitionId: competition._id,
-      approved: true
-    })
-      .populate("clubId", "clubName")
-      .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
-
-    const doc = new PDFDocument({ margin: 40 });
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="startna_lista_${competition._id}.pdf"`
-    );
-
-    doc.pipe(res);
-
-    doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
-    doc.moveDown();
-
-    doc.text(`Natjecanje: ${competition.name}`);
-    doc.text(`Datum: ${competition.date.toLocaleDateString("hr-HR")}`);
-    doc.text(`Lokacija: ${competition.location}`);
-    doc.moveDown(2);
-
-    const grouped = {};
-
-    performances.forEach(p => {
-      const key = `${p.ageCategory} | ${p.danceStyle} | ${p.groupSize}`;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(p);
-    });
-
-    for (const category in grouped) {
-      doc.fontSize(14).text(category, { underline: true });
-      doc.moveDown(0.5);
-
-      grouped[category].forEach((p, i) => {
-        const mins = Math.floor(p.performanceDuration / 60);
-        const secs = p.performanceDuration % 60;
-        doc.fontSize(11).text(
-          `${i + 1}. ${p.choreographyName} – ${p.clubId.clubName} (${mins}:${secs
-            .toString()
-            .padStart(2, "0")})`
-        );
-      });
-
-      doc.moveDown(1.5);
-    }
-
-    doc.end();
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Greška pri generiranju PDF-a");
   }
 });
 
