@@ -346,3 +346,13 @@
   border-radius: 5px;
   margin-bottom: 20px;
 }
+
+.comp-header.clickable:hover {
+  background: #eef2ff;
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+  color: #4F46E5;
+  font-weight: bold;
+}
