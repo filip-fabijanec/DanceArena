@@ -152,7 +152,7 @@ function Login() {
 
             <div className="review-card fade-in" key={fadeTick}>
               <p className="review-quote">“{r.quote}”</p>
-              <p className="review-author">— {r.author}</p>
+              <p className="review-author">- {r.author}</p>
             </div>
           </div>
         </div>
