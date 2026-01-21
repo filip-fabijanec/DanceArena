@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
+import { ReactComponent as UnderdogsLogo } from './underdogs_inv.svg';
 
 function Navbar() {
   const { currentUser, logout } = useAuth();

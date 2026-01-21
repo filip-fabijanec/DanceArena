@@ -29,9 +29,9 @@
 
 /* ✅ underdogs mark in navbar */
 .navbar-underdogs-logo {
-  height: 36px;
+  height: 60px;
   width: auto;
-  opacity: 0.95;
+  opacity: 1;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.18));
 }
 

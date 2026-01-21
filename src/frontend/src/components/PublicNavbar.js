@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ExcuseButton from './ExcuseButton';
 import './PublicNavbar.css';
-import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
+import { ReactComponent as UnderdogsLogo } from './underdogs_inv.svg';
 
 function PublicNavbar() {
   return (

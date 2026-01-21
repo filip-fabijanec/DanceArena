@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { ReactComponent as Logo } from './dancearena.svg';
 import { ReactComponent as Cloud } from './cloud.svg';
 import heroBanner from './hero-banner.jpg';
-import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
+import { ReactComponent as UnderdogsLogoInv } from './underdogs_inv.svg';
 
 function LandingPage() {
   const [finished, setFinished] = useState([]);
@@ -51,24 +51,30 @@ function LandingPage() {
     ref.current?.scrollBy({ left: dir * 420, behavior: 'smooth' });
   };
 
-  const Event = ({ c }) => (
+  const Event = ({ c, variant }) => (
     <Link
       to={`/competition/${c._id}/results`}
       className="event-panel-link"
       style={{ textDecoration: 'none', color: 'inherit' }}
     >
-      <div className="event-panel" role="button">
+      <div className={`event-panel ${variant === 'finished' ? 'is-finished' : ''}`} role="button">
         <div className="event-content">
           <span className="event-date">{formatDate(c.date)}</span>
           <h3>{c.name}</h3>
           <span className="event-location">{c.location}</span>
           {c.description && <p>{c.description}</p>}
         </div>
+
+        {variant === 'finished' && (
+          <div className="event-cta" aria-hidden="true">
+            <span className="cta-pill">Pregled rezultata</span>
+          </div>
+        )}
       </div>
     </Link>
   );
 
-  const Section = ({ title, data, refEl }) => (
+  const Section = ({ title, data, refEl, variant }) => (
     <section className="events-section">
       <h2>{title}</h2>
 
@@ -78,7 +84,7 @@ function LandingPage() {
         <div className="events-wrapper">
           <button className="scroll-btn" onClick={() => scroll(refEl, -1)}>←</button>
           <div className="events-strip" ref={refEl}>
-            {data.map((c) => <Event key={c._id} c={c} />)}
+            {data.map((c) => <Event key={c._id} c={c} variant={variant} />)}
           </div>
           <button className="scroll-btn" onClick={() => scroll(refEl, 1)}>→</button>
         </div>
@@ -106,14 +112,12 @@ function LandingPage() {
         </div>
       </section>
 
-      <Section title="UPCOMING" data={upcoming} refEl={upcomingRef} />
-      <Section title="FINISHED" data={finished} refEl={finishedRef} />
+      <Section title="UPCOMING" data={upcoming} refEl={upcomingRef} variant="upcoming" />
+      <Section title="FINISHED" data={finished} refEl={finishedRef} variant="finished" />
 
       <footer className="landing-footer">
         <div className="landing-footer-inner">
-          {/* ✅ Underdogs logo in footer */}
-          <UnderdogsLogo className="footer-logo" aria-hidden="true" />
-
+          <UnderdogsLogoInv className="footer-logo" aria-hidden="true" />
           <p>Hvala na pažnji.</p>
           <p className="footer-sub">© Underdogs 2026</p>
         </div>
