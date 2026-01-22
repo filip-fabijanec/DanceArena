@@ -26,8 +26,8 @@ function LandingPage() {
     try {
       const [f, u, o] = await Promise.all([
         fetch(`${process.env.REACT_APP_API_URL}/competitions/finished`),
-        fetch(`${process.env.REACT_APP_API_URL}/competitions/upcoming`),
-        fetch(`${process.env.REACT_APP_API_URL}/competitions/ongoing`)
+        fetch(`${process.env.REACT_APP_API_URL}/competitions/upcominglp`),
+        fetch(`${process.env.REACT_APP_API_URL}/competitions/ongoinglp`)
       ]);
 
       const finishedData = await f.json();
