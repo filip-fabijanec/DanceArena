@@ -1,0 +1,618 @@
+{
+  "id": "dee87164-5363-44d1-b955-9ca2b48309a6",
+  "version": "2.0",
+  "name": "DanceArena",
+  "url": "https://dancearena.onrender.com/",
+  "tests": [{
+    "id": "d945f263-5073-4472-a049-9e36540c3a78",
+    "name": "voditelj-redovno",
+    "commands": [{
+      "id": "5b879585-2aaf-46aa-9819-1068b108f745",
+      "comment": "",
+      "command": "open",
+      "target": "https://dancearena.onrender.com/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0be7e37c-93f1-4787-a18d-cf41fc5b8881",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "783x730",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "6ff5afc7-fa38-4a50-ae57-829d537a38f0",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prijava",
+      "targets": [
+        ["linkText=Prijava", "linkText"],
+        ["css=.login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Prijava')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/nav/div/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login')]", "xpath:href"],
+        ["xpath=//div/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prijava')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "2026aa7a-7823-4f25-a0dd-cc89ae0faea9",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "f1649f09-525b-455c-a4f7-e1b06050851a",
+      "comment": "",
+      "command": "type",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='vodkluba123']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "vodklub123"
+    }, {
+      "id": "3af24570-c945-46d2-afa5-ba7e98fd1180",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-button",
+      "targets": [
+        ["css=.secret-button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/button", "xpath:idRelative"],
+        ["xpath=//form/button", "xpath:position"],
+        ["xpath=//button[contains(.,'🔐 Prijavi se')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "855d9905-6f85-4799-97db-ad420ae93786",
+    "name": "prijavinastup-bezglazbe",
+    "commands": [{
+      "id": "5eb3010a-5a15-4e4d-b5db-384b56fc6c3d",
+      "comment": "",
+      "command": "open",
+      "target": "https://dancearena.onrender.com/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "47182ebb-3b8a-48d6-875a-ce49173bbab8",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "786x733",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "8ef1ae74-143e-45e1-b089-e812b23e0745",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prijava",
+      "targets": [
+        ["linkText=Prijava", "linkText"],
+        ["css=.login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Prijava')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/nav/div/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login')]", "xpath:href"],
+        ["xpath=//div/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prijava')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "ad3b7b25-a974-4fbf-a758-93057623d379",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "8f8768ee-9325-45a6-8626-d5e5be0243e5",
+      "comment": "",
+      "command": "type",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='vodklub123']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "vodklub123"
+    }, {
+      "id": "567b7941-3b71-4ddf-b219-5468a56a3270",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='vodklub123']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "29a276aa-6add-404e-b921-ca0e3c1969d0",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prijavi nastup",
+      "targets": [
+        ["linkText=Prijavi nastup", "linkText"],
+        ["css=.btn-primary", "css:finder"],
+        ["xpath=//a[contains(text(),'Prijavi nastup')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/div/section[2]/div/div[3]/div[2]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/voditelj/prijavi-nastup/690f24d8c3e5bd4a9d1ef8df')]", "xpath:href"],
+        ["xpath=//a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prijavi nastup')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "8b181507-a06e-4bb5-b82e-2f381cc7b10e",
+      "comment": "",
+      "command": "click",
+      "target": "name=choreographyName",
+      "targets": [
+        ["name=choreographyName", "name"],
+        ["css=.form-section > .form-group > input", "css:finder"],
+        ["xpath=//input[@name='choreographyName']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "0515e384-ce55-4847-854b-0328efa84f60",
+      "comment": "",
+      "command": "type",
+      "target": "name=choreographyName",
+      "targets": [
+        ["name=choreographyName", "name"],
+        ["css=.form-section > .form-group > input", "css:finder"],
+        ["xpath=//input[@name='choreographyName']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "bla"
+    }, {
+      "id": "88d9d509-de30-48ca-9935-3db32177cd07",
+      "comment": "",
+      "command": "click",
+      "target": "name=ageCategory",
+      "targets": [
+        ["name=ageCategory", "name"],
+        ["css=.form-row:nth-child(3) > .form-group:nth-child(1) > select", "css:finder"],
+        ["xpath=//select[@name='ageCategory']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div/div[2]/div/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "1bf5b284-9fb3-49cb-9e3a-4988198d0fcf",
+      "comment": "",
+      "command": "select",
+      "target": "name=ageCategory",
+      "targets": [],
+      "value": "label=Cicibani (2-7 god.)"
+    }, {
+      "id": "9dddde14-6efc-4b86-94bd-a0768512d917",
+      "comment": "",
+      "command": "click",
+      "target": "name=danceStyle",
+      "targets": [
+        ["name=danceStyle", "name"],
+        ["css=.form-group:nth-child(2) > select", "css:finder"],
+        ["xpath=//select[@name='danceStyle']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div/div[2]/div[2]/select", "xpath:idRelative"],
+        ["xpath=//div[2]/select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "949144cb-5f62-47cb-80d2-e57659569afe",
+      "comment": "",
+      "command": "click",
+      "target": "name=groupSize",
+      "targets": [
+        ["name=groupSize", "name"],
+        ["css=.form-row:nth-child(4) select", "css:finder"],
+        ["xpath=//select[@name='groupSize']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div/div[3]/div/select", "xpath:idRelative"],
+        ["xpath=//div[3]/div/select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "6bd2c8cf-0951-489e-b049-36f8ef958c8b",
+      "comment": "",
+      "command": "select",
+      "target": "name=groupSize",
+      "targets": [],
+      "value": "label=Duo (2 plesača)"
+    }, {
+      "id": "bd7ee69d-40c1-4cf5-90d6-271751a30eeb",
+      "comment": "",
+      "command": "click",
+      "target": "name=performanceDuration",
+      "targets": [
+        ["name=performanceDuration", "name"],
+        ["css=.form-group:nth-child(1) > input", "css:finder"],
+        ["xpath=//input[@name='performanceDuration']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div[2]/div/div/input", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "176b0d20-83ee-4405-a3c2-1f775878242d",
+      "comment": "",
+      "command": "type",
+      "target": "name=performanceDuration",
+      "targets": [
+        ["name=performanceDuration", "name"],
+        ["css=.form-group:nth-child(1) > input", "css:finder"],
+        ["xpath=//input[@name='performanceDuration']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/div[2]/div/div/input", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div/input", "xpath:position"]
+      ],
+      "value": "120"
+    }, {
+      "id": "3683a631-945d-4e80-860b-4b6f6eb180f7",
+      "comment": "",
+      "command": "click",
+      "target": "css=.submit-button",
+      "targets": [
+        ["css=.submit-button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/form/button", "xpath:idRelative"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'💳 Prijavi nastup i plati')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "95f7b448-1348-4a57-9e23-544220d58493",
+    "name": "prijava-pogresnasifra",
+    "commands": [{
+      "id": "ef0b0f88-af90-4374-bb23-a12bd1ed952a",
+      "comment": "",
+      "command": "open",
+      "target": "https://dancearena.onrender.com/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a336e3c9-a8ce-4998-9ba8-60fa893feea7",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "789x735",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a214a7cd-b733-4cab-b79f-51d001bcc650",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prijava",
+      "targets": [
+        ["linkText=Prijava", "linkText"],
+        ["css=.login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Prijava')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/nav/div/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login')]", "xpath:href"],
+        ["xpath=//div/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prijava')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3bea3db1-d5bd-4d1f-a265-e25801ac70ce",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "9107c1e9-d264-417a-b2c1-fa2f363a9ba7",
+      "comment": "",
+      "command": "type",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='krivassifra']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "krivassifra"
+    }, {
+      "id": "7259919f-fc7c-475d-8023-b5c08de5f4fa",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-button",
+      "targets": [
+        ["css=.secret-button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/button", "xpath:idRelative"],
+        ["xpath=//form/button", "xpath:position"],
+        ["xpath=//button[contains(.,'🔐 Prijavi se')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "0e57492b-a2be-4fdf-b712-7306eb236067",
+    "name": "manjeod3suca",
+    "commands": [{
+      "id": "237c4ab8-c024-45d0-beef-5fffc3a19212",
+      "comment": "",
+      "command": "open",
+      "target": "https://dancearena.onrender.com/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "16642058-68fa-47fb-a1c5-a0539c0748d9",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Prijava",
+      "targets": [
+        ["linkText=Prijava", "linkText"],
+        ["css=.login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Prijava')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/nav/div/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login')]", "xpath:href"],
+        ["xpath=//div/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Prijava')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3033dc2b-a739-44b6-92df-9ec716a458d8",
+      "comment": "",
+      "command": "click",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "940898a6-f15c-44d3-ac97-27ebf146e7f6",
+      "comment": "",
+      "command": "type",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='org123']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "org123"
+    }, {
+      "id": "910e2c40-41d9-4806-9057-8a412cbff635",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "css=.secret-input",
+      "targets": [
+        ["css=.secret-input", "css:finder"],
+        ["xpath=//input[@value='org123']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[2]/div[2]/div/form/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "7d2fd27a-e4b3-41f8-aa2a-34a200f3d44c",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=+ Novo natjecanje",
+      "targets": [
+        ["linkText=+ Novo natjecanje", "linkText"],
+        ["css=.btn-primary", "css:finder"],
+        ["xpath=//a[contains(text(),'+ Novo natjecanje')]", "xpath:link"],
+        ["xpath=//div[@id='root']/div/div/div/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/organizator/kreiranje-natjecanja')]", "xpath:href"],
+        ["xpath=//a", "xpath:position"],
+        ["xpath=//a[contains(.,'+ Novo natjecanje')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "8da0d053-f53d-42f0-a2f6-3af05a20b059",
+      "comment": "",
+      "command": "click",
+      "target": "name=name",
+      "targets": [
+        ["name=name", "name"],
+        ["css=.form-section > .form-group > input", "css:finder"],
+        ["xpath=//input[@name='name']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "abd7cb08-6968-48e1-af3a-121215d2ed4f",
+      "comment": "",
+      "command": "type",
+      "target": "name=name",
+      "targets": [
+        ["name=name", "name"],
+        ["css=.form-section > .form-group > input", "css:finder"],
+        ["xpath=//input[@name='name']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "bla"
+    }, {
+      "id": "5a5bb571-3226-49fc-8d2f-fe78bb5fc5e0",
+      "comment": "",
+      "command": "click",
+      "target": "name=date",
+      "targets": [
+        ["name=date", "name"],
+        ["css=.form-row:nth-child(2) > .form-group:nth-child(1) > input", "css:finder"],
+        ["xpath=//input[@name='date']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[2]/div/input", "xpath:idRelative"],
+        ["xpath=//div[2]/div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "b596411e-a569-46ba-84df-4f9435c4cd03",
+      "comment": "",
+      "command": "type",
+      "target": "name=date",
+      "targets": [
+        ["name=date", "name"],
+        ["css=.form-row:nth-child(2) > .form-group:nth-child(1) > input", "css:finder"],
+        ["xpath=//input[@name='date']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[2]/div/input", "xpath:idRelative"],
+        ["xpath=//div[2]/div/input", "xpath:position"]
+      ],
+      "value": "2026-05-15"
+    }, {
+      "id": "9b892a35-7308-4da3-927a-c27d47063860",
+      "comment": "",
+      "command": "click",
+      "target": "name=location",
+      "targets": [
+        ["name=location", "name"],
+        ["css=.form-row:nth-child(2) > .form-group:nth-child(2) > input", "css:finder"],
+        ["xpath=//input[@name='location']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[2]/div[2]/input", "xpath:idRelative"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "6d872175-a6d8-41f5-a6dc-9cb0464c7712",
+      "comment": "",
+      "command": "type",
+      "target": "name=location",
+      "targets": [
+        ["name=location", "name"],
+        ["css=.form-row:nth-child(2) > .form-group:nth-child(2) > input", "css:finder"],
+        ["xpath=//input[@name='location']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[2]/div[2]/input", "xpath:idRelative"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": "zagreb"
+    }, {
+      "id": "6eff7065-b660-4ef6-9e8e-4290e3b5c835",
+      "comment": "",
+      "command": "click",
+      "target": "name=danceStyles",
+      "targets": [
+        ["name=danceStyles", "name"],
+        ["css=.form-group:nth-child(1) > textarea", "css:finder"],
+        ["xpath=//textarea[@name='danceStyles']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[4]/div/textarea", "xpath:idRelative"],
+        ["xpath=//div[4]/div/textarea", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "57955677-0390-4444-b4e7-cf87dbac352a",
+      "comment": "",
+      "command": "type",
+      "target": "name=danceStyles",
+      "targets": [
+        ["name=danceStyles", "name"],
+        ["css=.form-group:nth-child(1) > textarea", "css:finder"],
+        ["xpath=//textarea[@name='danceStyles']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div/div[4]/div/textarea", "xpath:idRelative"],
+        ["xpath=//div[4]/div/textarea", "xpath:position"]
+      ],
+      "value": "jazz"
+    }, {
+      "id": "3c8c6fac-411a-4fc3-96f6-4348e7f14e48",
+      "comment": "",
+      "command": "click",
+      "target": "css=.form-section:nth-child(2) .checkbox-label:nth-child(4) > input",
+      "targets": [
+        ["css=.form-section:nth-child(2) .checkbox-label:nth-child(4) > input", "css:finder"],
+        ["xpath=(//input[@type='checkbox'])[4]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div[2]/div/label[4]/input", "xpath:idRelative"],
+        ["xpath=//label[4]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "96221da0-a0dc-44ea-8c4f-9b70f828619c",
+      "comment": "",
+      "command": "click",
+      "target": "css=.checkbox-label:nth-child(6) > input",
+      "targets": [
+        ["css=.checkbox-label:nth-child(6) > input", "css:finder"],
+        ["xpath=(//input[@type='checkbox'])[10]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div[3]/div/label[6]/input", "xpath:idRelative"],
+        ["xpath=//label[6]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "19194c89-1a8a-439f-a6d9-e65aea46f5c1",
+      "comment": "",
+      "command": "click",
+      "target": "css=.referee-card:nth-child(2) > input",
+      "targets": [
+        ["css=.referee-card:nth-child(2) > input", "css:finder"],
+        ["xpath=(//input[@type='checkbox'])[12]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/div[4]/div/div[2]/input", "xpath:idRelative"],
+        ["xpath=//div[4]/div/div[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "f97f5473-9485-446e-aeb7-2d5f9ace3f90",
+      "comment": "",
+      "command": "click",
+      "target": "css=.referee-card:nth-child(1)",
+      "targets": [
+        ["css=.referee-card:nth-child(1)", "css:finder"],
+        ["xpath=//div[@id='root']/div/div/form/div[4]/div/div", "xpath:idRelative"],
+        ["xpath=//div[4]/div/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "17520c7d-f0cd-4a6c-8b36-e27a9c42f646",
+      "comment": "",
+      "command": "click",
+      "target": "css=.submit-button",
+      "targets": [
+        ["css=.submit-button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div/form/button", "xpath:idRelative"],
+        ["xpath=//form/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Kreiraj natjecanje')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "4ca5e57e-ebd0-4b25-ac08-3afa5fda46d4",
+    "name": "nepostojeca-stranica",
+    "commands": [{
+      "id": "e62c3b26-8b39-4a92-9360-99c008a685e2",
+      "comment": "",
+      "command": "open",
+      "target": "https://dancearena.onrender.com/nepostojeca-stranica-404",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "1dd9e24c-9dde-4e07-869b-4cdc99f1c871",
+      "comment": "",
+      "command": "waitForElementPresent",
+      "target": "https://dancearena.onrender.com/nepostojeca-stranica-404",
+      "targets": [],
+      "value": "6000"
+    }]
+  }],
+  "suites": [{
+    "id": "92171d4f-86d7-46c1-bcb7-aefe464281d3",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": []
+  }],
+  "urls": ["https://dancearena.onrender.com/"],
+  "plugins": []
+}
