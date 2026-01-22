@@ -162,6 +162,36 @@ function VoditeljDashboard() {
     return list;
   }, [myPerformances, competitionFilter, perfFilter, perfSort]);
 
+  const viewScores = async (performanceId) => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/performances/${performanceId}/scores`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.error || "Greška pri dohvaćanju ocjena");
+        return;
+      }
+
+      const lines = data.scores.map(s =>
+        `${s.judge?.name || "Sudac"} ${s.judge?.surname || ""}: ${s.score}`
+      );
+
+      alert(
+        `Ocjene za: ${data.performance.choreographyName}\n\n` +
+        lines.join("\n") +
+        `\n\nUkupno: ${data.summary.totalScore}\nProsjek: ${data.summary.avgScore.toFixed(2)}`
+      );
+    } catch (e) {
+      alert("Greška pri dohvaćanju ocjena");
+    }
+  };
+
+
   if (loading) {
     return (
       <div>
@@ -382,14 +412,24 @@ function VoditeljDashboard() {
                 </div>
 
                 {perf.competitionId?.isLocked && perf.approved && (
-                  <button
-                    className="btn-download-pdf"
-                    onClick={() => downloadPdf(perf.competitionId._id)}
-                    disabled={downloadingPdf === perf.competitionId._id}
-                  >
-                    Preuzmi startnu listu (PDF)
-                  </button>
+                  <>
+                    <button
+                      className="btn-download-pdf"
+                      onClick={() => downloadPdf(perf.competitionId._id)}
+                      disabled={downloadingPdf === perf.competitionId._id}
+                    >
+                      Preuzmi startnu listu (PDF)
+                    </button>
+
+                    <button
+                      className="btn-view-scores"
+                      onClick={() => viewScores(perf._id)}
+                    >
+                      Prikaži ocjene
+                    </button>
+                  </>
                 )}
+
               </div>
             ))}
           </div>

@@ -554,6 +554,22 @@ a.btn-primary.full-width {
   box-shadow: none;
 }
 
+.btn-view-scores {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #e9ecff;
+  color: #3f51b5;
+  font-weight: 600;
+}
+
+.btn-view-scores:hover {
+  background: #dfe3ff;
+}
+
+
 /* Enter animation for performance cards */
 @keyframes perfEnter {
   from {
