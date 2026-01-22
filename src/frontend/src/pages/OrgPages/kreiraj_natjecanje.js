@@ -53,10 +53,23 @@ function KreirajNatjecanje() {
   };
 
   const handleRefereeToggle = (id) => {
-    setSelectedReferees(prev => 
-      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
-    );
-  };
+  const referee = referees.find(ref => ref._id === id);
+  
+  // Ako deselektiramo, samo ukloni
+  if (selectedReferees.includes(id)) {
+    setSelectedReferees(prev => prev.filter(r => r !== id));
+    return;
+  }
+  
+  // Provjera: Je li email tog suca već pozvan?
+  if (referee && invitedRefereeEmails.includes(referee.email)) {
+    alert(`Sudac ${referee.name} ${referee.surname} (${referee.email}) je već pozvan putem emaila.`);
+    return;
+  }
+
+  // Dodaj suca
+  setSelectedReferees(prev => [...prev, id]);
+};
 
 
   const handleAddEmail = () => {
