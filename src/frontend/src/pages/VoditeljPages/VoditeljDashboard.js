@@ -21,6 +21,8 @@ function VoditeljDashboard() {
   const [perfSort, setPerfSort] = useState('dateAsc'); // dateAsc | dateDesc
   const [perfAnimateIn, setPerfAnimateIn] = useState(false);
 
+  const [scoresByPerformance, setScoresByPerformance] = useState({});
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
@@ -40,7 +42,7 @@ function VoditeljDashboard() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+  }, [currentUser, token]);
 
   const fetchData = async () => {
     try {
@@ -58,10 +60,38 @@ function VoditeljDashboard() {
         `${process.env.REACT_APP_API_URL}/performances?clubId=${currentUser._id}`
       );
       if (perfResponse.ok) {
-        setMyPerformances(await perfResponse.json());
-      } else {
-        setMyPerformances([]);
+      const perfs = await perfResponse.json();
+      setMyPerformances(perfs);
+
+      // povuci ocjene samo za locked + approved
+      const needScores = perfs.filter(p => p.approved && p.competitionId?.isLocked);
+
+      if (needScores.length > 0 && token) {
+        const results = await Promise.all(
+          needScores.map(async (p) => {
+            try {
+              const r = await fetch(
+                `${process.env.REACT_APP_API_URL}/performances/${p._id}/scores`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              if (!r.ok) return [p._id, { error: true }];
+
+              const data = await r.json();
+              return [p._id, data];
+            } catch {
+              return [p._id, { error: true }];
+            }
+          })
+        );
+
+        const map = Object.fromEntries(results);
+        setScoresByPerformance(map);
       }
+    } else {
+      setMyPerformances([]);
+    }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -161,35 +191,6 @@ function VoditeljDashboard() {
 
     return list;
   }, [myPerformances, competitionFilter, perfFilter, perfSort]);
-
-  const viewScores = async (performanceId) => {
-    try {
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/performances/${performanceId}/scores`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data?.error || "Greška pri dohvaćanju ocjena");
-        return;
-      }
-
-      const lines = data.scores.map(s =>
-        `${s.judge?.name || "Sudac"} ${s.judge?.surname || ""}: ${s.score}`
-      );
-
-      alert(
-        `Ocjene za: ${data.performance.choreographyName}\n\n` +
-        lines.join("\n") +
-        `\n\nUkupno: ${data.summary.totalScore}\nProsjek: ${data.summary.avgScore.toFixed(2)}`
-      );
-    } catch (e) {
-      alert("Greška pri dohvaćanju ocjena");
-    }
-  };
 
 
   if (loading) {
@@ -421,12 +422,42 @@ function VoditeljDashboard() {
                       Preuzmi startnu listu (PDF)
                     </button>
 
-                    <button
-                      className="btn-view-scores"
-                      onClick={() => viewScores(perf._id)}
-                    >
-                      Prikaži ocjene
-                    </button>
+                    {(() => {
+                      const scoreData = scoresByPerformance[perf._id];
+
+                      // nije dohvaćeno još
+                      if (!scoreData) return <p style={{ marginTop: 10 }}>Učitavam ocjene...</p>;
+
+                      // greška ili nema prava
+                      if (scoreData.error) return <p style={{ marginTop: 10 }}>Ocjene nisu dostupne.</p>;
+
+                      const { summary, scores } = scoreData;
+
+                      return (
+                        <div style={{ marginTop: 10 }}>
+                          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                            <span><strong>Ukupno:</strong> {summary.totalScore}</span>
+                            <span><strong>Prosjek:</strong> {summary.avgScore.toFixed(2)}</span>
+                            <span><strong>Sudaca:</strong> {summary.judgesCount}</span>
+                          </div>
+
+                          {scores?.length > 0 && (
+                            <ul style={{ marginTop: 8, paddingLeft: 18 }}>
+                              {scores.map((s) => (
+                                <li key={s._id}>
+                                  {s.judge?.name || 'Sudac'} {s.judge?.surname || ''}: {s.score}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          {scores?.length === 0 && (
+                            <p style={{ marginTop: 8 }}>Još nema unesenih ocjena.</p>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                   </>
                 )}
 
