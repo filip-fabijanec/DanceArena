@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import '../Dashboard.css';
+import './suci.css'; // Dodajte ovu liniju
 
 function OcjenjivanjePage() {
   const auth = useAuth();
@@ -133,57 +134,57 @@ function OcjenjivanjePage() {
                       Još niste ocijenili nastupe za ovo natjecanje.
                     </p>
                   ) : (
-                    Object.entries(groupedScores).map(([style, ages]) => (
-                      <div key={style} style={{ marginBottom: '30px' }}>
-                        <h4 style={{ 
-                          borderBottom: '2px solid #4F46E5', 
-                          paddingBottom: '5px', 
-                          marginBottom: '15px', 
-                          color: '#2c3e50' 
-                        }}>
-                          {style}
-                        </h4>
+                    <div className="scores-container">
+                      {Object.entries(groupedScores).map(([style, ages]) => (
+                        <div key={style} className="style-section">
+                          <h4 className="style-title">{style}</h4>
 
-                        {Object.entries(ages).map(([age, sizes]) => (
-                          <div key={age} style={{ marginLeft: '10px', marginBottom: '20px' }}>
-                            <h5 style={{ color: '#555', marginBottom: '10px', fontSize: '1.05rem' }}>
-                              • {age}
-                            </h5>
+                          {Object.entries(ages).map(([age, sizes]) => (
+                            <div key={age} className="age-section">
+                              <h5 className="age-title">• {age}</h5>
 
-                            {Object.entries(sizes).map(([size, list]) => (
-                              <div key={size} style={{ marginLeft: '15px', marginBottom: '15px' }}>
-                                <div style={{ 
-                                  fontSize: '0.9rem', 
-                                  color: '#888', 
-                                  marginBottom: '8px', 
-                                  fontStyle: 'italic' 
-                                }}>
-                                  Kategorija: {size}
-                                </div>
+                              {Object.entries(sizes).map(([size, list]) => (
+                                <div key={size} className="size-section">
+                                  <div className="size-label">
+                                    Kategorija: {size}
+                                  </div>
 
-                                <div className="scores-grid">
-                                  {list.map(score => (
-                                    <div key={score._id} className="score-item-card">
-                                      <div className="score-top">
-                                        <div className="performance-name">
-                                          {score.performanceId?.choreographyName || 'Nepoznat nastup'}
-                                        </div>
-                                        <div className="score-badge">
-                                          {calculateTotalScore(score)}
+                                  <div className="scores-grid">
+                                    {list.map(score => (
+                                      <div key={score._id} className="score-item-card">
+                                        <div className="score-content">
+                                          <div className="performance-info">
+                                            <div className="performance-name">
+                                              {score.performanceId?.choreographyName || 'Nepoznat nastup'}
+                                            </div>
+                                            {score.performanceId?.clubName && (
+                                              <div className="club-name">
+                                                {score.performanceId.clubName}
+                                              </div>
+                                            )}
+                                            <div className="score-date">
+                                              📅 Datum ocjene: {new Date(score.performanceId?.competitionId?.date || Date.now()).toLocaleDateString('hr-HR')}
+                                            </div>
+                                          </div>
+                                          <div className="score-display">
+                                            <div className="score-value">
+                                              {calculateTotalScore(score)}
+                                            </div>
+                                            <div className="score-label-small">
+                                              Ocjena
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
-                                      <div className="score-bottom">
-                                        Datum ocjene: {new Date(score.performanceId?.competitionId?.date || Date.now()).toLocaleDateString('hr-HR')}
-                                      </div>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    ))
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
