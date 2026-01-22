@@ -436,9 +436,9 @@ function VoditeljDashboard() {
                       return (
                         <div style={{ marginTop: 10 }}>
                           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                            <span><strong>Ukupno:</strong> {summary.totalScore}</span>
+                            <span><strong>Ocjena:</strong> {summary.totalScore}</span>
                             <span><strong>Prosjek:</strong> {summary.avgScore.toFixed(2)}</span>
-                            <span><strong>Sudaca:</strong> {summary.judgesCount}</span>
+                            <span><strong>Suci:</strong> {summary.judgesCount}</span>
                           </div>
 
                           {scores?.length > 0 && (
