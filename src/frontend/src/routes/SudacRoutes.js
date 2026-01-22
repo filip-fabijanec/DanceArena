@@ -14,9 +14,7 @@ const SudacRoutes = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<SudacDashboard />} />
-        <Route path="/moja-natjecanja" element={<SudacFolder />} />
         <Route path="/ocjenjivanje/:competitionId" element={<OcjenjivanjeKategorija />} />
-        <Route path="/ocjenjeno" element={<OcjenjivanjePage />} />
       </Routes>
     </div>
   );

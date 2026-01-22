@@ -151,8 +151,8 @@ function OcjenjivanjeKategorija() {
 
   return (
     <div className="dashboard-container">
-      <Link to="/sudac/moja-natjecanja" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
-        ← Nazad na Moja Natjecanja
+      <Link to="/sudac" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
+        ← Nazad na Dashboard
       </Link>
       <h1>Ocjenjivanje nastupa</h1>
 
