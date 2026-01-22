@@ -40,40 +40,33 @@ router.get("/finished", async (req, res) => {
 // =======================
 router.get("/ongoing", async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const ongoingCompetitions = await Competition.find({
-      date: { $lte: today },
+    const competitions = await Competition.find({
       autoStatus: "ongoing"
     })
       .populate("organizer", "name surname")
       .sort({ date: 1 });
 
-    res.status(200).json(ongoingCompetitions);
+    res.status(200).json(competitions);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
-  
+
 
 router.get("/upcoming", async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const upcomingCompetitions = await Competition.find({
-      date: { $gte: today },
+    const competitions = await Competition.find({
       autoStatus: "upcoming"
     })
       .populate("organizer", "name surname")
       .sort({ date: 1 });
 
-    res.status(200).json(upcomingCompetitions);
+    res.status(200).json(competitions);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // =======================
 // GET /competitions/upcoming/after-2-days
