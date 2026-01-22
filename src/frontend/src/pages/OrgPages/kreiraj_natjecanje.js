@@ -58,6 +58,7 @@ function KreirajNatjecanje() {
     );
   };
 
+
   const handleAddEmail = () => {
     const email = emailInput.trim();
     // Jednostavna regex provjera za email format
@@ -70,12 +71,21 @@ function KreirajNatjecanje() {
         return;
     }
 
-    if (!invitedRefereeEmails.includes(email)) {
-      setInvitedRefereeEmails([...invitedRefereeEmails, email]);
-      setEmailInput(""); // Očisti input
-    } else {
+    // Provjera: Je li email već u listi pozivnica?
+    if (invitedRefereeEmails.includes(email)) {
         alert("Ovaj email je već dodan.");
+        return;
     }
+
+    // Provjera: Je li taj email već odabran iz baze?
+    const existingReferee = referees.find(ref => ref.email === email);
+    if (existingReferee && selectedReferees.includes(existingReferee._id)) {
+        alert(`Sudac ${existingReferee.name} ${existingReferee.surname} (${email}) je već odabran iz baze.`);
+        return;
+    }
+
+    setInvitedRefereeEmails([...invitedRefereeEmails, email]);
+    setEmailInput(""); // Očisti input
   };
 
   const handleRemoveEmail = (email) => {
