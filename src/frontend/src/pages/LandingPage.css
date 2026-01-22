@@ -315,7 +315,8 @@
 }
 
 /* show CTA only on hover for finished */
-.event-panel.is-finished:hover .event-cta {
+.event-panel.is-finished:hover .event-cta,
+.event-panel.is-ongoing:hover .event-cta {
   opacity: 1;
   transform: translateY(0);
 }

@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.612707b8.css",
-    "main.js": "/static/js/main.0dd083bf.js",
+    "main.css": "/static/css/main.079da2a1.css",
+    "main.js": "/static/js/main.59048077.js",
     "static/js/453.d7446e4a.chunk.js": "/static/js/453.d7446e4a.chunk.js",
     "static/media/hero-banner.jpg": "/static/media/hero-banner.4b6785cbff37c08da483.jpg",
     "static/media/underdogs_inv.svg": "/static/media/underdogs_inv.145e3d1d2e003e229bd25f1b304addfb.svg",
     "static/media/underdogs.svg": "/static/media/underdogs.3899fbd446d8995c8aba6b5d67e1f1af.svg",
     "static/media/dancearena.svg": "/static/media/dancearena.c79e39e519caa9c19eabb9aaa944e574.svg",
     "index.html": "/index.html",
-    "main.612707b8.css.map": "/static/css/main.612707b8.css.map",
-    "main.0dd083bf.js.map": "/static/js/main.0dd083bf.js.map",
+    "main.079da2a1.css.map": "/static/css/main.079da2a1.css.map",
+    "main.59048077.js.map": "/static/js/main.59048077.js.map",
     "453.d7446e4a.chunk.js.map": "/static/js/453.d7446e4a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.612707b8.css",
-    "static/js/main.0dd083bf.js"
+    "static/css/main.079da2a1.css",
+    "static/js/main.59048077.js"
   ]
 }

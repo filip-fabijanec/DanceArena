@@ -58,16 +58,30 @@ function LandingPage() {
     ref.current?.scrollBy({ left: dir * 420, behavior: 'smooth' });
   };
 
-  const Event = ({ c, variant }) => (
+const Event = ({ c, variant }) => {
+  const link =
+    variant === 'upcoming'
+      ? `/competition/${c._id}`
+      : `/competition/${c._id}/results`;
+
+  const handleClick = (e) => {
+    if (variant === 'upcoming') {
+      e.preventDefault();
+      alert('Rezultati za upcoming natjecanja još nisu dostupni.');
+    }
+  };
+
+  return (
     <Link
-      to={`/competition/${c._id}/results`}
+      to={link}
+      onClick={handleClick}
       className="event-panel-link"
       style={{ textDecoration: 'none', color: 'inherit' }}
     >
       <div
         className={`event-panel ${
           variant === 'finished' ? 'is-finished' : ''
-        }`}
+        } ${variant === 'ongoing' ? 'is-ongoing' : ''}`}
         role="button"
       >
         <div className="event-content">
@@ -78,19 +92,23 @@ function LandingPage() {
         </div>
 
         {variant === 'finished' && (
-          <div className="event-cta" aria-hidden="true">
+          <div className="event-cta">
             <span className="cta-pill">Pregled rezultata</span>
           </div>
         )}
 
         {variant === 'ongoing' && (
-          <div className="event-cta" aria-hidden="true">
+          <div className="event-cta">
             <span className="cta-pill">Natjecanje u tijeku</span>
           </div>
         )}
       </div>
     </Link>
   );
+};
+
+
+ 
 
   const Section = ({ title, data, refEl, variant }) => (
     <section className="events-section">
