@@ -135,16 +135,22 @@ router.get("/competition/:competitionId", async (req, res) => {
 
     // Dohvati sve nastupe za zadani competitionId
     const performances = await Performance.find({ competitionId })
+    
 
       .populate("clubId", "name surname") // Opcionalno: podaci o klubu
       .populate("competitionId", "name date location isLocked"); // Opcionalno: podaci o natjecanju
     
 
+
     if (!performances || performances.length === 0) {
       return res.status(404).json({ message: "Nema nastupa za ovo natjecanje." });
     }
 
-    res.status(200).json(performances);
+    const performaUpcoming= performances.filter(comp => {
+      return comp.approved === "true";
+    });
+
+    res.status(200).json(performaUpcoming);
   } catch (error) {
     console.error("Greška pri dohvaćanju nastupa:", error);
     res.status(500).json({ message: "Greška na serveru." });
