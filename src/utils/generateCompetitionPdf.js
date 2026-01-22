@@ -1,5 +1,6 @@
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
+const fs = require("fs");
 const path = require("path");
 
 module.exports = async function generatePdfForCompetition(competition, res) {
@@ -12,10 +13,11 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
   const doc = new PDFDocument({ 
     margin: 40,
-    bufferPages: true
+    bufferPages: true,
+    autoFirstPage: true
   });
 
-  res.setHeader("Content-Type", "application/pdf; charset=utf-8");
+  res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
     `attachment; filename="startna_lista_${competition._id}.pdf"`
@@ -23,10 +25,16 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
   doc.pipe(res);
 
-  // Registriraj font koji podržava Unicode (preuzmi Roboto ili DejaVu)
-  // Stavi font u /fonts direktorij u projektu
-  doc.registerFont('Regular', path.join(__dirname, '../fonts/Roboto-Regular.ttf'));
-  doc.font('Regular');
+  // Path do fonta (2 foldera gore od utils/)
+  const fontPath = path.join(__dirname, '../../fonts/DejaVuSans.ttf');
+  
+  if (fs.existsSync(fontPath)) {
+    doc.registerFont('DejaVu', fontPath);
+    doc.font('DejaVu');
+  } else {
+    console.error('❌ Font DejaVuSans.ttf nije pronađen na:', fontPath);
+    doc.font('Helvetica'); // fallback
+  }
 
   // Naslov
   doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
