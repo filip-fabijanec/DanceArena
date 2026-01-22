@@ -18,6 +18,9 @@
   --danger: #ef4444;
   --danger-bg: #fee2e2;
 
+  --edit: #3b82f6;
+  --edit-bg: #dbeafe;
+
   --shadow-sm: 0 2px 10px rgba(16, 24, 40, 0.08);
   --shadow-md: 0 10px 25px rgba(16, 24, 40, 0.12);
   --radius: 12px;
@@ -275,7 +278,8 @@
 }
 
 .btn-approve,
-.btn-delete {
+.btn-delete,
+.btn-edit {
   flex: 1;
   min-width: 140px;
   padding: 11px 14px;
@@ -287,10 +291,22 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
+.btn-edit {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 10px 18px rgba(59, 130, 246, 0.18);
+}
+
+.btn-edit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(59, 130, 246, 0.24);
+}
+
 .btn-approve {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   color: white;
-  box-shadow: 0 10px 18px rgba(34, 197, 94, 0.18);
+  box-shadow: 0 10px 18px rgba(11, 97, 43, 0.18);
 }
 
 .btn-approve:hover {
@@ -334,7 +350,7 @@
   border-radius: 999px;
 }
 
-/* ====== Modal ====== */
+/* ====== Modals ====== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -354,6 +370,12 @@
   width: 100%;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.35);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.edit-modal-content {
+  max-width: 600px;
 }
 
 .modal-content h3 {
@@ -383,10 +405,12 @@
   gap: 12px;
   justify-content: flex-end;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 .btn-cancel,
-.btn-confirm-delete {
+.btn-confirm-delete,
+.btn-save {
   padding: 10px 14px;
   border: 0;
   border-radius: 10px;
@@ -415,6 +439,65 @@
   transform: translateY(-1px);
   filter: brightness(1.02);
   box-shadow: 0 14px 24px rgba(239, 68, 68, 0.24);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 10px 18px rgba(59, 130, 246, 0.18);
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 14px 24px rgba(59, 130, 246, 0.24);
+}
+
+/* Edit form styles */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
 /* ====== Empty & Error ====== */
@@ -472,7 +555,8 @@
   }
 
   .btn-approve,
-  .btn-delete {
+  .btn-delete,
+  .btn-edit {
     width: 100%;
   }
 
@@ -481,4 +565,46 @@
     width: 100%;
     justify-content: center;
   }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn-cancel,
+  .btn-confirm-delete,
+  .btn-save {
+    width: 100%;
+  }
+
+  .edit-approved-notice {
+  color: #166534;
+  background: var(--success-bg);
+  border: 1px solid rgba(22, 101, 52, 0.18);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-approved-notice::before {
+  content: "✓";
+  font-weight: bold;
+}
+
+/* Stil za disabled polja u edit modalu */
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 }
