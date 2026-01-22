@@ -147,7 +147,7 @@ router.get("/competition/:competitionId", async (req, res) => {
     }
 
     const performaUpcoming= performances.filter(comp => {
-      return comp.approved === "true";
+      return comp.approved === true;
     });
 
     res.status(200).json(performaUpcoming);
