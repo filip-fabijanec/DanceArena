@@ -46,51 +46,87 @@ function CompetitionResults() {
     <>
       <PublicNavbar />
       <div className="dashboard-container" style={{ paddingTop: 24 }}>
-          <Link to="/" role="button" className="back-button" aria-label="Natrag na glavnu stranicu">← Nazad</Link>
+        <Link to="/" role="button" className="back-button" aria-label="Natrag na glavnu stranicu">← Nazad</Link>
         <h1 className="results-title">Rezultati: {competitionName}</h1>
 
-      {results.length === 0 ? (
-        <p>Nema rezultata za ovo natjecanje.</p>
-      ) : (
-        results.map(ageBlock => (
-          <section key={ageBlock.ageCategory} className="age-block">
-            <div className="age-header"><span className="age-icon">🏆</span><h2 className="age-title">{ageBlock.ageCategory}</h2></div>
+        {results.length === 0 ? (
+          <p>Nema rezultata za ovo natjecanje.</p>
+        ) : (
+          results.map(styleBlock => (
+            <section key={styleBlock.danceStyle} className="style-block" style={{ marginBottom: '48px' }}>
+              {/* PLESNI STIL - Najviša razina */}
+              <div className="style-header" style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                padding: '20px',
+                borderRadius: '12px',
+                marginBottom: '24px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}>
+                <span style={{ fontSize: '32px', marginRight: '12px' }}>💃</span>
+                <h2 style={{ 
+                  color: 'white', 
+                  fontSize: '28px', 
+                  fontWeight: 'bold',
+                  margin: 0,
+                  display: 'inline'
+                }}>
+                  {styleBlock.danceStyle}
+                </h2>
+              </div>
 
-            {ageBlock.sizes.map(size => (
-              <div key={size.sizeLabel} className="size-block">
-                <div className="size-header">
-                  <span className="size-badge">Veličina: {size.sizeLabel}</span>
-                </div>
+              {/* DOBNE KATEGORIJE */}
+              {styleBlock.ageCategories.map(ageBlock => (
+                <div key={ageBlock.ageCategory} className="age-block" style={{ marginLeft: '20px', marginBottom: '32px' }}>
+                  <div className="age-header">
+                    <span className="age-icon">🏆</span>
+                    <h2 className="age-title">{ageBlock.ageCategory}</h2>
+                  </div>
 
-                <div className="group-list">
-                  {size.items.map(item => (
-                    <article key={item.performanceId} className="group-item">
-                      <div className="group-left">
-                        <div className="group-top">
-                          <span className={`medal-badge rank-${item.rank}`} aria-hidden={item.rank <= 3}>{item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}</span>
-                          <div className="group-name">{item.choreographyName}{item.clubName ? ` (${item.clubName})` : ''}</div>
-                        </div>
-
-                        <div className="group-meta">
-                          <span className="info-badge">{item.groupSize}</span>
-                          <span className="info-badge">Sudaca: {item.judgesCount}</span>
-                        </div>
+                  {/* VELIČINE GRUPA */}
+                  {ageBlock.sizes.map(size => (
+                    <div key={size.sizeLabel} className="size-block">
+                      <div className="size-header">
+                        <span className="size-badge">Veličina: {size.sizeLabel}</span>
                       </div>
 
-                      <div className="group-right">
-                        <span className="points-badge" aria-label={`Bodovi: ${item.totalScore} points`}>{item.totalScore} pts</span>
+                      <div className="group-list">
+                        {size.items.map(item => (
+                          <article key={item.performanceId} className="group-item">
+                            <div className="group-left">
+                              <div className="group-top">
+                                <span className={`medal-badge rank-${item.rank}`} aria-hidden={item.rank <= 3}>
+                                  {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}
+                                </span>
+                                <div className="group-name">
+                                  {item.choreographyName}
+                                  {item.clubName ? ` (${item.clubName})` : ''}
+                                </div>
+                              </div>
+
+                              <div className="group-meta">
+                                <span className="info-badge">{item.groupSize}</span>
+                                <span className="info-badge">Sudaca: {item.judgesCount}</span>
+                              </div>
+                            </div>
+
+                            <div className="group-right">
+                              <span className="points-badge" aria-label={`Bodovi: ${item.totalScore} points`}>
+                                {item.totalScore} pts
+                              </span>
+                            </div>
+                          </article>
+                        ))}
                       </div>
-                    </article>
+                    </div>
                   ))}
                 </div>
-              </div>
-            ))}
-
-          </section>
-        ))
-      )}
-    </div>
+              ))}
+            </section>
+          ))
+        )}
+      </div> 
     </>
   );
 }
+
 export default CompetitionResults;

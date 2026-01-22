@@ -73,8 +73,14 @@
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
   border: 1px solid #edf2f7;
+
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+
+  position: relative; /* for stat-cta positioning */
 }
 
 .stat-card:hover {
@@ -103,8 +109,52 @@
   letter-spacing: 0.5px;
 }
 
+.stat-card .stat-cta {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: #667eea;
+  opacity: 0.95;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  transform-origin: bottom right;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.stat-card .stat-cta .arrow {
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+
+.stat-card:hover .stat-cta {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+.stat-card:hover .stat-cta .arrow {
+  transform: translateX(2px);
+}
+
+.stat-card.active {
+  border-color: rgba(102, 126, 234, 0.45);
+  box-shadow: 0 18px 26px -12px rgba(102, 126, 234, 0.35);
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.06), rgba(102, 126, 234, 0.35));
+}
+
+.stat-card:focus-visible {
+  outline: 3px solid rgba(102, 126, 234, 0.35);
+  outline-offset: 3px;
+}
+
 /* =========================================
-   4. FILTERI
+   4. FILTERI (možeš kasnije obrisat)
    ========================================= */
 .filters {
   display: flex;
@@ -172,6 +222,19 @@
   gap: 24px;
 }
 
+/* ✅ ENTER ANIMATION */
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateX(18px) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* base card */
 .competition-card {
   background: white;
   border-radius: 20px;
@@ -179,6 +242,16 @@
   overflow: hidden;
   transition: transform 0.25s, box-shadow 0.25s;
   border: 1px solid #edf2f7;
+}
+
+/* ✅ only when animateIn is true */
+.competition-card.enter {
+  animation: cardEnter 420ms ease both;
+}
+
+/* small stagger using CSS variable */
+.competition-card.enter {
+  animation-delay: calc(var(--i, 0) * 55ms);
 }
 
 .competition-card:hover {
@@ -269,35 +342,6 @@
 }
 
 /* =========================================
-   9. KATEGORIJE I TAGOVI
-   ========================================= */
-.categories {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.category-group strong {
-  display: block;
-  margin-bottom: 10px;
-  color: #2d3748;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tag {
-  display: inline-block;
-  padding: 6px 14px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  color: #667eea;
-  border-radius: 50px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* =========================================
    10. AKCIJSKI GUMBI (ORGANIZATOR)
    ========================================= */
 .card-actions-org {
@@ -333,14 +377,6 @@
 
 .btn-view {
   background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-}
-
-.btn-referees {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-}
-
-.btn-edit {
-  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
 }
 
 .btn-delete {
@@ -570,5 +606,12 @@
   .btn-cancel,
   .btn-confirm-delete {
     width: 100%;
+  }
+}
+
+/* ✅ accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .competition-card.enter {
+    animation: none !important;
   }
 }

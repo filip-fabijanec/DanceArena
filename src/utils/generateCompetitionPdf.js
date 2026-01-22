@@ -1,5 +1,7 @@
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = async function generatePdfForCompetition(competition, res) {
   const performances = await Performance.find({
@@ -9,7 +11,11 @@ module.exports = async function generatePdfForCompetition(competition, res) {
     .populate("clubId", "clubName")
     .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
 
-  const doc = new PDFDocument({ margin: 40 });
+  const doc = new PDFDocument({ 
+    margin: 40,
+    bufferPages: true,
+    autoFirstPage: true
+  });
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -19,15 +25,58 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
   doc.pipe(res);
 
+  // Path do fonta (2 foldera gore od utils/)
+  const fontPath = path.join(__dirname, '../../fonts/DejaVuSans.ttf');
+  
+  if (fs.existsSync(fontPath)) {
+    doc.registerFont('DejaVu', fontPath);
+    doc.font('DejaVu');
+  } else {
+    console.error('❌ Font DejaVuSans.ttf nije pronađen na:', fontPath);
+    doc.font('Helvetica'); // fallback
+  }
+
+  // Naslov
   doc.fontSize(18).text("STARTNA LISTA", { align: "center" });
   doc.moveDown();
-  doc.fontSize(12).text(`Natjecanje: ${competition.name}`);
-  doc.text(`Lokacija: ${competition.location}`);
+  
+  // Info o natjecanju
+  doc.fontSize(12)
+     .text(`Natjecanje: ${competition.name}`)
+     .text(`Datum: ${new Date(competition.date).toLocaleDateString('hr-HR')}`)
+     .text(`Lokacija: ${competition.location}`);
   doc.moveDown();
 
-  performances.forEach((p, i) => {
-    doc.text(`${i + 1}. ${p.choreographyName} – ${p.clubId?.clubName || "N/A"}`);
+  // Grupiraj po kategorijama
+  let currentCategory = null;
+  let counter = 1;
+
+  performances.forEach((p) => {
+    const category = `${p.ageCategory} | ${p.groupSize}`;
+    
+    if (category !== currentCategory) {
+      doc.moveDown();
+      doc.fontSize(14).fillColor('#333').text(category, { underline: true });
+      doc.moveDown(0.5);
+      currentCategory = category;
+      counter = 1;
+    }
+
+    doc.fontSize(11)
+       .fillColor('#000')
+       .text(
+         `${counter}. ${p.danceStyle} – ${p.choreographyName} – ${p.clubId?.clubName || "N/A"} (${formatDuration(p.duration)})`,
+         { indent: 10 }
+       );
+    
+    counter++;
   });
 
   doc.end();
 };
+
+function formatDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}

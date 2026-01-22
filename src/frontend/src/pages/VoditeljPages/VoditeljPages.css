@@ -104,34 +104,7 @@
   font-weight: 650;
 }
 
-/* edit button */
-.btn-edit-club {
-  margin-top: 16px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 14px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  box-shadow: 0 10px 18px rgba(102, 126, 234, 0.22);
-}
-
-.btn-edit-club:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(1.02);
-  box-shadow: 0 14px 24px rgba(102, 126, 234, 0.3);
-}
-
-.btn-edit-club:disabled {
-  background: #d1d5db;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-/* ========== NATJECANJA ========== */
+/* ========== NATJECANJA (cards) ========== */
 .competitions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
@@ -332,15 +305,14 @@ a.btn-primary.full-width {
 /* ===== Fix: CTA buttons too wide inside competition cards ===== */
 .competition-card .card-body .full-width.btn-primary,
 .competition-card .card-body .full-width.btn-disabled {
-  width: auto;            /* override full-width */
-  display: inline-flex;   /* keep button layout */
+  width: auto;
+  display: inline-flex;
   margin-left: auto;
-  margin-right: auto;     /* center */
-  min-width: 220px;       /* nice CTA size */
-  max-width: 260px;       /* prevent too wide */
+  margin-right: auto;
+  min-width: 220px;
+  max-width: 260px;
 }
 
-/* optional: on very small screens keep it full width */
 @media (max-width: 420px) {
   .competition-card .card-body .full-width.btn-primary,
   .competition-card .card-body .full-width.btn-disabled {
@@ -349,13 +321,82 @@ a.btn-primary.full-width {
   }
 }
 
-/* ========== MOJE PRIJAVE ========== */
+/* ========== MOJE PRIJAVE (new clean cards + toolbar) ========== */
+
+/* Toolbar: filters + sort */
+.performance-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px 0;
+  flex-wrap: wrap;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: #374151;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(102, 126, 234, 0.35);
+  box-shadow: 0 10px 18px rgba(16, 24, 40, 0.06);
+}
+
+.chip.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 12px 22px rgba(102, 126, 234, 0.25);
+}
+
+.sort-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  color: #374151;
+  font-size: 13px;
+}
+
+.sort-select select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+  font-weight: 800;
+  color: #111827;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.sort-select select:focus {
+  border-color: rgba(102, 126, 234, 0.55);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.16);
+}
+
+/* List layout */
 .performances-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+/* Cleaner performance card */
 .performance-card {
   background: var(--card);
   border-radius: var(--radius);
@@ -363,6 +404,22 @@ a.btn-primary.full-width {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.performance-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: rgba(245, 158, 11, 0.55); /* default: pending */
+}
+
+.performance-card.approved::before {
+  background: rgba(22, 163, 74, 0.6);
 }
 
 .performance-card:hover {
@@ -390,9 +447,10 @@ a.btn-primary.full-width {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 750;
 }
 
+/* Status badge */
 .status-badge {
   padding: 8px 12px;
   border-radius: 999px;
@@ -414,18 +472,19 @@ a.btn-primary.full-width {
   border-color: rgba(22, 101, 52, 0.18);
 }
 
+/* Details: cleaner 2-column grid */
 .performance-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
 }
 
 .detail-row {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 12px;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
   align-items: baseline;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #f3f4f6;
 }
 
@@ -434,31 +493,32 @@ a.btn-primary.full-width {
 }
 
 .detail-label {
-  font-weight: 800;
+  font-weight: 900;
   color: #374151;
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
 
 .detail-value {
   color: var(--text);
-  font-weight: 650;
+  font-weight: 750;
   text-align: right;
 }
 
+/* Music link: nicer */
 .detail-value a {
   color: #3b5bdb;
   text-decoration: none;
   word-break: break-all;
-  font-weight: 750;
+  font-weight: 800;
 }
 
 .detail-value a:hover {
   text-decoration: underline;
 }
 
-/* ========== DOWNLOAD PDF BUTTON ========== */
+/* PDF button stays full width */
 .btn-download-pdf {
   margin-top: 14px;
   width: 100%;
@@ -492,6 +552,29 @@ a.btn-primary.full-width {
   opacity: 0.75;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* Enter animation for performance cards */
+@keyframes perfEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.performance-card.enter {
+  animation: perfEnter 420ms ease both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-card.enter {
+    animation: none !important;
+  }
 }
 
 /* Spinner animation */
@@ -572,6 +655,10 @@ a.btn-primary.full-width {
   .performance-header {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .performance-details {
+    grid-template-columns: 1fr;
   }
 
   .detail-row {

@@ -187,9 +187,26 @@ function KreirajNatjecanje() {
                     <label>Stilovi (odvojeni zarezom)</label>
                     <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} placeholder="Jazz, Hip Hop, Show..." rows="2" />
                 </div>
-                <div className="form-group">
-                    <label>Kotizacija (€)</label>
-                    <input type="number" name="registrationFee" value={formData.registrationFee} onChange={handleChange} placeholder="0.00" step="0.01" />
+              <div className="form-group">
+                <label>Kotizacija (€)</label>
+                  <input
+                    type="number"
+                    name="registrationFee"
+                    value={formData.registrationFee}
+                    onChange={(e) => {
+                      // Dopusti da tipka kako želi (npr. 0.5 ili prazno)
+                      setFormData({ ...formData, registrationFee: e.target.value });
+                    }}
+                    onBlur={() => {
+                      // Kad korisnik napusti polje, osiguraj minimum 1
+                      let val = parseFloat(formData.registrationFee);
+                      if (isNaN(val) || val < 1) val = 1;
+                      setFormData({ ...formData, registrationFee: val });
+                    }}
+                    placeholder="0.00"
+                    step="1"
+                    min="1"
+                  />
                 </div>
              </div>
         </div>

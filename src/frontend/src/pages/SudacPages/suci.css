@@ -1,8 +1,8 @@
-.radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  align-items: center;
+/* Global dashboard styling */
+.dashboard-container {
+  background: #F8FAFC;
+  min-height: 100vh;
+  padding: 24px;
 }
 
 .radio-label {
@@ -72,121 +72,8 @@
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px; /* reduced gap to tighten vertical spacing */
+  gap: 12px;
 }
-
-/* separation for size groups */
-.size-block {
-  margin-top: 16px;
-  padding: 14px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #ffffff, #fbfdff);
-  border: 1px solid rgba(15,15,20,0.03);
-}
-
-.size-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.size-badge {
-  font-weight: 700;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: rgba(99,102,241,0.08);
-  color: #1f2937;
-  display: inline-block;
-}
-
-.age-block {
-  margin-bottom: 28px;
-  padding: 14px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #fff, #fbfdff);
-  border: 1px solid rgba(15,15,20,0.04);
-}
-
-.age-header { display:flex; align-items:center; gap:12px; }
-.age-title { margin: 0; font-size: 1.05rem; font-weight: 800; }
-
-/* medal badge */
-.medal-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px; /* slightly smaller */
-  height: 36px;
-  border-radius: 10px;
-  font-weight: 800;
-  margin-right: 8px; /* reduced spacing */
-  background: #fff;
-  border: 1px solid rgba(15,15,20,0.03);
-}
-.medal-badge.rank-1 { color: #b7791f; background: linear-gradient(180deg,#fff7ed,#fffaf0); }
-.medal-badge.rank-2 { color: #475569; background: linear-gradient(180deg,#f8fafc,#f1f5f9); }
-.medal-badge.rank-3 { color: #6b7280; background: linear-gradient(180deg,#fafafa,#f8fafc); }
-
-.info-badge {
-  display: inline-block;
-  margin-right: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(15,23,42,0.04);
-  color: #1f2937;
-  font-size: 0.9rem;
-}
-
-.points-badge {
-  background: #eef2ff;
-  color: #2d6cdf;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight: 800;
-  min-width: 72px;
-  text-align: center;
-}
-
-.group-item {
-  background: white;
-  padding: 10px 12px; /* tighter padding */
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px; /* reduced gap */
-  transition: transform .12s ease, box-shadow .12s ease;
-  border: 1px solid rgba(15,15,20,0.04);
-}
-
-.group-top { display:flex; align-items:center; gap:8px; }
-.group-left { flex: 1; min-width: 0; }
-.group-right { display:flex; align-items:center; justify-content:flex-end; min-width: 90px; }
-
-/* stronger back button */
-.back-button {
-  display:inline-block;
-  background:#fff;
-  color:#2d6cdf;
-  padding:8px 12px;
-  border-radius:6px;
-  border:1px solid rgba(45,108,223,0.12);
-  box-shadow: 0 2px 8px rgba(45,108,223,0.03);
-  text-decoration:none;
-  font-weight:700;
-}
-
-/* responsive */
-@media (max-width: 640px) {
-  .group-item { flex-direction: column; align-items: flex-start; }
-  .group-right { width:100%; display:flex; justify-content: flex-end; margin-top:8px; }
-  .medal-badge { min-width: 36px; height: 36px; }
-  .points-badge { min-width: 60px; }
-}
-
-/* results title */
-.results-title { margin-top: 6px; margin-bottom: 18px; font-size: 1.4rem; }
 
 /* group item card look */
 .group-item {
@@ -251,4 +138,221 @@
   .age-header { font-size: 1rem; }
   .group-item { flex-direction: column; align-items: flex-start; }
   .group-size-badge { margin-top: 8px; }
+
+  /* Responsive za kartice */
+  .choreography-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .dance-style-header {
+    font-size: 24px !important;
+    padding: 16px !important;
+  }
+
+  .age-category-header {
+    font-size: 18px !important;
+    padding: 12px 16px !important;
+  }
+
+  .choreography-card {
+    padding: 16px !important;
+  }
+
+  .card-meta {
+    justify-content: center !important;
+    padding: 12px !important;
+    font-size: 12px !important;
+  }
+
+  .radio-group.compact-radio {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .choreography-card .radio-label {
+    padding: 8px !important;
+    min-height: 36px !important;
+  }
+}
+
+/* Hover efekti za radio gumbe u karticama */
+.choreography-card .radio-label:hover {
+  background: #F9FAFB !important;
+  border-color: #4F46E5 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.choreography-card .radio-label input[type="radio"]:checked + .radio-num {
+  color: #4F46E5;
+  font-weight: 600;
+}
+
+.choreography-card .radio-label:has(input[type="radio"]:checked) {
+  background: #EEF2FF;
+  border-color: #4F46E5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+}
+
+/* Disabled stanje za gumb */
+.choreography-card button:disabled {
+  background: #E5E7EB !important;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+}
+
+/* Hover za gumb */
+.choreography-card button:not(:disabled):hover {
+  background: #4338CA !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+/* --- Stilovi za OcjenjivanjePage --- */
+
+.back-link {
+  text-decoration: none;
+  margin-bottom: 20px;
+  display: inline-block;
+  color: #555;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #000;
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Kartica samog natjecanja */
+.competition-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.comp-header {
+  background: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.comp-header h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.comp-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.comp-body {
+  padding: 20px;
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+}
+
+/* Grid sustav za ocjene unutar natjecanja */
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+/* Kartica pojedinačne ocjene */
+.score-item-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.score-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  border-color: #ccc;
+}
+
+.score-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.performance-name {
+  font-weight: 600;
+  color: #333;
+  padding-right: 10px;
+  line-height: 1.3;
+}
+
+/* Dizajn same brojke ocjene */
+.score-badge {
+  background-color: #4F46E5; /* Promijeni boju po želji */
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.score-bottom {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 8px;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.empty-state {
+  color: #777;
+  font-style: italic;
+}
+
+.error-message {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.comp-header.clickable:hover {
+  background: #eef2ff;
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+  color: #4F46E5;
+  font-weight: bold;
 }

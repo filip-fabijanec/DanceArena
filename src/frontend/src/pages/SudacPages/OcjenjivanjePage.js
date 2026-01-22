@@ -12,90 +12,185 @@ function OcjenjivanjePage() {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openCompetitionId, setOpenCompetitionId] = useState(null);
+
+  const toggleCompetition = (id) => {
+    setOpenCompetitionId(prev => (prev === id ? null : id));
+  };
 
   useEffect(() => {
     if (!judgeId) {
+      setError('Niste prijavljeni.');
       setLoading(false);
-      setError("Niste prijavljeni ili vaš korisnički profil nije potpun.");
       return;
     }
 
-    const fetchData = async () => {
+    const fetchCompetitions = async () => {
       try {
-        setLoading(true);
-        // Dohvati sva natjecanja na kojima je sudac ocjenjivao
-        const compsRes = await axios.get(`${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`);
-        setCompetitions(compsRes.data || []);
-      } catch (err) {
-        setError("Nije moguće dohvatiti podatke. Provjerite konzolu za detalje.");
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/competitions/judge/${judgeId}`
+        );
+        setCompetitions(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setError('Greška pri dohvaćanju natjecanja.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchCompetitions();
   }, [judgeId]);
 
   useEffect(() => {
     if (!judgeId) return;
+
     const fetchScores = async () => {
       try {
-        const scoresRes = await axios.get(`${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`);
-        setScores(scoresRes.data || []);
-      } catch (err) {
-        setError("Nije moguće dohvatiti ocjene.");
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/scores/judge/${judgeId}`
+        );
+        setScores(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setError('Greška pri dohvaćanju ocjena.');
       }
     };
+
     fetchScores();
   }, [judgeId]);
 
+  const calculateTotalScore = (score) => {
+    if (typeof score.score === 'number') return score.score;
+    return (
+      (Number(score.choreography) || 0) +
+      (Number(score.performance) || 0) +
+      (Number(score.rhythm) || 0)
+    );
+  };
+
+  if (loading) return <p>Učitavanje...</p>;
+  if (error) return <p className="error-message">{error}</p>;
+
   return (
     <div className="dashboard-container">
-      <Link to="/sudac" className="back-link" style={{ textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
-        ← Nazad na Dashboard
-      </Link>
-      <h1>Moje Ocjene</h1>
-      <p>Popis svih natjecanja i ocjena koje ste dali.</p>
+      <Link to="/sudac" className="back-link">← Nazad na Dashboard</Link>
 
-      {loading && <p>Učitavanje...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div className="page-header">
+        <h1>Moje Ocjene</h1>
+        <p className="subtitle">
+          Popis svih natjecanja i ocjena koje ste dodijelili
+        </p>
+      </div>
 
-      {!loading && !error && (
-        competitions.length > 0 ? (
-          <div className="competition-list">
-            {competitions.map(comp => (
-              <div key={comp._id} className="dashboard-card" style={{ marginBottom: 16 }}>
-                <h3>{comp.name}</h3>
-                <p>📅 Datum: {new Date(comp.date).toLocaleDateString('hr-HR')}</p>
-                <p>📍 Lokacija: {comp.location}</p>
-                <h4>Ocjene:</h4>
-                {Array.isArray(scores) && scores.length > 0 ? (
-                  (() => {
-                    const scoresForComp = scores.filter(s => s.performanceId && s.performanceId.competitionId && String(s.performanceId.competitionId._id) === String(comp._id));
-                    return scoresForComp.length > 0 ? (
-                      <ul>
-                        {scoresForComp.map(score => (
-                          <li key={score._id}>
-                            Nastup: {score.performanceId?.choreographyName || 'N/A'} <br />
-                            Ocjena: {typeof score.score === 'number' ? score.score : ((Number(score.choreography)||0) + (Number(score.performance)||0) + (Number(score.rhythm)||0))} <br />
-                            Datum: {score.performanceId?.competitionId?.date ? new Date(score.performanceId.competitionId.date).toLocaleDateString('hr-HR') : 'N/A'}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>Još niste ocijenili nastupe za ovo natjecanje.</p>
-                    );
-                  })()
-                ) : (
-                  <p>Još niste ocijenili nastupe za ovo natjecanje.</p>
-                )}
+      <div className="competition-list">
+        {competitions.map(comp => {
+          const scoresForComp = scores.filter(
+            s =>
+              s.performanceId &&
+              s.performanceId.competitionId &&
+              String(
+                s.performanceId.competitionId._id ||
+                s.performanceId.competitionId
+              ) === String(comp._id)
+          );
+
+          const groupedScores = scoresForComp.reduce((acc, score) => {
+            const p = score.performanceId || {};
+            const style = p.danceStyle || 'Ostali stilovi';
+            const age = p.ageCategory || 'Ostale dobi';
+            const size = p.groupCategory || 'Ostale grupe';
+
+            if (!acc[style]) acc[style] = {};
+            if (!acc[style][age]) acc[style][age] = {};
+            if (!acc[style][age][size]) acc[style][age][size] = [];
+
+            acc[style][age][size].push(score);
+            return acc;
+          }, {});
+
+          return (
+            <div key={comp._id} className="competition-card">
+              <div
+                className="comp-header clickable"
+                onClick={() => toggleCompetition(comp._id)}
+              >
+                <div>
+                  <h3>{comp.name}</h3>
+                  <div className="comp-meta">
+                    <span>📅 {new Date(comp.date).toLocaleDateString('hr-HR')}</span>
+                    <span>📍 {comp.location}</span>
+                  </div>
+                </div>
+
+                <div className="dropdown-icon">
+                  {openCompetitionId === comp._id ? '▲' : '▼'}
+                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p>Nema natjecanja na kojima ste ocjenjivali.</p>
-        )
-      )}
+
+              {openCompetitionId === comp._id && (
+                <div className="comp-body">
+                  {scoresForComp.length === 0 ? (
+                    <p className="empty-state">
+                      Još niste ocijenili nastupe za ovo natjecanje.
+                    </p>
+                  ) : (
+                    Object.entries(groupedScores).map(([style, ages]) => (
+                      <div key={style} style={{ marginBottom: '30px' }}>
+                        <h4 style={{ 
+                          borderBottom: '2px solid #4F46E5', 
+                          paddingBottom: '5px', 
+                          marginBottom: '15px', 
+                          color: '#2c3e50' 
+                        }}>
+                          {style}
+                        </h4>
+
+                        {Object.entries(ages).map(([age, sizes]) => (
+                          <div key={age} style={{ marginLeft: '10px', marginBottom: '20px' }}>
+                            <h5 style={{ color: '#555', marginBottom: '10px', fontSize: '1.05rem' }}>
+                              • {age}
+                            </h5>
+
+                            {Object.entries(sizes).map(([size, list]) => (
+                              <div key={size} style={{ marginLeft: '15px', marginBottom: '15px' }}>
+                                <div style={{ 
+                                  fontSize: '0.9rem', 
+                                  color: '#888', 
+                                  marginBottom: '8px', 
+                                  fontStyle: 'italic' 
+                                }}>
+                                  Kategorija: {size}
+                                </div>
+
+                                <div className="scores-grid">
+                                  {list.map(score => (
+                                    <div key={score._id} className="score-item-card">
+                                      <div className="score-top">
+                                        <div className="performance-name">
+                                          {score.performanceId?.choreographyName || 'Nepoznat nastup'}
+                                        </div>
+                                        <div className="score-badge">
+                                          {calculateTotalScore(score)}
+                                        </div>
+                                      </div>
+                                      <div className="score-bottom">
+                                        Datum ocjene: {new Date(score.performanceId?.competitionId?.date || Date.now()).toLocaleDateString('hr-HR')}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

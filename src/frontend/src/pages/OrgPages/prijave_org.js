@@ -188,7 +188,7 @@ function UpravljanjePrijavama() {
       {/* 🔒 LOCK / PDF AKCIJE – TOČNO OVDJE */}
       {competition && !competition.isLocked && (
         <button className="btn-lock" onClick={handleLock}>
-          Zaključi prijave
+          Zaključaj prijave
         </button>
       )}
 
