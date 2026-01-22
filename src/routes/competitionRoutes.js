@@ -59,6 +59,48 @@ router.get("/upcoming", async (req, res) => {
   }
 });
 
+router.get("/upcominglp", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const competitions = await Competition.find({
+      date: { $gte: today }
+    })
+      .populate("organizer", "name surname")
+      .sort({ date: 1 });
+
+    const upcomingCompetitions = competitions.filter(comp => {
+      return comp.autoStatus === "upcoming";
+    });
+
+    res.status(200).json(upcomingCompetitions);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.get("/ongoinglp", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const competitions = await Competition.find({
+      date: { $gte: today }
+    })
+      .populate("organizer", "name surname")
+      .sort({ date: 1 });
+
+    const upcomingCompetitions = competitions.filter(comp => {
+      return comp.autoStatus === "ongoing";
+    });
+
+    res.status(200).json(upcomingCompetitions);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // =======================
 // GET /competitions/upcoming/after-2-days
 // =======================
@@ -255,6 +297,7 @@ router.get("/:id/results", async (req, res) => {
         $project: {
           choreographyName: 1,
           ageCategory: 1,
+          danceStyle: 1,
           groupSize: 1,
           totalScore: 1,
           judgesCount: 1,
@@ -264,45 +307,60 @@ router.get("/:id/results", async (req, res) => {
       }
     ]);
 
+    // Grupiranje po PLESNI STIL -> DOB -> VELIČINA
     const grouped = {};
     performances.forEach(p => {
+      const style = p.danceStyle || "Nepoznat stil";
       const age = p.ageCategory || "Nepoznata kategorija";
-      if (!grouped[age]) grouped[age] = {};
       const sizeLabel = p.groupSize || "Nepoznata veličina";
+      
+      if (!grouped[style]) grouped[style] = {};
+      if (!grouped[style][age]) grouped[style][age] = {};
+      
       const num = (() => {
         const m = (sizeLabel || "").match(/\d+/);
         return m ? parseInt(m[0], 10) : 999;
       })();
-      if (!grouped[age][sizeLabel]) grouped[age][sizeLabel] = { sizeOrder: num, items: [] };
-      grouped[age][sizeLabel].items.push(p);
+      
+      if (!grouped[style][age][sizeLabel]) {
+        grouped[style][age][sizeLabel] = { sizeOrder: num, items: [] };
+      }
+      grouped[style][age][sizeLabel].items.push(p);
     });
 
-    const ageKeys = Object.keys(grouped).sort((a, b) => {
-      const na = Number(a),
-        nb = Number(b);
-      if (!isNaN(na) && !isNaN(nb)) return na - nb;
-      return a.localeCompare(b);
-    });
+    // Sortiranje stilova
+    const styleKeys = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
 
-    const result = ageKeys.map(age => {
-      const sizes = Object.keys(grouped[age])
-        .map(sizeLabel => {
-          const bucket = grouped[age][sizeLabel];
-          bucket.items.sort((a, b) => b.totalScore - a.totalScore);
-          const items = bucket.items.map((it, idx) => ({
-            rank: idx + 1,
-            performanceId: it._id,
-            choreographyName: it.choreographyName,
-            clubName: it.clubName,
-            groupSize: it.groupSize,
-            totalScore: it.totalScore,
-            judgesCount: it.judgesCount
-          }));
-          return { sizeLabel, sizeOrder: bucket.sizeOrder, items };
-        })
-        .sort((a, b) => a.sizeOrder - b.sizeOrder);
+    const result = styleKeys.map(style => {
+      // Sortiranje dobnih kategorija
+      const ageKeys = Object.keys(grouped[style]).sort((a, b) => {
+        const na = Number(a), nb = Number(b);
+        if (!isNaN(na) && !isNaN(nb)) return na - nb;
+        return a.localeCompare(b);
+      });
 
-      return { ageCategory: age, sizes };
+      const ageCategories = ageKeys.map(age => {
+        const sizes = Object.keys(grouped[style][age])
+          .map(sizeLabel => {
+            const bucket = grouped[style][age][sizeLabel];
+            bucket.items.sort((a, b) => b.totalScore - a.totalScore);
+            const items = bucket.items.map((it, idx) => ({
+              rank: idx + 1,
+              performanceId: it._id,
+              choreographyName: it.choreographyName,
+              clubName: it.clubName,
+              groupSize: it.groupSize,
+              totalScore: it.totalScore,
+              judgesCount: it.judgesCount
+            }));
+            return { sizeLabel, sizeOrder: bucket.sizeOrder, items };
+          })
+          .sort((a, b) => a.sizeOrder - b.sizeOrder);
+
+        return { ageCategory: age, sizes };
+      });
+
+      return { danceStyle: style, ageCategories };
     });
 
     res.status(200).json(result);
