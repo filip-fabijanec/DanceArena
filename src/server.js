@@ -38,9 +38,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
-doc.registerFont('DejaVu', path.join(__dirname, '../fonts/DejaVuSans.ttf'));
-doc.font('DejaVu');
-
 // Connect DB
 connectDB();
 
