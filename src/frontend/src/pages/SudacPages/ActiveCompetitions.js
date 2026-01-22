@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { downloadCompetitionPdf } from "../../utils/downloadPdf";
+
 
 function ActiveCompetitions() {
   const auth = useAuth();
   const judgeId = auth?.currentUser?._id;
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +75,18 @@ function ActiveCompetitions() {
               Nadolazeće
             </button>
           )}
+
+          {(
+                  <button
+                    className="btn-export"
+                    onClick={() =>
+                      downloadCompetitionPdf(comp._id, token)
+                        .catch(err => alert(err.message))
+                    }
+                  >
+                    Preuzmi startnu listu (PDF)
+                  </button>
+                )}
         </div>
       ))}
     </div>
