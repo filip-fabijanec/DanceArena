@@ -474,54 +474,76 @@ router.post("/", async (req, res) => {
 
     await competition.save();
 
-    if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
-      for (const rawEmail of invitedRefereeEmails) {
-        const email = rawEmail.toLowerCase().trim();
-        if (!email) continue;
+    // U competitionRoutes.js, u POST "/" route, zamijenite dio sa invitedRefereeEmails:
 
-        const existingUser = await User.findOne({ email });
+if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
+  // NOVA VALIDACIJA - Provjeri duplikate
+  const allRefereesEmails = new Set();
+  
+  // 1. Dodaj emailove već odabranih sudaca iz baze
+  if (referees && referees.length > 0) {
+    const selectedReferees = await User.find({ _id: { $in: referees } });
+    selectedReferees.forEach(ref => {
+      allRefereesEmails.add(ref.email.toLowerCase());
+    });
+  }
 
-        if (existingUser && existingUser.role === "sudac") {
-          if (!competition.referees.includes(existingUser._id)) {
-            competition.referees.push(existingUser._id);
-          }
-          continue;
-        }
+  // 2. Provjeri pozivnice - je li email duplikat?
+  for (const rawEmail of invitedRefereeEmails) {
+    const email = rawEmail.toLowerCase().trim();
+    if (!email) continue;
 
-        const existingInvite = await Invite.findOne({
-          email,
-          competition: competition._id,
-          status: "pending"
-        });
-
-        if (existingInvite) continue;
-
-        const token = crypto.randomBytes(32).toString("hex");
-
-        const invite = new Invite({
-          email,
-          role: "sudac",
-          competition: competition._id,
-          invitedBy: organizer,
-          token,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        });
-
-        await invite.save();
-
-        try {
-          await sendInviteEmail({
-            to: email,
-            token,
-            competitionName: name
-          });
-        } catch (emailError) {
-          console.error(`Greška pri slanju emaila za ${email}:`, emailError);
-        }
-      }
-
-      await competition.save();
+    // Provjera duplikata
+    if (allRefereesEmails.has(email)) {
+      return res.status(400).json({ 
+        error: `Email ${email} je već dodan kao sudac!` 
+      });
     }
+    allRefereesEmails.add(email);
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser && existingUser.role === "sudac") {
+      if (!competition.referees.includes(existingUser._id)) {
+        competition.referees.push(existingUser._id);
+      }
+      continue;
+    }
+
+    const existingInvite = await Invite.findOne({
+      email,
+      competition: competition._id,
+      status: "pending"
+    });
+
+    if (existingInvite) continue;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const invite = new Invite({
+      email,
+      role: "sudac",
+      competition: competition._id,
+      invitedBy: organizer,
+      token,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+
+    await invite.save();
+
+    try {
+      await sendInviteEmail({
+        to: email,
+        token,
+        competitionName: name
+      });
+    } catch (emailError) {
+      console.error(`Greška pri slanju emaila za ${email}:`, emailError);
+    }
+  }
+
+  await competition.save();
+}
 
     res.status(201).json(competition);
   } catch (error) {
