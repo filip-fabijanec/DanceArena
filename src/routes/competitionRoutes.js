@@ -38,20 +38,36 @@ router.get("/finished", async (req, res) => {
 // =======================
 // GET /competitions/upcoming
 // =======================
+router.get("/ongoing", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const ongoingCompetitions = await Competition.find({
+      date: { $lte: today },
+      autoStatus: "ongoing"
+    })
+      .populate("organizer", "name surname")
+      .sort({ date: 1 });
+
+    res.status(200).json(ongoingCompetitions);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+  
+
 router.get("/upcoming", async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const competitions = await Competition.find({
-      date: { $gte: today }
+    const upcomingCompetitions = await Competition.find({
+      date: { $gte: today },
+      autoStatus: "upcoming"
     })
       .populate("organizer", "name surname")
       .sort({ date: 1 });
-
-    const upcomingCompetitions = competitions.filter(comp => {
-      return comp.autoStatus === "upcoming" || comp.autoStatus === "ongoing";
-    });
 
     res.status(200).json(upcomingCompetitions);
   } catch (error) {
