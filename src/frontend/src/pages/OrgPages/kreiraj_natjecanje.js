@@ -79,6 +79,8 @@ function KreirajNatjecanje() {
   };
 
   // ✅ POBOLJŠANA FUNKCIJA - Provjera prije dodavanja emaila (s pozivom serveru)
+  // Promjena: ako korisnik postoji u bazi (check.exists === true) NE DOZVOLJAVAMO dodavanje putem pozivnice.
+  // Umjesto toga korisnika treba odabrati iz baze (ako je sudac) ili eventualno promijeniti njegovu ulogu na serveru.
   const handleAddEmail = async () => {
     const email = emailInput.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -107,24 +109,17 @@ function KreirajNatjecanje() {
     try {
       const check = await checkEmailExistsOnServer(email);
 
-      // Ako server kaže da postoji i da je već sudac -> spriječi dupliciranje
-      if (check && check.exists && check.isReferee) {
-        alert(`❌ Korisnik ${check.name || ""} ${check.surname || ""} (${email}) već postoji u bazi kao sudac.`);
+      // Ako server kaže da postoji u bazi -> NE DOPUŠTAMO dodavanje putem pozivnice
+      if (check && check.exists) {
+        // Obavijesti organizatora da korisnik već postoji i da ga treba odabrati iz baze
+        const displayName = `${check.name || ""} ${check.surname || ""}`.trim();
+        if (displayName) {
+          alert(`Korisnik ${displayName} (${email}) već postoji u bazi. Nemoguće je poslati pozivnicu ovom putem - ukoliko vjerujete da je ovo greška kontaktirajte korisnika ili admine`);
+        }
         return;
       }
 
-      // Ako postoji user ali nije sudac -> obavijesti i dopusti dodavanje pozivnice (ili promijeni po potrebi)
-      if (check && check.exists && !check.isReferee) {
-        // Obavijest, ali dozvoli dodavanje pozivnice (ako želiš drugačije ponašanje, promijeni ovdje)
-        const displayName = `${check.name || ""} ${check.surname || ""}`.trim();
-        if (displayName) {
-          alert(`ℹ️ Korisnik ${displayName} (${email}) postoji u bazi, ali nije označen kao sudac. Pozivnica će mu biti poslana.`);
-        } else {
-          alert(`ℹ️ Korisnik s emailom ${email} postoji u bazi, ali nije označen kao sudac. Pozivnica će mu biti poslana.`);
-        }
-      }
-
-      // Ako ne postoji u bazi ili je postojanje prihvatljivo, dodaj pozivnicu
+      // Ako NE postoji u bazi -> dodaj pozivnicu
       setInvitedRefereeEmails([...invitedRefereeEmails, emailInput.trim()]);
       setEmailInput("");
     } catch (err) {
