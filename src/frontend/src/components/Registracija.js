@@ -190,7 +190,7 @@ function Registracija() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="name">Ime *</label>
+              <label htmlFor="name">Ime</label>
               <input
                 type="text"
                 id="name"
@@ -204,7 +204,7 @@ function Registracija() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="surname">Prezime *</label>
+              <label htmlFor="surname">Prezime</label>
               <input
                 type="text"
                 id="surname"
@@ -219,7 +219,7 @@ function Registracija() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email *</label>
+            <label htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
@@ -245,6 +245,7 @@ function Registracija() {
                   name="clubName"
                   value={formData.clubName}
                   onChange={handleChange}
+                  required
                   placeholder="Naziv plesnog kluba (neobavezno)"
                   disabled={loading}
                 />
@@ -258,6 +259,7 @@ function Registracija() {
                   name="clubLocation"
                   value={formData.clubLocation}
                   onChange={handleChange}
+                  required
                   placeholder="Grad, Država (neobavezno)"
                   disabled={loading}
                 />

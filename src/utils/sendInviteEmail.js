@@ -17,6 +17,7 @@ const sendInviteEmail = async ({ to, token, competitionName }) => {
         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee;">
           <h2 style="color: #333;">Pozvani ste kao sudac!</h2>
           <p>Organizator vas je pozvao da sudite na natjecanju:  <strong>${competitionName}</strong></p>
+          <p>NAPOMENA! Morate se prijaviti sa google računom, registrirati se, te se opet prijaviti da bi pristupili stranici"
           <br/>
           <a href="${inviteLink}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             Prihvati poziv i registriraj se

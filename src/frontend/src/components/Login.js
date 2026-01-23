@@ -10,6 +10,10 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [secret, setSecret] = useState('');
+  
+  // ✅ NOVO STANJE: Prati čeka li korisnik odobrenje admina
+  const [isPending, setIsPending] = useState(false);
+
   const { loginWithGoogle, loginWithSecret } = useAuth();
   const navigate = useNavigate();
 
@@ -53,30 +57,43 @@ function Login() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
+    setIsPending(false); // Resetiramo status čekanja
     setLoading(true);
 
     try {
       const user = await loginWithGoogle(credentialResponse.credential);
       redirectByRole(user.role);
     } catch (err) {
-      try {
-        const base64Url = credentialResponse.credential.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-          atob(base64)
-            .split('')
-            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-            .join('')
-        );
-        const payload = JSON.parse(jsonPayload);
-        const email = payload.email;
-        const providerId = payload.sub;
+      const errorMessage = err.message || "Greška pri prijavi";
 
-        navigate(`/registracija${inviteToken ? `?invite=${inviteToken}` : ''}`, {
-          state: { email, providerId, provider: 'google' }
-        });
-      } catch (decodeError) {
-        setError('Greška pri obradi Google prijave');
+      // ✅ PROVJERA: Je li greška zbog neodobrenog računa?
+      if (errorMessage.includes("čeka odobrenje") || errorMessage.includes("approved")) {
+        setIsPending(true);
+      } 
+      // ✅ PROVJERA: Ako korisnik ne postoji, šalji na registraciju
+      else if (errorMessage === "USER_NOT_FOUND") {
+        try {
+          const base64Url = credentialResponse.credential.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const payload = JSON.parse(jsonPayload);
+          const email = payload.email;
+          const providerId = payload.sub;
+
+          navigate(`/registracija${inviteToken ? `?invite=${inviteToken}` : ''}`, {
+            state: { email, providerId, provider: 'google' }
+          });
+        } catch (decodeError) {
+          setError('Greška pri obradi Google prijave');
+        }
+      } else {
+        // Ostale greške
+        setError(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -84,20 +101,28 @@ function Login() {
   };
 
   const handleGoogleError = () => {
-    setError('Google prijava nije uspjela.  Molimo pokušajte ponovo.');
+    setError('Google prijava nije uspjela. Molimo pokušajte ponovo.');
   };
 
   const handleSecretSubmit = async (e) => {
     e.preventDefault();
     if (!secret) return;
     setError('');
+    setIsPending(false); // Resetiramo status
     setLoading(true);
 
     try {
       const user = await loginWithSecret(secret);
       redirectByRole(user.role);
     } catch (err) {
-      setError(err.message || 'Neispravna tajna riječ');
+      const errorMessage = err.message || 'Neispravna tajna riječ';
+      
+      // ✅ PROVJERA ZA TAJNU RIJEČ TAKOĐER
+      if (errorMessage.includes("čeka odobrenje") || errorMessage.includes("approved")) {
+        setIsPending(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -174,6 +199,20 @@ function Login() {
             </div>
           )}
 
+          {/* ✅ NOVI UI ELEMENT: Prikazuje se samo ako korisnik čeka odobrenje */}
+          {isPending && (
+            <div className="pending-approval-box fade-in">
+              <div className="pending-icon">⏳</div>
+              <h3>Račun čeka odobrenje</h3>
+              <p>
+                Vaša registracija je uspješna, ali administrator još mora odobriti vaš pristup.
+              </p>
+              <p className="pending-note">
+                Molimo pokušajte ponovo kasnije ili kontaktirajte podršku.
+              </p>
+            </div>
+          )}
+
           <div className="secret-section">
             <h3 className="secret-title">Prijava preko šifre</h3>
 
@@ -209,7 +248,9 @@ function Login() {
             />
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {/* Prikazujemo error samo ako NIJE pending (da ne bude duplih poruka) */}
+          {error && !isPending && <div className="error-message">{error}</div>}
+          
           {loading && <div className="loading-message">Prijava u tijeku...</div>}
 
           <div className="info-box">
