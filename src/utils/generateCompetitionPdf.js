@@ -1,6 +1,5 @@
 const PDFDocument = require("pdfkit");
 const Performance = require("../models/Performance");
-const fs = require("fs");
 const path = require("path");
 
 module.exports = async function generatePdfForCompetition(competition, res) {
@@ -26,26 +25,20 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
     doc.pipe(res);
 
-    // Putanja do fonta
-    const fontPath = path.join(__dirname, '../../fonts/DejaVuSans.ttf');
+    // Font iz node_modules (KLJUČNA PROMJENA)
+    const fontPath = require.resolve('dejavu-fonts-ttf/ttf/DejaVuSans.ttf');
     
     console.log('📂 Font path:', fontPath);
-    console.log('✅ Font postoji:', fs.existsSync(fontPath));
-    
-    if (!fs.existsSync(fontPath)) {
-      console.error('❌ Font nije pronađen!');
-      throw new Error('Font file not found');
-    }
 
     // Registriraj font
     doc.registerFont('DejaVu', fontPath);
-    console.log('✅ Font registriran');
+    console.log('✅ Font registriran: DejaVu');
 
-    // Naslov - OBAVEZNO .font('DejaVu') nakon .fontSize()
+    // Naslov
     doc.fontSize(18).font('DejaVu').text("STARTNA LISTA", { align: "center" });
     doc.moveDown();
     
-    // Info o natjecanju - OBAVEZNO .font('DejaVu') nakon .fontSize()
+    // Info o natjecanju
     doc.fontSize(12).font('DejaVu')
        .text(`Natjecanje: ${competition.name}`)
        .text(`Datum: ${new Date(competition.date).toLocaleDateString('hr-HR')}`)
@@ -61,14 +54,12 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       
       if (category !== currentCategory) {
         doc.moveDown();
-        // OBAVEZNO .font('DejaVu') nakon .fontSize()
         doc.fontSize(14).font('DejaVu').fillColor('#333').text(category, { underline: true });
         doc.moveDown(0.5);
         currentCategory = category;
         counter = 1;
       }
 
-      // OBAVEZNO .font('DejaVu') nakon .fontSize()
       doc.fontSize(11).font('DejaVu').fillColor('#000')
          .text(
            `${counter}. ${p.danceStyle} – ${p.choreographyName} – ${p.clubId?.clubName || "N/A"} (${formatDuration(p.duration)})`,
@@ -79,7 +70,7 @@ module.exports = async function generatePdfForCompetition(competition, res) {
     });
 
     doc.end();
-    console.log('✅ PDF generiran');
+    console.log('✅ PDF generiran uspješno');
     
   } catch (error) {
     console.error('❌ Greška pri generiranju PDF-a:', error);

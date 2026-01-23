@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.9b0c2116.css",
-    "main.js": "/static/js/main.3b9f1c9e.js",
+    "main.css": "/static/css/main.8f775582.css",
+    "main.js": "/static/js/main.ceee8750.js",
     "static/js/453.d7446e4a.chunk.js": "/static/js/453.d7446e4a.chunk.js",
     "static/media/hero-banner.jpg": "/static/media/hero-banner.4b6785cbff37c08da483.jpg",
-    "static/media/underdogs_inv.svg": "/static/media/underdogs_inv.145e3d1d2e003e229bd25f1b304addfb.svg",
-    "static/media/underdogs.svg": "/static/media/underdogs.3899fbd446d8995c8aba6b5d67e1f1af.svg",
-    "static/media/dancearena.svg": "/static/media/dancearena.c79e39e519caa9c19eabb9aaa944e574.svg",
+    "static/media/underdogs_inv.svg": "/static/media/underdogs_inv.c158b57c73ff7bff4ddec39566e164b7.svg",
+    "static/media/underdogs.svg": "/static/media/underdogs.9ebca6fe8dc3c89aa6c90a3717fb3039.svg",
+    "static/media/dancearena.svg": "/static/media/dancearena.4eca59575fdd666feae129417f0e0718.svg",
     "index.html": "/index.html",
-    "main.9b0c2116.css.map": "/static/css/main.9b0c2116.css.map",
-    "main.3b9f1c9e.js.map": "/static/js/main.3b9f1c9e.js.map",
+    "main.8f775582.css.map": "/static/css/main.8f775582.css.map",
+    "main.ceee8750.js.map": "/static/js/main.ceee8750.js.map",
     "453.d7446e4a.chunk.js.map": "/static/js/453.d7446e4a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9b0c2116.css",
-    "static/js/main.3b9f1c9e.js"
+    "static/css/main.8f775582.css",
+    "static/js/main.ceee8750.js"
   ]
 }
