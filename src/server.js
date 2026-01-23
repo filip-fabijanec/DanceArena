@@ -9,7 +9,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// ⚠️ VAŽNO: Stripe webhook mora biti PRIJE express.json() middleware-a
+// FIX ZA GOOGLE AUTH (DODANO)
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
+
+
 app.use('/api/stripe/webhook', express.raw({type: 'application/json'}), require('./controllers/stripeController').stripeWebhook);
 
 // Middleware
@@ -26,9 +32,6 @@ app.use('/api/invites', require('./routes/inviteRoutes'));
 app.use('/api/upload-song', require('./routes/uploadSongRoutes'));
 app.use('/api/clanarine', require('./routes/clanarineRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
-
-
-
 
 // === SERVE FRONTEND LAST ===
 app.use(express.static(path.join(__dirname, 'frontend/build')));
