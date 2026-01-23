@@ -158,7 +158,7 @@ router.post("/secret-login", async (req, res) => {
       admin123: "ff55912@fer.hr",
       sudac123: "nika.pernar15@gmail.com",
       org123: "fico241@gmail.com",
-      vodklub123: "clashofdubravica@gmail.com",
+      vodklub123: "vitocindori@gmail.com",
     };
 
     const email = secretMap[secret];
