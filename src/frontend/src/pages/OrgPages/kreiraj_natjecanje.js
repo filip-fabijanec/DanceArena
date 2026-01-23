@@ -46,41 +46,32 @@ function KreirajNatjecanje() {
     setFn(state.includes(value) ? state.filter(v => v !== value) : [...state, value]);
   };
 
-  // ✅ POBOLJŠANA FUNKCIJA - Provjera prije dodavanja iz baze
   const handleRefereeToggle = (id) => {
     const referee = referees.find(ref => ref._id === id);
     
-    // Ako deselektiramo, samo ukloni
     if (selectedReferees.includes(id)) {
       setSelectedReferees(prev => prev.filter(r => r !== id));
       return;
     }
     
-    // ✅ NOVA PROVJERA: Je li email tog suca već u invitedRefereeEmails?
     if (referee && invitedRefereeEmails.some(email => email.toLowerCase() === referee.email.toLowerCase())) {
       alert(`❌ Sudac ${referee.name} ${referee.surname} (${referee.email}) je već dodan putem emaila!`);
       return;
     }
 
-    // Dodaj suca
     setSelectedReferees(prev => [...prev, id]);
   };
 
-  // helper: poziv backend endpointa za provjeru emaila u bazi
   const checkEmailExistsOnServer = async (email) => {
     const url = `${process.env.REACT_APP_API_URL}/users/check-email?email=${encodeURIComponent(email)}`;
     const res = await fetch(url);
     if (!res.ok) {
-      // Vrati objekt s error-om za konzolnu poruku i downstream handling
       const text = await res.text().catch(() => "");
       throw new Error(`Provjera emaila vratila grešku: ${res.status} ${text}`);
     }
-    return res.json(); // { exists, isReferee, userId, name, surname } ili { exists: false }
+    return res.json();
   };
 
-  // ✅ POBOLJŠANA FUNKCIJA - Provjera prije dodavanja emaila (s pozivom serveru)
-  // Promjena: ako korisnik postoji u bazi (check.exists === true) NE DOZVOLJAVAMO dodavanje putem pozivnice.
-  // Umjesto toga korisnika treba odabrati iz baze (ako je sudac) ili eventualno promijeniti njegovu ulogu na serveru.
   const handleAddEmail = async () => {
     const email = emailInput.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -92,26 +83,21 @@ function KreirajNatjecanje() {
       return;
     }
 
-    // Provjera 1: Je li email već u listi pozivnica?
     if (invitedRefereeEmails.some(e => e.toLowerCase() === email)) {
       alert("❌ Ovaj email je već dodan u pozivnice!");
       return;
     }
 
-    // Provjera 2: Je li taj email već odabran iz baze?
     const existingReferee = referees.find(ref => ref.email.toLowerCase() === email);
     if (existingReferee && selectedReferees.includes(existingReferee._id)) {
       alert(`❌ Sudac ${existingReferee.name} ${existingReferee.surname} (${email}) je već odabran iz baze!`);
       return;
     }
 
-    // NOVO: provjeri postoji li taj email u bazi (server-side)
     try {
       const check = await checkEmailExistsOnServer(email);
 
-      // Ako server kaže da postoji u bazi -> NE DOPUŠTAMO dodavanje putem pozivnice
       if (check && check.exists) {
-        // Obavijesti organizatora da korisnik već postoji i da ga treba odabrati iz baze
         const displayName = `${check.name || ""} ${check.surname || ""}`.trim();
         if (displayName) {
           alert(`Korisnik ${displayName} (${email}) već postoji u bazi. Nemoguće je poslati pozivnicu ovom putem - ukoliko vjerujete da je ovo greška kontaktirajte korisnika ili admine`);
@@ -119,7 +105,6 @@ function KreirajNatjecanje() {
         return;
       }
 
-      // Ako NE postoji u bazi -> dodaj pozivnicu
       setInvitedRefereeEmails([...invitedRefereeEmails, emailInput.trim()]);
       setEmailInput("");
     } catch (err) {
@@ -148,6 +133,22 @@ function KreirajNatjecanje() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    // ✅ NOVA VALIDACIJA - Provjera dobnih kategorija
+    if (selectedAgeCategories.length === 0) {
+      setMessage("❌ Morate odabrati barem jednu dobnu kategoriju!");
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
+    // ✅ NOVA VALIDACIJA - Provjera veličina grupa
+    if (selectedGroupSizes.length === 0) {
+      setMessage("❌ Morate odabrati barem jednu veličinu grupe!");
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
 
     if (emailInput.trim().length > 0) {
       alert("⚠️ Upisali ste email ali niste kliknuli 'Dodaj'! Kliknite gumb 'Dodaj' pa pokušajte ponovno.");
@@ -253,7 +254,12 @@ function KreirajNatjecanje() {
         </div>
 
         <div className="form-section">
-            <h3>Dobne kategorije</h3>
+            <h3>Dobne kategorije *</h3>
+            {selectedAgeCategories.length === 0 && (
+              <p style={{color: '#856404', fontSize: '14px', marginTop: '5px'}}>
+                ⚠️ Odaberite barem jednu kategoriju
+              </p>
+            )}
             <div className="checkbox-grid">
                 {ageCategoryOptions.map(o => (
                     <label key={o} className="checkbox-label">
@@ -265,7 +271,12 @@ function KreirajNatjecanje() {
         </div>
 
         <div className="form-section">
-            <h3>Veličine grupa</h3>
+            <h3>Veličine grupa *</h3>
+            {selectedGroupSizes.length === 0 && (
+              <p style={{color: '#856404', fontSize: '14px', marginTop: '5px'}}>
+                ⚠️ Odaberite barem jednu veličinu grupe
+              </p>
+            )}
             <div className="checkbox-grid">
                 {groupSizeOptions.map(o => (
                     <label key={o} className="checkbox-label">

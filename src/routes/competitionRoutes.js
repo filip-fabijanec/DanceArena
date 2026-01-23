@@ -214,14 +214,6 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
     // Generiraj PDF
     const doc = new PDFDocument({ margin: 40 });
 
-    // =========================================================================
-    // 🛠️ FIX ZA HRVATSKE ZNAKOVE (Č, Ć, Ž, Š, Đ)
-    // =========================================================================
-    // 1. Morate imati .ttf datoteku (npr. Roboto-Regular.ttf) u folderu 'fonts'
-    // 2. Ovdje učitavamo taj font. Ako font ne postoji, vratit će se na default (i znakovi neće raditi).
-    
-    // Pretpostavka: Imate mapu "fonts" u rootu backenda ili jednu razinu iznad routes
-    // Prilagodite ovu putanju ovisno o tome gdje spremite .ttf datoteku!
     const fontPath = path.join(__dirname, "../fonts/Roboto-Regular.ttf"); 
     
     try {
@@ -479,6 +471,14 @@ router.post("/", async (req, res) => {
         error:
           "Vaša članarina je istekla. Molimo platite članarinu kako biste kreirali novo natjecanje."
       });
+    }
+
+    if (!ageCategories || ageCategories.length === 0) {
+      return res.status(400).json({ error: "Morate odabrati barem jednu dobnu kategoriju" });
+    }
+
+    if (!groupSizes || groupSizes.length === 0) {
+      return res.status(400).json({ error: "Morate odabrati barem jednu veličinu grupe" });
     }
 
     const competition = new Competition({
