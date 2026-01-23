@@ -66,8 +66,20 @@ function KreirajNatjecanje() {
     setSelectedReferees(prev => [...prev, id]);
   };
 
-  // ✅ POBOLJŠANA FUNKCIJA - Provjera prije dodavanja emaila
-  const handleAddEmail = () => {
+  // helper: poziv backend endpointa za provjeru emaila u bazi
+  const checkEmailExistsOnServer = async (email) => {
+    const url = `${process.env.REACT_APP_API_URL}/users/check-email?email=${encodeURIComponent(email)}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      // Vrati objekt s error-om za konzolnu poruku i downstream handling
+      const text = await res.text().catch(() => "");
+      throw new Error(`Provjera emaila vratila grešku: ${res.status} ${text}`);
+    }
+    return res.json(); // { exists, isReferee, userId, name, surname } ili { exists: false }
+  };
+
+  // ✅ POBOLJŠANA FUNKCIJA - Provjera prije dodavanja emaila (s pozivom serveru)
+  const handleAddEmail = async () => {
     const email = emailInput.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
@@ -91,68 +103,63 @@ function KreirajNatjecanje() {
       return;
     }
 
-    setInvitedRefereeEmails([...invitedRefereeEmails, emailInput.trim()]);
-    setEmailInput("");
+    // NOVO: provjeri postoji li taj email u bazi (server-side)
+    try {
+      const check = await checkEmailExistsOnServer(email);
+
+      // Ako server kaže da postoji i da je već sudac -> spriječi dupliciranje
+      if (check && check.exists && check.isReferee) {
+        alert(`❌ Korisnik ${check.name || ""} ${check.surname || ""} (${email}) već postoji u bazi kao sudac.`);
+        return;
+      }
+
+      // Ako postoji user ali nije sudac -> obavijesti i dopusti dodavanje pozivnice (ili promijeni po potrebi)
+      if (check && check.exists && !check.isReferee) {
+        // Obavijest, ali dozvoli dodavanje pozivnice (ako želiš drugačije ponašanje, promijeni ovdje)
+        const displayName = `${check.name || ""} ${check.surname || ""}`.trim();
+        if (displayName) {
+          alert(`ℹ️ Korisnik ${displayName} (${email}) postoji u bazi, ali nije označen kao sudac. Pozivnica će mu biti poslana.`);
+        } else {
+          alert(`ℹ️ Korisnik s emailom ${email} postoji u bazi, ali nije označen kao sudac. Pozivnica će mu biti poslana.`);
+        }
+      }
+
+      // Ako ne postoji u bazi ili je postojanje prihvatljivo, dodaj pozivnicu
+      setInvitedRefereeEmails([...invitedRefereeEmails, emailInput.trim()]);
+      setEmailInput("");
+    } catch (err) {
+      console.error("Greška pri provjeri emaila:", err);
+      alert("Greška pri provjeri emaila na serveru. Pokušajte ponovno.");
+    }
   };
 
   const handleRemoveEmail = (email) => {
     setInvitedRefereeEmails(invitedRefereeEmails.filter(e => e !== email));
   };
 
-  // Validacije
   const totalJudges = selectedReferees.length + invitedRefereeEmails.length;
   const isRefereesValid = totalJudges >= 3 && totalJudges % 2 !== 0;
-  
-  const isAgeCategoriesValid = selectedAgeCategories.length >= 1;
-  const isGroupSizesValid = selectedGroupSizes.length >= 1;
 
-  // Tekstovi za validaciju
-  let refereesValidationText = "";
+  let validationText = "";
   if (totalJudges < 3) {
-      refereesValidationText = `⚠️ Minimalno 3 suca (Trenutno: ${totalJudges})`;
+      validationText = `⚠️ Minimalno 3 suca (Trenutno: ${totalJudges})`;
   } else if (totalJudges % 2 === 0) {
-      refereesValidationText = `⚠️ Broj sudaca mora biti neparan (Trenutno: ${totalJudges})`;
+      validationText = `⚠️ Broj sudaca mora biti neparan (Trenutno: ${totalJudges})`;
   } else {
-      refereesValidationText = `✅ Odabrano ${totalJudges} sudaca`;
+      validationText = `✅ Odabrano ${totalJudges} sudaca`;
   }
-
-  const ageCategoriesValidationText = isAgeCategoriesValid 
-    ? `✅ Odabrano ${selectedAgeCategories.length} kategorija`
-    : `⚠️ Odaberite barem 1 dobnu kategoriju (Trenutno: ${selectedAgeCategories.length})`;
-
-  const groupSizesValidationText = isGroupSizesValid 
-    ? `✅ Odabrano ${selectedGroupSizes.length} veličina grupa`
-    : `⚠️ Odaberite barem 1 veličinu grupe (Trenutno: ${selectedGroupSizes.length})`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    // Provjera da li je email upisan ali nije dodan
     if (emailInput.trim().length > 0) {
       alert("⚠️ Upisali ste email ali niste kliknuli 'Dodaj'! Kliknite gumb 'Dodaj' pa pokušajte ponovno.");
       setLoading(false);
       return;
     }
 
-    // Validacija dobrih kategorija
-    if (!isAgeCategoriesValid) {
-      setMessage("❌ Odaberite barem jednu dobnu kategoriju!");
-      setIsError(true);
-      setLoading(false);
-      return;
-    }
-
-    // Validacija veličina grupa
-    if (!isGroupSizesValid) {
-      setMessage("❌ Odaberite barem jednu veličinu grupe!");
-      setIsError(true);
-      setLoading(false);
-      return;
-    }
-
-    // Validacija sudaca
     if (!isRefereesValid) {
       setMessage(totalJudges < 3 ? "❌ Nedostaje sudaca!" : "❌ Broj sudaca mora biti neparan!");
       setIsError(true);
@@ -221,19 +228,18 @@ function KreirajNatjecanje() {
              </div>
              <div className="form-group">
                 <label>Opis</label>
-                <textarea name="description" value={formData.description} onChange={handleChange} required placeholder="Detalji natjecanja..." rows="3" />
+                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Detalji natjecanja..." rows="3" />
              </div>
              <div className="form-row">
                 <div className="form-group">
                     <label>Stilovi (odvojeni zarezom)</label>
-                    <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} required placeholder="Jazz, Hip Hop, Show..." rows="2" />
+                    <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} placeholder="Jazz, Hip Hop, Show..." rows="2" />
                 </div>
               <div className="form-group">
                 <label>Kotizacija (€)</label>
                   <input
                     type="number"
                     name="registrationFee"
-                    required
                     value={formData.registrationFee}
                     onChange={(e) => {
                       setFormData({ ...formData, registrationFee: e.target.value });
@@ -252,62 +258,26 @@ function KreirajNatjecanje() {
         </div>
 
         <div className="form-section">
-            <h3>Dobne kategorije (Odabrano: {selectedAgeCategories.length})</h3>
+            <h3>Dobne kategorije</h3>
             <div className="checkbox-grid">
                 {ageCategoryOptions.map(o => (
                     <label key={o} className="checkbox-label">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedAgeCategories.includes(o)} 
-                          onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} 
-                        /> 
+                        <input type="checkbox" checked={selectedAgeCategories.includes(o)} onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} /> 
                         <span>{o}</span>
                     </label>
                 ))}
-            </div>
-            
-            <div style={{ 
-              marginTop: '20px', 
-              padding: '10px', 
-              borderRadius: '5px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              display: isAgeCategoriesValid ? 'none': 'grid',
-              backgroundColor: isAgeCategoriesValid ? '#d4edda' : '#fff3cd',
-              color: isAgeCategoriesValid ? '#155724' : '#856404',
-              border: `1px solid ${isAgeCategoriesValid ? '#c3e6cb' : '#ffeeba'}`
-            }}>
-              {ageCategoriesValidationText}
             </div>
         </div>
 
         <div className="form-section">
-            <h3>Veličine grupa (Odabrano: {selectedGroupSizes.length})</h3>
+            <h3>Veličine grupa</h3>
             <div className="checkbox-grid">
                 {groupSizeOptions.map(o => (
                     <label key={o} className="checkbox-label">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedGroupSizes.includes(o)} 
-                          onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} 
-                        />
+                        <input type="checkbox" checked={selectedGroupSizes.includes(o)} onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} /> 
                         <span>{o}</span>
                     </label>
                 ))}
-            </div>
-            
-            <div style={{ 
-              marginTop: '20px', 
-              padding: '10px', 
-              borderRadius: '5px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              display: isGroupSizesValid ? 'none': 'grid',
-              backgroundColor: isGroupSizesValid ? '#d4edda' : '#fff3cd',
-              color: isGroupSizesValid ? '#155724' : '#856404',
-              border: `1px solid ${isGroupSizesValid ? '#c3e6cb' : '#ffeeba'}`
-            }}>
-              {groupSizesValidationText}
             </div>
         </div>
 
@@ -364,13 +334,13 @@ function KreirajNatjecanje() {
               color: isRefereesValid ? '#155724' : '#856404',
               border: `1px solid ${isRefereesValid ? '#c3e6cb' : '#ffeeba'}`
           }}>
-            {refereesValidationText}
+            {validationText}
           </div>
         </div>
 
         {message && <div className={`message ${isError ? "error" : "success"}`}>{message}</div>}
 
-        <button type="submit" className="submit-button" disabled={loading || !isAgeCategoriesValid || !isGroupSizesValid || !isRefereesValid}>
+        <button type="submit" className="submit-button" disabled={loading}>
           {loading ? "Slanje..." : "Kreiraj natjecanje"}
         </button>
       </form>

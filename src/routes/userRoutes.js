@@ -113,6 +113,33 @@ router.get("/referees", async (req, res) => {
 });
 
 // =======================
+// NOVA RUTA: CHECK EMAIL (postoji li email u bazi i je li sudac)
+// =======================
+router.get("/check-email", async (req, res) => {
+  try {
+    const email = (req.query.email || "").trim().toLowerCase();
+    if (!email) return res.status(400).json({ error: "Missing email" });
+
+    const user = await User.findOne({ email }).select("role name surname");
+    if (!user) {
+      return res.status(200).json({ exists: false });
+    }
+
+    const isReferee = (user.role === "sudac") || (Array.isArray(user.roles) && user.roles.includes("sudac"));
+    return res.status(200).json({
+      exists: true,
+      isReferee,
+      userId: user._id,
+      name: user.name,
+      surname: user.surname,
+    });
+  } catch (error) {
+    console.error("Greška /check-email:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// =======================
 // UPDATE USER
 // =======================
 router.put("/:id", async (req, res) => {
