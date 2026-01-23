@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './Registracija.css';
+import { ReactComponent as UnderdogsLogo } from './underdogs.svg';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3500";
 
@@ -141,7 +142,9 @@ function Registracija() {
   }
 
   return (
+    
     <div className="registracija-container">
+      <UnderdogsLogo className="banjosipjelacic" aria-hidden="true" />
       <div className="registracija-box">
         <Link to="/login" className="back-to-login">
           ← Natrag na prijavu

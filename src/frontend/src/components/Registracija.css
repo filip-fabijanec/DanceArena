@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #30a36a 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #9ec1f5 0%, #3b4d6b 100%);
   padding: 20px;
 }
 
@@ -150,21 +150,18 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .registracija-box {
-    padding: 30px 20px;
-  }
+  .banjosipjelacic {
+  position: absolute;
+  right: 150px;
+  top: 56%;
+  transform: translateY(-50%) rotate(-12deg);
+  width: 675px;
+  height: auto;
 
-  .registracija-form .form-row {
-    grid-template-columns: 1fr;
-  }
+  opacity: 0.18;          /* ✅ bilo je 0.06 */
+  z-index: 0;             /* ✅ da bude iznad backgrounda */
+  pointer-events: none;
 
-  .registracija-box h1 {
-    font-size: 28px;
-  }
-
-  .registracija-box h2 {
-    font-size: 18px;
-  }
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.14));
 }
+
