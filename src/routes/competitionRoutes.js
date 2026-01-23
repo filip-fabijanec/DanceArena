@@ -16,19 +16,13 @@ const sendInviteEmail = require("../utils/sendInviteEmail");
 const authMiddleware = require("../backend/middleware/authMiddleware");
 const PDFDocument = require("pdfkit");
 
-async function autoLockOngoingCompetitions() {
-  await Competition.updateMany(
-    { autoStatus: "ongoing", isLocked: false },
-    { $set: { isLocked: true } }
-  );
-}
+
 
 // =======================
 // GET /competitions/finished (završena natjecanja)
 // =======================
 router.get("/finished", async (req, res) => {
   try {
-        await autoLockOngoingCompetitions();
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -50,7 +44,6 @@ router.get("/finished", async (req, res) => {
 // =======================
 router.get("/upcoming", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -72,7 +65,6 @@ router.get("/upcoming", async (req, res) => {
 
 router.get("/upcominglp", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -95,7 +87,6 @@ router.get("/upcominglp", async (req, res) => {
 
 router.get("/ongoinglp", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -120,7 +111,6 @@ router.get("/ongoinglp", async (req, res) => {
 // =======================
 router.get("/upcoming/after-2-days", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
 
     const dateFrom = new Date();
     dateFrom.setHours(0, 0, 0, 0);
@@ -145,7 +135,6 @@ router.get("/upcoming/after-2-days", async (req, res) => {
 // =======================
 router.get("/judge/:judgeId", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
     const { judgeId } = req.params;
 
     const competitions = await Competition.find({
@@ -295,7 +284,6 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
 // =======================
 router.get("/:id/results", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
     const compId = req.params.id;
     const competition = await Competition.findById(compId);
     if (!competition) {
@@ -405,7 +393,6 @@ router.get("/:id/results", async (req, res) => {
 // =======================
 router.get("/:id", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
     const competition = await Competition.findById(req.params.id)
       .populate("organizer", "name surname email")
       .populate("referees", "name surname email");
@@ -425,7 +412,6 @@ router.get("/:id", async (req, res) => {
 // =======================
 router.get("/", async (req, res) => {
   try {
-    await autoLockOngoingCompetitions();
 
     const query = req.query.organizerId ? { organizer: req.query.organizerId } : {};
 
