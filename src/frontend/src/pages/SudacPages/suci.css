@@ -357,3 +357,26 @@
   font-weight: bold;
 }
 
+.marko_marulic{
+  margin-top: 8px;
+   width: 100%;
+ padding: 12px;
+ border-radius: 8px;
+   border: none;
+   color: white;
+  /*color: isAlreadyJudged ? '#9CA3AF' : (hasScore ? 'white' : '#9CA3AF'),*/
+  font-size: 15px;
+  
+ /* cursor: (hasScore && !isAlreadyJudged) ? 'pointer' : 'not-allowed',*/
+  transition:  all 0.2s ease;
+  height: 44px;
+  background-color: rgb(73, 73, 125);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.marko_marulic:hover {
+  background-color: rgb(58, 58, 100);
+  
+}
+

@@ -76,16 +76,16 @@ function ActiveCompetitions() {
             </button>
           )}
 
-          {(
+          {(comp.isLocked  &&(
                   <button
-                    className="btn-export"
+                    className="marko_marulic"
                     onClick={() =>
                       downloadCompetitionPdf(comp._id, token)
                         .catch(err => alert(err.message))
                     }
                   >
                     Preuzmi startnu listu (PDF)
-                  </button>
+                  </button>)
                 )}
         </div>
       ))}

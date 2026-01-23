@@ -378,6 +378,7 @@ function OcjenjivanjeKategorija() {
                                         className="card-button btn-primary-blue"
                                         disabled={isCompleted || perfStatus === 'Slanje...' || isAlreadyJudged || !hasScore}
                                         style={{
+                                          marginTop: '108px',
                                           width: '100%',
                                           padding: '12px',
                                           borderRadius: '8px',
