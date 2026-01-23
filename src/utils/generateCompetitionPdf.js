@@ -1,3 +1,4 @@
+/*
 const { PDFDocument, rgb } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
 const Performance = require("../models/Performance");
@@ -215,3 +216,4 @@ function formatDuration(seconds) {
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
+*/

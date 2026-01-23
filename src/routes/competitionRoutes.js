@@ -2,18 +2,20 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
+const path = require("path"); // <--- DODANO: Za rad s putanjama datoteka
 
 // Modeli
 const Competition = require("../models/Competition");
 const User = require("../models/User");
 const Invite = require("../models/Invite");
+const Performance = require("../models/Performance");
 
 // Utility za slanje maila
 const sendInviteEmail = require("../utils/sendInviteEmail");
 
 const authMiddleware = require("../backend/middleware/authMiddleware");
 const PDFDocument = require("pdfkit");
-const Performance = require("../models/Performance");
+
 
 // =======================
 // GET /competitions/finished (završena natjecanja)
@@ -211,6 +213,26 @@ router.get("/:id/pdf", authMiddleware, async (req, res) => {
 
     // Generiraj PDF
     const doc = new PDFDocument({ margin: 40 });
+
+    // =========================================================================
+    // 🛠️ FIX ZA HRVATSKE ZNAKOVE (Č, Ć, Ž, Š, Đ)
+    // =========================================================================
+    // 1. Morate imati .ttf datoteku (npr. Roboto-Regular.ttf) u folderu 'fonts'
+    // 2. Ovdje učitavamo taj font. Ako font ne postoji, vratit će se na default (i znakovi neće raditi).
+    
+    // Pretpostavka: Imate mapu "fonts" u rootu backenda ili jednu razinu iznad routes
+    // Prilagodite ovu putanju ovisno o tome gdje spremite .ttf datoteku!
+    const fontPath = path.join(__dirname, "../fonts/Roboto-Regular.ttf"); 
+    
+    try {
+        // Registriramo font pod nazivom 'MainFont'
+        doc.font(fontPath); 
+    } catch (err) {
+        console.warn("⚠️ UPOZORENJE: Font datoteka nije pronađena na putanji:", fontPath);
+        console.warn("Hrvatski znakovi se možda neće ispravno prikazati.");
+        // Ako nema fonta, nastavit će sa standardnim, ali tekst će biti zbrčkan
+    }
+    // =========================================================================
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
@@ -474,76 +496,74 @@ router.post("/", async (req, res) => {
 
     await competition.save();
 
-    // U competitionRoutes.js, u POST "/" route, zamijenite dio sa invitedRefereeEmails:
-
-if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
-  // NOVA VALIDACIJA - Provjeri duplikate
-  const allRefereesEmails = new Set();
-  
-  // 1. Dodaj emailove već odabranih sudaca iz baze
-  if (referees && referees.length > 0) {
-    const selectedReferees = await User.find({ _id: { $in: referees } });
-    selectedReferees.forEach(ref => {
-      allRefereesEmails.add(ref.email.toLowerCase());
-    });
-  }
-
-  // 2. Provjeri pozivnice - je li email duplikat?
-  for (const rawEmail of invitedRefereeEmails) {
-    const email = rawEmail.toLowerCase().trim();
-    if (!email) continue;
-
-    // Provjera duplikata
-    if (allRefereesEmails.has(email)) {
-      return res.status(400).json({ 
-        error: `Email ${email} je već dodan kao sudac!` 
-      });
-    }
-    allRefereesEmails.add(email);
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser && existingUser.role === "sudac") {
-      if (!competition.referees.includes(existingUser._id)) {
-        competition.referees.push(existingUser._id);
+    if (Array.isArray(invitedRefereeEmails) && invitedRefereeEmails.length > 0) {
+      // NOVA VALIDACIJA - Provjeri duplikate
+      const allRefereesEmails = new Set();
+      
+      // 1. Dodaj emailove već odabranih sudaca iz baze
+      if (referees && referees.length > 0) {
+        const selectedReferees = await User.find({ _id: { $in: referees } });
+        selectedReferees.forEach(ref => {
+          allRefereesEmails.add(ref.email.toLowerCase());
+        });
       }
-      continue;
+
+      // 2. Provjeri pozivnice - je li email duplikat?
+      for (const rawEmail of invitedRefereeEmails) {
+        const email = rawEmail.toLowerCase().trim();
+        if (!email) continue;
+
+        // Provjera duplikata
+        if (allRefereesEmails.has(email)) {
+          return res.status(400).json({ 
+            error: `Email ${email} je već dodan kao sudac!` 
+          });
+        }
+        allRefereesEmails.add(email);
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser && existingUser.role === "sudac") {
+          if (!competition.referees.includes(existingUser._id)) {
+            competition.referees.push(existingUser._id);
+          }
+          continue;
+        }
+
+        const existingInvite = await Invite.findOne({
+          email,
+          competition: competition._id,
+          status: "pending"
+        });
+
+        if (existingInvite) continue;
+
+        const token = crypto.randomBytes(32).toString("hex");
+
+        const invite = new Invite({
+          email,
+          role: "sudac",
+          competition: competition._id,
+          invitedBy: organizer,
+          token,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        });
+
+        await invite.save();
+
+        try {
+          await sendInviteEmail({
+            to: email,
+            token,
+            competitionName: name
+          });
+        } catch (emailError) {
+          console.error(`Greška pri slanju emaila za ${email}:`, emailError);
+        }
+      }
+
+      await competition.save();
     }
-
-    const existingInvite = await Invite.findOne({
-      email,
-      competition: competition._id,
-      status: "pending"
-    });
-
-    if (existingInvite) continue;
-
-    const token = crypto.randomBytes(32).toString("hex");
-
-    const invite = new Invite({
-      email,
-      role: "sudac",
-      competition: competition._id,
-      invitedBy: organizer,
-      token,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
-
-    await invite.save();
-
-    try {
-      await sendInviteEmail({
-        to: email,
-        token,
-        competitionName: name
-      });
-    } catch (emailError) {
-      console.error(`Greška pri slanju emaila za ${email}:`, emailError);
-    }
-  }
-
-  await competition.save();
-}
 
     res.status(201).json(competition);
   } catch (error) {
