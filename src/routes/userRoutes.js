@@ -167,7 +167,7 @@ router.post("/secret-login", async (req, res) => {
     const { secret } = req.body;
     const secretMap = {
       admin123: "ff55912@fer.hr",
-      sudac123: "nika.pernar15@gmail.com",
+      sudac123: "2004josip5@gmail.com",
       org123: "fico241@gmail.com",
       vodklub123: "vitocindori@gmail.com",
     };
