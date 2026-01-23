@@ -23,8 +23,6 @@ const userSchema = new mongoose.Schema({
 
   clubLocation: { type: String, default: null },
 
-  approved: { type: Boolean, default: false },
-
   subscriptionStatus: { type: String, enum: ['active', 'inactive', 'expired'], default: 'inactive' },
 
   subscriptionExpiry: { type: Date, default: null },

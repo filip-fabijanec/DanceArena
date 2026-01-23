@@ -10,10 +10,8 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [secret, setSecret] = useState('');
+  // MAKNUTO isPending
   
-  // ✅ NOVO STANJE: Prati čeka li korisnik odobrenje admina
-  const [isPending, setIsPending] = useState(false);
-
   const { loginWithGoogle, loginWithSecret } = useAuth();
   const navigate = useNavigate();
 
@@ -30,7 +28,6 @@ function Login() {
 
   const [activeReview, setActiveReview] = useState(0);
   const [fadeTick, setFadeTick] = useState(0);
-
   const pauseUntilRef = useRef(0);
 
   useEffect(() => {
@@ -38,7 +35,6 @@ function Login() {
       if (Date.now() < pauseUntilRef.current) return;
       setActiveReview((i) => (i + 1) % reviews.length);
     }, 7000);
-
     return () => window.clearInterval(id);
   }, [reviews.length]);
 
@@ -57,7 +53,6 @@ function Login() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
-    setIsPending(false); // Resetiramo status čekanja
     setLoading(true);
 
     try {
@@ -66,12 +61,8 @@ function Login() {
     } catch (err) {
       const errorMessage = err.message || "Greška pri prijavi";
 
-      // ✅ PROVJERA: Je li greška zbog neodobrenog računa?
-      if (errorMessage.includes("čeka odobrenje") || errorMessage.includes("approved")) {
-        setIsPending(true);
-      } 
-      // ✅ PROVJERA: Ako korisnik ne postoji, šalji na registraciju
-      else if (errorMessage === "USER_NOT_FOUND") {
+      // Ako korisnik ne postoji, šalji na registraciju
+      if (errorMessage === "USER_NOT_FOUND") {
         try {
           const base64Url = credentialResponse.credential.split('.')[1];
           const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -92,7 +83,7 @@ function Login() {
           setError('Greška pri obradi Google prijave');
         }
       } else {
-        // Ostale greške
+        // Prikaz ostalih grešaka
         setError(errorMessage);
       }
     } finally {
@@ -108,21 +99,13 @@ function Login() {
     e.preventDefault();
     if (!secret) return;
     setError('');
-    setIsPending(false); // Resetiramo status
     setLoading(true);
 
     try {
       const user = await loginWithSecret(secret);
       redirectByRole(user.role);
     } catch (err) {
-      const errorMessage = err.message || 'Neispravna tajna riječ';
-      
-      // ✅ PROVJERA ZA TAJNU RIJEČ TAKOĐER
-      if (errorMessage.includes("čeka odobrenje") || errorMessage.includes("approved")) {
-        setIsPending(true);
-      } else {
-        setError(errorMessage);
-      }
+      setError(err.message || 'Neispravna tajna riječ');
     } finally {
       setLoading(false);
     }
@@ -182,7 +165,7 @@ function Login() {
           </div>
         </div>
 
-        {/* ✅ Underdogs watermark behind the login box */}
+        {/* ✅ Underdogs watermark */}
         <UnderdogsLogo className="login-underdogs-bg" aria-hidden="true" />
 
         <div className="login-box">
@@ -199,19 +182,7 @@ function Login() {
             </div>
           )}
 
-          {/* ✅ NOVI UI ELEMENT: Prikazuje se samo ako korisnik čeka odobrenje */}
-          {isPending && (
-            <div className="pending-approval-box fade-in">
-              <div className="pending-icon">⏳</div>
-              <h3>Račun čeka odobrenje</h3>
-              <p>
-                Vaša registracija je uspješna, ali administrator još mora odobriti vaš pristup.
-              </p>
-              <p className="pending-note">
-                Molimo pokušajte ponovo kasnije ili kontaktirajte podršku.
-              </p>
-            </div>
-          )}
+          {/* Maknut "Pending" prozorčić */}
 
           <div className="secret-section">
             <h3 className="secret-title">Prijava preko šifre</h3>
@@ -248,8 +219,7 @@ function Login() {
             />
           </div>
 
-          {/* Prikazujemo error samo ako NIJE pending (da ne bude duplih poruka) */}
-          {error && !isPending && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
           
           {loading && <div className="loading-message">Prijava u tijeku...</div>}
 

@@ -5,7 +5,7 @@ const Invite = require("../models/Invite");
 const Competition = require("../models/Competition");
 const jwt = require("jsonwebtoken");
 
-// --- MIDDLEWARE ZA PROVJERU TOKENA (Potreban za /me rutu) ---
+// --- MIDDLEWARE ZA PROVJERU TOKENA ---
 const authenticateToken = (req, res, next) => {
   try {
     const tokenHeader = req.headers.authorization;
@@ -22,18 +22,13 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-// =======================================================
-// 1. GET CURRENT USER (DOHVATI SVJEŽE PODATKE)
-// =======================================================
+// =======================
+// 1. GET CURRENT USER
+// =======================
 router.get("/me", authenticateToken, async (req, res) => {
   try {
-    // req.user.id dolazi iz tokena
     const user = await User.findById(req.user.id).select("-password"); 
-    
-    if (!user) {
-      return res.status(404).json({ error: "Korisnik nije pronađen" });
-    }
-
+    if (!user) return res.status(404).json({ error: "Korisnik nije pronađen" });
     res.status(200).json(user);
   } catch (error) {
     console.error("Greška /me:", error);
@@ -42,48 +37,37 @@ router.get("/me", authenticateToken, async (req, res) => {
 });
 
 // =======================
-// 2. CREATE USER (REGISTRACIJA)
+// 2. REGISTRACIJA
 // =======================
 router.post("/", async (req, res) => {
   try {
     const { inviteToken, email, role } = req.body;
-
     let invite = null;
-    let isAutoApproved = false; // Po defaultu korisnik NIJE odobren
 
-    // Ako postoji invite → validacija
+    // Validacija pozivnice (ako postoji)
     if (inviteToken) {
       invite = await Invite.findOne({ token: inviteToken });
-
       if (!invite) return res.status(400).json({ error: "Neispravan invite token" });
       if (invite.used) return res.status(400).json({ error: "Invite je već iskorišten" });
       if (invite.status !== "pending") return res.status(400).json({ error: "Invite više nije validan" });
       if (new Date() > invite.expiresAt) return res.status(400).json({ error: "Invite je istekao" });
       if (invite.email !== email || invite.role !== role) return res.status(403).json({ error: "Invite podaci se ne podudaraju" });
-      
-      // ✅ Ako korisnik ima valjanu pozivnicu, automatski je odobren
-      isAutoApproved = true;
     }
 
-    // Kreiranje novog korisnika
-    // Koristimo spread operator (...) za body, ali eksplicitno postavljamo 'approved'
-    const newUser = new User({
-      ...req.body,
-      approved: isAutoApproved 
-    });
-
+    // Kreiranje korisnika (nema više polja 'approved')
+    const newUser = new User(req.body);
+    
     await newUser.save({
       runValidators: true,
       validateBeforeSave: true,
     });
 
-    // Ako je invite → poveži suca s natjecanjem i označi invite kao iskorišten
+    // Povezivanje pozivnice
     if (invite) {
       await Competition.findByIdAndUpdate(
         invite.competition,
         { $addToSet: { referees: newUser._id } }
       );
-
       invite.used = true;
       invite.status = "accepted";
       invite.acceptedBy = newUser._id;
@@ -123,7 +107,7 @@ router.get("/referees", async (req, res) => {
 });
 
 // =======================
-// CHECK EMAIL (postoji li email u bazi i je li sudac)
+// CHECK EMAIL
 // =======================
 router.get("/check-email", async (req, res) => {
   try {
@@ -131,9 +115,7 @@ router.get("/check-email", async (req, res) => {
     if (!email) return res.status(400).json({ error: "Missing email" });
 
     const user = await User.findOne({ email }).select("role name surname");
-    if (!user) {
-      return res.status(200).json({ exists: false });
-    }
+    if (!user) return res.status(200).json({ exists: false });
 
     const isReferee = (user.role === "sudac") || (Array.isArray(user.roles) && user.roles.includes("sudac"));
     return res.status(200).json({
@@ -144,7 +126,6 @@ router.get("/check-email", async (req, res) => {
       surname: user.surname,
     });
   } catch (error) {
-    console.error("Greška /check-email:", error);
     return res.status(500).json({ error: "Server error" });
   }
 });
@@ -157,15 +138,9 @@ router.put("/:id", async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       req.body,
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
+      { new: true, runValidators: true, context: "query" }
     );
-
     if (!updatedUser) return res.status(404).json({ error: "User not found" });
-
     res.status(200).json(updatedUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -185,12 +160,11 @@ router.delete("/:id", async (req, res) => {
 });
 
 // =======================
-// SECRET LOGIN (DEBUG)
+// SECRET LOGIN
 // =======================
 router.post("/secret-login", async (req, res) => {
   try {
     const { secret } = req.body;
-
     const secretMap = {
       admin123: "ff55912@fer.hr",
       sudac123: "nika.pernar15@gmail.com",
@@ -204,10 +178,7 @@ router.post("/secret-login", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: "Korisnik nije pronađen" });
 
-    // 🔥 PROVJERA ODOBRENJA
-    if (user.approved === false) {
-       return res.status(403).json({ error: "Vaš račun još nije odobren od strane administratora." });
-    }
+    // NEMA VIŠE PROVJERE user.approved
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
@@ -216,7 +187,6 @@ router.post("/secret-login", async (req, res) => {
     );
 
     res.status(200).json({ user, token });
-
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
@@ -228,7 +198,6 @@ router.post("/secret-login", async (req, res) => {
 router.post("/google-login", async (req, res) => {
   try {
     const { credential } = req.body;
-    
     if (!credential) return res.status(400).json({ error: "Credential missing" });
 
     const base64Url = credential.split(".")[1];
@@ -241,10 +210,7 @@ router.post("/google-login", async (req, res) => {
       return res.status(404).json({ error: "USER_NOT_FOUND" });
     }
 
-    // 🔥 PROVJERA ODOBRENJA
-    if (user.approved === false) {
-      return res.status(403).json({ error: "Vaš račun čeka odobrenje administratora. Molimo pričekajte." });
-    }
+    // NEMA VIŠE PROVJERE user.approved - SVI ULAZE
 
     const token = jwt.sign(
       { id: user._id, role: user.role, email: user.email },
@@ -253,7 +219,6 @@ router.post("/google-login", async (req, res) => {
     );
 
     res.status(200).json({ user, token });
-
   } catch (error) {
     console.error("❌ Google login error:", error);
     res.status(500).json({ error: error.message || "Google login failed" });
