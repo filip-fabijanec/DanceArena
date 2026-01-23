@@ -5,6 +5,10 @@ const path = require("path");
 const fs = require("fs").promises;
 
 module.exports = async function generatePdfForCompetition(competition, res) {
+  console.log('🚀 === PDF-LIB GENERATOR POKRENUT ===');
+  console.log('🆔 Competition ID:', competition._id);
+  console.log('📅 Competition Name:', competition.name);
+  
   try {
     const performances = await Performance.find({
       competitionId: competition._id,
@@ -13,35 +17,48 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       .populate("clubId", "clubName")
       .sort({ ageCategory: 1, danceStyle: 1, groupSize: 1 });
 
+    console.log('📊 Broj performance-a:', performances.length);
+
     // Kreiraj novi PDF dokument
     const pdfDoc = await PDFDocument.create();
+    console.log('📄 PDF dokument kreiran');
     
     // KLJUČNO: Registriraj fontkit PRIJE učitavanja fonta
     pdfDoc.registerFontkit(fontkit);
+    console.log('🔧 Fontkit registriran');
 
     // Učitaj Roboto font
     const fontPath = path.join(__dirname, '../../fonts/Roboto-Regular.ttf');
-    console.log('📂 Font path:', fontPath);
+    console.log('📂 Tražim font na:', fontPath);
 
     let customFont;
     try {
       const fontBytes = await fs.readFile(fontPath);
+      console.log('📥 Font učitan, veličina:', fontBytes.length, 'bytes');
+      
       // embedFont s fontkit-om pravilno obrađuje Unicode
       customFont = await pdfDoc.embedFont(fontBytes, { subset: false });
-      console.log('✅ Font uspješno učitan: Roboto');
+      console.log('✅ Font embeddan u PDF');
     } catch (err) {
-      console.error('❌ Greška pri učitavanju fonta:', err);
+      console.error('❌ GREŠKA pri učitavanju fonta:', err.message);
       throw new Error('Font nije pronađen. Preuzmi Roboto-Regular.ttf u fonts/ folder');
     }
 
     // Testiranje encoding-a
     const testStr = "Test: šđčćžŠĐČĆŽ";
     console.log('🧪 Test string:', testStr);
-    console.log('🧪 Font encoding test:', customFont.encodeText(testStr));
+    
+    try {
+      const encoded = customFont.encodeText(testStr);
+      console.log('✅ Font encoding test PASSED');
+    } catch (encErr) {
+      console.error('❌ Font encoding FAILED:', encErr.message);
+    }
 
     // Dodaj prvu stranicu
     let page = pdfDoc.addPage([595.28, 841.89]); // A4 format
     const { width, height } = page.getSize();
+    console.log('📄 Stranica dodana:', width, 'x', height);
     
     let yPosition = height - 60;
     const leftMargin = 50;
@@ -78,10 +95,13 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       if (yPosition < 80) {
         page = pdfDoc.addPage([595.28, 841.89]);
         yPosition = height - 60;
+        console.log('📄 Nova stranica dodana');
         return true;
       }
       return false;
     };
+
+    console.log('✍️ Započinjem pisanje sadržaja...');
 
     // NASLOV
     drawText("STARTNA LISTA", { 
@@ -155,7 +175,6 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       checkNewPage();
 
       const line = `${counter}. ${p.danceStyle} – ${p.choreographyName} – ${p.clubId?.clubName || "N/A"} (${formatDuration(p.duration)})`;
-      console.log(`📝 Line ${counter}:`, line);
       
       drawText(line, { 
         size: 11, 
@@ -167,8 +186,10 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       counter++;
     }
 
+    console.log('💾 Serializiram PDF...');
     // Serijaliziraj PDF
     const pdfBytes = await pdfDoc.save();
+    console.log('✅ PDF serijaliziran, veličina:', pdfBytes.length, 'bytes');
 
     // Postavi headers i pošalji
     res.setHeader("Content-Type", "application/pdf; charset=utf-8");
@@ -178,10 +199,11 @@ module.exports = async function generatePdfForCompetition(competition, res) {
     );
     res.send(Buffer.from(pdfBytes));
 
-    console.log('✅ PDF generiran uspješno s pdf-lib');
+    console.log('✅✅✅ PDF USPJEŠNO POSLAN KLIJENTU! ✅✅✅');
     
   } catch (error) {
-    console.error('❌ Greška pri generiranju PDF-a:', error);
+    console.error('❌❌❌ GREŠKA pri generiranju PDF-a:', error);
+    console.error('Stack trace:', error.stack);
     if (!res.headersSent) {
       res.status(500).json({ error: 'Greška pri generiranju PDF-a: ' + error.message });
     }
