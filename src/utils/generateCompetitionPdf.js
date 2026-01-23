@@ -26,62 +26,37 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
     doc.pipe(res);
 
-    // Roboto font paths
-    let fontRegistered = false;
+    // Putanja do Roboto fonta
+    const fontPath = path.join(__dirname, '../../fonts/Roboto-Regular.ttf');
     
-    try {
-      // Pokušaj pronaći Roboto Regular .ttf
-      const robotoPath = path.join(
-        require.resolve('roboto-fontface/package.json').replace('package.json', ''),
-        'fonts/roboto/Roboto-Regular.ttf'
-      );
-      
-      console.log('📂 Roboto path:', robotoPath);
-      
-      if (fs.existsSync(robotoPath)) {
-        doc.registerFont('Roboto', robotoPath);
-        doc.font('Roboto');
-        fontRegistered = true;
-        console.log('✅ Font registriran: Roboto-Regular.ttf');
-      } else {
-        console.warn('⚠️ Roboto TTF ne postoji, pokušavam alternative...');
-        
-        // Fallback na Roboto Latin Extended
-        const robotoLatinPath = path.join(
-          require.resolve('roboto-fontface/package.json').replace('package.json', ''),
-          'fonts/roboto/Roboto-Regular.woff'
-        );
-        
-        if (fs.existsSync(robotoLatinPath)) {
-          console.log('ℹ️ Roboto WOFF nije podržan za PDFKit, koristim Helvetica');
-        }
-      }
-    } catch (err) {
-      console.error('❌ Roboto font greška:', err.message);
+    console.log('📂 Font path:', fontPath);
+    console.log('📂 __dirname:', __dirname);
+    console.log('✅ Font postoji:', fs.existsSync(fontPath));
+
+    if (!fs.existsSync(fontPath)) {
+      console.error('❌ Roboto font nije pronađen!');
+      console.error('💡 Moraš downloadati Roboto-Regular.ttf u fonts/ folder');
+      throw new Error('Font file not found');
     }
 
-    // Fallback na Helvetica ako Roboto nije učitan
-    if (!fontRegistered) {
-      console.warn('⚠️ Roboto font nije dostupan, koristim Helvetica (ograničena podrška za đ, ć, č)');
-      doc.font('Helvetica');
-    }
+    // Registriraj font
+    doc.registerFont('Roboto', fontPath);
+    console.log('✅ Font uspješno registriran: Roboto');
 
-    const currentFont = fontRegistered ? 'Roboto' : 'Helvetica';
-
-    // Testiraj font sa svim znakovima
+    // Testiraj font
     const testStr = "Test: šđčćžŠĐČĆŽ";
     console.log('🧪 Test string:', testStr);
 
     // Naslov
-    doc.fontSize(18).font(currentFont).text("STARTNA LISTA", { align: "center" });
+    doc.fontSize(18).font('Roboto').text("STARTNA LISTA", { align: "center" });
     doc.moveDown();
     
     // Test hrvatski znakovi
-    doc.fontSize(10).font(currentFont).text(testStr, { align: "center" });
+    doc.fontSize(10).font('Roboto').text(testStr, { align: "center" });
     doc.moveDown();
     
     // Info o natjecanju
-    doc.fontSize(12).font(currentFont)
+    doc.fontSize(12).font('Roboto')
        .text(`Natjecanje: ${competition.name}`)
        .text(`Datum: ${new Date(competition.date).toLocaleDateString('hr-HR')}`)
        .text(`Lokacija: ${competition.location}`);
@@ -96,16 +71,16 @@ module.exports = async function generatePdfForCompetition(competition, res) {
       
       if (category !== currentCategory) {
         doc.moveDown();
-        doc.fontSize(14).font(currentFont).fillColor('#333').text(category, { underline: true });
+        doc.fontSize(14).font('Roboto').fillColor('#333').text(category, { underline: true });
         doc.moveDown(0.5);
         currentCategory = category;
         counter = 1;
       }
 
       const line = `${counter}. ${p.danceStyle} – ${p.choreographyName} – ${p.clubId?.clubName || "N/A"} (${formatDuration(p.duration)})`;
-      console.log(`📝 Line ${counter}:`, line); // Debug output
+      console.log(`📝 Line ${counter}:`, line);
       
-      doc.fontSize(11).font(currentFont).fillColor('#000')
+      doc.fontSize(11).font('Roboto').fillColor('#000')
          .text(line, { indent: 10 });
       
       counter++;
