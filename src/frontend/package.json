@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "@react-oauth/google": "^0.12.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -11,6 +12,7 @@
     "axios": "^1.13.2",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
+    "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.5",

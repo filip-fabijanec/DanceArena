@@ -8,6 +8,7 @@
     "express": "^5.2.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
+    "pdf-lib": "^1.17.1",
     "pdfkit": "^0.17.2",
     "roboto-fontface": "^0.10.0",
     "stripe": "^19.3.0"
