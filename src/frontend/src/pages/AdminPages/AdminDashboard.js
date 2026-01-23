@@ -85,14 +85,6 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="stat-card orange">
-            <div className="stat-icon"><ClockIcon /></div>
-            <div className="stat-info">
-              <span className="stat-number">{stats.users.pending}</span>
-              <span className="stat-label">Čeka odobrenje</span>
-            </div>
-          </div>
-
           <div className="stat-card purple">
             <div className="stat-icon"><TrophyIcon /></div>
             <div className="stat-info">
