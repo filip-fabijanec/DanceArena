@@ -28,6 +28,8 @@ async function autoLockOngoingCompetitions() {
 // =======================
 router.get("/finished", async (req, res) => {
   try {
+        await autoLockOngoingCompetitions();
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

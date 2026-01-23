@@ -7,12 +7,19 @@ const authMiddleware = require("../backend/middleware/authMiddleware");
 const Score = require("../models/Score");
 const User = require("../models/User");
 
-
+async function autoLockOngoingCompetitions() {
+  await Competition.updateMany(
+    { autoStatus: "ongoing", isLocked: false },
+    { $set: { isLocked: true } }
+  );
+}
 
 
 // GET - Dohvati sve prijave (s opcionalnim filterom)
 router.get("/", async (req, res) => {
   try {
+        await autoLockOngoingCompetitions();
+
     const { competitionId, clubId } = req.query;
     
     // ← DODAJ FILTER ZA QUERY PARAMETRE
@@ -38,6 +45,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     console.log('📝 [PERFORMANCE] Kreiram novu prijavu:', req.body);
+    await autoLockOngoingCompetitions();
 
     const competition = await Competition.findById(req.body.competitionId);
 
@@ -136,6 +144,7 @@ router.delete("/:id", async (req, res) => {
 router.get("/competition/:competitionId", async (req, res) => {
   try {
     const { competitionId } = req.params;
+    await autoLockOngoingCompetitions();
 
     // Dohvati sve nastupe za zadani competitionId
     const performances = await Performance.find({ competitionId })
@@ -167,6 +176,7 @@ router.get("/:id/scores", authMiddleware, async (req, res) => {
   try {
     const performanceId = req.params.id;
     const user = req.user;
+    await autoLockOngoingCompetitions();
 
     const performance = await Performance.findById(performanceId)
       .populate("competitionId", "isLocked organizer referees date name")
