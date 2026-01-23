@@ -1,4 +1,4 @@
-const { PDFDocument, rgb, StandardFonts } = require("pdf-lib");
+const { PDFDocument, rgb } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
 const Performance = require("../models/Performance");
 const path = require("path");
@@ -16,18 +16,28 @@ module.exports = async function generatePdfForCompetition(competition, res) {
     // Kreiraj novi PDF dokument
     const pdfDoc = await PDFDocument.create();
     
-    // Registriraj fontkit za custom fontove
+    // KLJUČNO: Registriraj fontkit PRIJE učitavanja fonta
     pdfDoc.registerFontkit(fontkit);
 
     // Učitaj Roboto font
     const fontPath = path.join(__dirname, '../../fonts/Roboto-Regular.ttf');
-    
     console.log('📂 Font path:', fontPath);
-    console.log('✅ Font postoji:', await fs.access(fontPath).then(() => true).catch(() => false));
 
-    const fontBytes = await fs.readFile(fontPath);
-    const customFont = await pdfDoc.embedFont(fontBytes);
-    console.log('✅ Font uspješno učitan: Roboto');
+    let customFont;
+    try {
+      const fontBytes = await fs.readFile(fontPath);
+      // embedFont s fontkit-om pravilno obrađuje Unicode
+      customFont = await pdfDoc.embedFont(fontBytes, { subset: false });
+      console.log('✅ Font uspješno učitan: Roboto');
+    } catch (err) {
+      console.error('❌ Greška pri učitavanju fonta:', err);
+      throw new Error('Font nije pronađen. Preuzmi Roboto-Regular.ttf u fonts/ folder');
+    }
+
+    // Testiranje encoding-a
+    const testStr = "Test: šđčćžŠĐČĆŽ";
+    console.log('🧪 Test string:', testStr);
+    console.log('🧪 Font encoding test:', customFont.encodeText(testStr));
 
     // Dodaj prvu stranicu
     let page = pdfDoc.addPage([595.28, 841.89]); // A4 format
@@ -44,8 +54,7 @@ module.exports = async function generatePdfForCompetition(competition, res) {
         x = leftMargin,
         y = yPosition,
         color = rgb(0, 0, 0),
-        align = 'left',
-        bold = false
+        align = 'left'
       } = options;
 
       let xPos = x;
@@ -59,21 +68,9 @@ module.exports = async function generatePdfForCompetition(competition, res) {
         y: y,
         size: size,
         font: customFont,
-        color: color
+        color: color,
+        lineHeight: size * 1.2
       });
-
-      if (bold) {
-        // Simuliraj bold s duplim tekstom (offset 0.5px)
-        page.drawText(text, {
-          x: xPos + 0.5,
-          y: y,
-          size: size,
-          font: customFont,
-          color: color
-        });
-      }
-
-      return textWidth;
     };
 
     // Helper za provjeru i dodavanje nove stranice
@@ -88,29 +85,25 @@ module.exports = async function generatePdfForCompetition(competition, res) {
 
     // NASLOV
     drawText("STARTNA LISTA", { 
-      size: 18, 
+      size: 20, 
       y: yPosition,
-      align: 'center',
-      bold: true
+      align: 'center'
     });
-    yPosition -= lineHeight * 1.5;
+    yPosition -= lineHeight * 2;
 
     // Test hrvatski znakovi
-    const testStr = "Test: šđčćžŠĐČĆŽ";
-    console.log('🧪 Test string:', testStr);
     drawText(testStr, { 
       size: 10, 
       y: yPosition,
       align: 'center',
       color: rgb(0.5, 0.5, 0.5)
     });
-    yPosition -= lineHeight * 1.5;
+    yPosition -= lineHeight * 2;
 
     // Info o natjecanju
     drawText(`Natjecanje: ${competition.name}`, { 
       size: 12, 
-      y: yPosition,
-      bold: true
+      y: yPosition
     });
     yPosition -= lineHeight;
 
@@ -143,7 +136,6 @@ module.exports = async function generatePdfForCompetition(competition, res) {
         drawText(category, { 
           size: 14, 
           y: yPosition,
-          bold: true,
           color: rgb(0.2, 0.2, 0.2)
         });
 
@@ -191,7 +183,7 @@ module.exports = async function generatePdfForCompetition(competition, res) {
   } catch (error) {
     console.error('❌ Greška pri generiranju PDF-a:', error);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Greška pri generiranju PDF-a' });
+      res.status(500).json({ error: 'Greška pri generiranju PDF-a: ' + error.message });
     }
   }
 };
