@@ -377,7 +377,7 @@ function UpravljanjePrijavama() {
                 )}
 
                 {/* UREDI – omogućeno za sve prijave dok natjecanje nije zaključano */}
-                {!competition.isLocked && (
+                {(
                   <button
                     onClick={() => handleEditClick(perf)}
                     className="btn-edit"
@@ -461,7 +461,7 @@ function UpravljanjePrijavama() {
             
             <form onSubmit={handleEditSubmit} className="edit-form">
               <div className="form-group">
-                <label>Naziv koreografije *</label>
+                <label>Naziv koreografije</label>
                 <input
                   type="text"
                   name="choreographyName"
@@ -473,7 +473,7 @@ function UpravljanjePrijavama() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Dobna kategorija *</label>
+                  <label>Dobna kategorija</label>
                   <select
                     name="ageCategory"
                     value={editModal.formData.ageCategory}
@@ -488,7 +488,7 @@ function UpravljanjePrijavama() {
                 </div>
 
                 <div className="form-group">
-                  <label>Plesni stil *</label>
+                  <label>Plesni stil</label>
                   <select
                     name="danceStyle"
                     value={editModal.formData.danceStyle}
@@ -505,7 +505,7 @@ function UpravljanjePrijavama() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Veličina grupe *</label>
+                  <label>Veličina grupe</label>
                   <select
                     name="groupSize"
                     value={editModal.formData.groupSize}
@@ -527,13 +527,14 @@ function UpravljanjePrijavama() {
                     value={editModal.formData.choreographer}
                     onChange={handleEditChange}
                     placeholder="Ime koreografa (opcionalno)"
+                    required
                   />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Trajanje (sekunde) *</label>
+                  <label>Trajanje (sekunde)</label>
                   <input
                     type="number"
                     name="performanceDuration"

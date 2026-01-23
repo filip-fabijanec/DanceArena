@@ -187,7 +187,7 @@ function PrijaviNastup() {
           <h3>📋 Podaci o nastupu</h3>
 
           <div className="form-group">
-            <label>Naziv koreografije *</label>
+            <label>Naziv koreografije </label>
             <input
               name="choreographyName"
               value={formData.choreographyName}
@@ -199,7 +199,7 @@ function PrijaviNastup() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Dobna kategorija *</label>
+              <label>Dobna kategorija </label>
               <select
                 name="ageCategory"
                 value={formData.ageCategory}
@@ -214,7 +214,7 @@ function PrijaviNastup() {
             </div>
 
             <div className="form-group">
-              <label>Plesni stil *</label>
+              <label>Plesni stil </label>
               <select
                 name="danceStyle"
                 value={formData. danceStyle}
@@ -231,7 +231,7 @@ function PrijaviNastup() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Veličina grupe *</label>
+              <label>Veličina grupe </label>
               <select
                 name="groupSize"
                 value={formData.groupSize}
@@ -246,12 +246,13 @@ function PrijaviNastup() {
             </div>
 
             <div className="form-group">
-              <label>Koreograf</label>
+              <label>Koreograf </label>
               <input
                 name="choreographer"
                 value={formData.choreographer}
                 onChange={handleChange}
-                placeholder="Ime koreografa (opcionalno)"
+                placeholder="Ime koreografa"
+                required
               />
             </div>
           </div>
@@ -262,7 +263,7 @@ function PrijaviNastup() {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Trajanje (sekunde) *</label>
+              <label>Trajanje (sekunde)</label>
               <input
                 type="number"
                 name="performanceDuration"
@@ -276,7 +277,7 @@ function PrijaviNastup() {
             </div>
 
             <div className="form-group">
-              <label>Glazba (MP3) *</label>
+              <label>Glazba (MP3) </label>
               <input
                 type="file"
                 accept="audio/mpeg"

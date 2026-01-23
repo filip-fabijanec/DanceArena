@@ -299,21 +299,12 @@
   margin: 10px 0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .referees-grid {
-    grid-template-columns: 1fr;
-  }
+.error-text {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+}
 
-  .referee-card {
-    padding: 12px;
-  }
-
-  .referee-name {
-    font-size: 14px;
-  }
-
-  .referee-email {
-    font-size: 12px;
-  }
+.error-title {
+  color: #ff4d4f;
 }

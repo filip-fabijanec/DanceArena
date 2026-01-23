@@ -99,29 +99,60 @@ function KreirajNatjecanje() {
     setInvitedRefereeEmails(invitedRefereeEmails.filter(e => e !== email));
   };
 
+  // Validacije
   const totalJudges = selectedReferees.length + invitedRefereeEmails.length;
   const isRefereesValid = totalJudges >= 3 && totalJudges % 2 !== 0;
+  
+  const isAgeCategoriesValid = selectedAgeCategories.length >= 1;
+  const isGroupSizesValid = selectedGroupSizes.length >= 1;
 
-  let validationText = "";
+  // Tekstovi za validaciju
+  let refereesValidationText = "";
   if (totalJudges < 3) {
-      validationText = `⚠️ Minimalno 3 suca (Trenutno: ${totalJudges})`;
+      refereesValidationText = `⚠️ Minimalno 3 suca (Trenutno: ${totalJudges})`;
   } else if (totalJudges % 2 === 0) {
-      validationText = `⚠️ Broj sudaca mora biti neparan (Trenutno: ${totalJudges})`;
+      refereesValidationText = `⚠️ Broj sudaca mora biti neparan (Trenutno: ${totalJudges})`;
   } else {
-      validationText = `✅ Odabrano ${totalJudges} sudaca`;
+      refereesValidationText = `✅ Odabrano ${totalJudges} sudaca`;
   }
+
+  const ageCategoriesValidationText = isAgeCategoriesValid 
+    ? `✅ Odabrano ${selectedAgeCategories.length} kategorija`
+    : `⚠️ Odaberite barem 1 dobnu kategoriju (Trenutno: ${selectedAgeCategories.length})`;
+
+  const groupSizesValidationText = isGroupSizesValid 
+    ? `✅ Odabrano ${selectedGroupSizes.length} veličina grupa`
+    : `⚠️ Odaberite barem 1 veličinu grupe (Trenutno: ${selectedGroupSizes.length})`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
+    // Provjera da li je email upisan ali nije dodan
     if (emailInput.trim().length > 0) {
       alert("⚠️ Upisali ste email ali niste kliknuli 'Dodaj'! Kliknite gumb 'Dodaj' pa pokušajte ponovno.");
       setLoading(false);
       return;
     }
 
+    // Validacija dobrih kategorija
+    if (!isAgeCategoriesValid) {
+      setMessage("❌ Odaberite barem jednu dobnu kategoriju!");
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
+    // Validacija veličina grupa
+    if (!isGroupSizesValid) {
+      setMessage("❌ Odaberite barem jednu veličinu grupe!");
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
+    // Validacija sudaca
     if (!isRefereesValid) {
       setMessage(totalJudges < 3 ? "❌ Nedostaje sudaca!" : "❌ Broj sudaca mora biti neparan!");
       setIsError(true);
@@ -190,18 +221,19 @@ function KreirajNatjecanje() {
              </div>
              <div className="form-group">
                 <label>Opis</label>
-                <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Detalji natjecanja..." rows="3" />
+                <textarea name="description" value={formData.description} onChange={handleChange} required placeholder="Detalji natjecanja..." rows="3" />
              </div>
              <div className="form-row">
                 <div className="form-group">
                     <label>Stilovi (odvojeni zarezom)</label>
-                    <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} placeholder="Jazz, Hip Hop, Show..." rows="2" />
+                    <textarea name="danceStyles" value={formData.danceStyles} onChange={handleChange} required placeholder="Jazz, Hip Hop, Show..." rows="2" />
                 </div>
               <div className="form-group">
                 <label>Kotizacija (€)</label>
                   <input
                     type="number"
                     name="registrationFee"
+                    required
                     value={formData.registrationFee}
                     onChange={(e) => {
                       setFormData({ ...formData, registrationFee: e.target.value });
@@ -220,26 +252,62 @@ function KreirajNatjecanje() {
         </div>
 
         <div className="form-section">
-            <h3>Dobne kategorije</h3>
+            <h3>Dobne kategorije (Odabrano: {selectedAgeCategories.length})</h3>
             <div className="checkbox-grid">
                 {ageCategoryOptions.map(o => (
                     <label key={o} className="checkbox-label">
-                        <input type="checkbox" checked={selectedAgeCategories.includes(o)} onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} /> 
+                        <input 
+                          type="checkbox" 
+                          checked={selectedAgeCategories.includes(o)} 
+                          onChange={() => toggleCheckbox(o, setSelectedAgeCategories, selectedAgeCategories)} 
+                        /> 
                         <span>{o}</span>
                     </label>
                 ))}
             </div>
+            
+            <div style={{ 
+              marginTop: '20px', 
+              padding: '10px', 
+              borderRadius: '5px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              display: isAgeCategoriesValid ? 'none': 'grid',
+              backgroundColor: isAgeCategoriesValid ? '#d4edda' : '#fff3cd',
+              color: isAgeCategoriesValid ? '#155724' : '#856404',
+              border: `1px solid ${isAgeCategoriesValid ? '#c3e6cb' : '#ffeeba'}`
+            }}>
+              {ageCategoriesValidationText}
+            </div>
         </div>
 
         <div className="form-section">
-            <h3>Veličine grupa</h3>
+            <h3>Veličine grupa (Odabrano: {selectedGroupSizes.length})</h3>
             <div className="checkbox-grid">
                 {groupSizeOptions.map(o => (
                     <label key={o} className="checkbox-label">
-                        <input type="checkbox" checked={selectedGroupSizes.includes(o)} onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} /> 
+                        <input 
+                          type="checkbox" 
+                          checked={selectedGroupSizes.includes(o)} 
+                          onChange={() => toggleCheckbox(o, setSelectedGroupSizes, selectedGroupSizes)} 
+                        />
                         <span>{o}</span>
                     </label>
                 ))}
+            </div>
+            
+            <div style={{ 
+              marginTop: '20px', 
+              padding: '10px', 
+              borderRadius: '5px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              display: isGroupSizesValid ? 'none': 'grid',
+              backgroundColor: isGroupSizesValid ? '#d4edda' : '#fff3cd',
+              color: isGroupSizesValid ? '#155724' : '#856404',
+              border: `1px solid ${isGroupSizesValid ? '#c3e6cb' : '#ffeeba'}`
+            }}>
+              {groupSizesValidationText}
             </div>
         </div>
 
@@ -296,13 +364,13 @@ function KreirajNatjecanje() {
               color: isRefereesValid ? '#155724' : '#856404',
               border: `1px solid ${isRefereesValid ? '#c3e6cb' : '#ffeeba'}`
           }}>
-            {validationText}
+            {refereesValidationText}
           </div>
         </div>
 
         {message && <div className={`message ${isError ? "error" : "success"}`}>{message}</div>}
 
-        <button type="submit" className="submit-button" disabled={loading}>
+        <button type="submit" className="submit-button" disabled={loading || !isAgeCategoriesValid || !isGroupSizesValid || !isRefereesValid}>
           {loading ? "Slanje..." : "Kreiraj natjecanje"}
         </button>
       </form>
