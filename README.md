@@ -154,6 +154,7 @@ Ovaj projekt je rezultat timskog rada u sklopu projektnog zadatka kolegija [Prog
 -   Plaćanje: [Stripe](https://stripe.com/en-hr)
 -   Autentikacija: [Google Cloud](https://console.cloud.google.com/)
 -   Mail: [Twilio SendGrid](https://sendgrid.com/en-us)
+-   Upload Glazbe: [CLoudfare](https://www.cloudflare.com/)
   
 # Pokretanje stranice
 
